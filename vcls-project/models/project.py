@@ -1,11 +1,16 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api, _
-from odoo.exceptions import ValidationError,UserError
+from odoo.exceptions import ValidationError, UserError
 from datetime import datetime, time
 from dateutil.relativedelta import relativedelta
+# import warnings
 
+import requests
+import json
 import logging
+
+URL_POWER_AUTOMATE = "https://prod-29.westeurope.logic.azure.com:443/workflows/9f6737616b7047498a61a053cd883fc2/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=W5bnOEb4gMnP_E9_VnzK7c8AuYb2zGovg5BHwIoi-U8"
 
 _logger = logging.getLogger(__name__)
 
@@ -141,27 +146,28 @@ class Project(models.Model):
     external_account = fields.Char(
         default="/",
     )
+    sp_folder = fields.Char('Sharepoint Folder')
 
-    sharepoint_folder = fields.Char(
-        string='Sharepoint Folder',
-        compute='_compute_sharepoint_folder',
-        readonly=True,
-        store=True,
-    )
+    # sharepoint_folder = fields.Char(
+    #     string='Sharepoint Folder',
+    #     compute='_compute_sharepoint_folder',
+    #     readonly=True,
+    #     store=True,
+    # )
 
     show_folder_path = fields.Boolean()
 
-    @api.depends('sale_order_id', 'project_type', 'parent_id','partner_id')
-    def _compute_sharepoint_folder(self):
-        pre = self.env.ref('vcls-contact.SP_client_root_prefix').value
-        post = self.env.ref('vcls-contact.SP_client_root_postfix').value
-        for project in self.filtered(lambda p: p.project_type=='client' and p.sale_order_id and p.partner_id.altname):
-            reference = project.parent_id.sale_order_id.internal_ref if project.parent_id \
-                else project.sale_order_id.internal_ref or ''
-            if reference:
-                reference = "{}-{}".format(reference.split('-')[0],reference.split('-')[1])
-            project.sharepoint_folder = "{}/{}/{}/{}{}".format(pre,project.partner_id.altname[0],project.partner_id.altname,reference,post)
-            project.show_folder_path = True
+    # @api.depends('sale_order_id', 'project_type', 'parent_id','partner_id')
+    # def _compute_sharepoint_folder(self):
+    #     pre = self.env.ref('vcls-contact.SP_client_root_prefix').value
+    #     post = self.env.ref('vcls-contact.SP_client_root_postfix').value
+    #     for project in self.filtered(lambda p: p.project_type=='client' and p.sale_order_id and p.partner_id.altname):
+    #         reference = project.parent_id.sale_order_id.internal_ref if project.parent_id \
+    #             else project.sale_order_id.internal_ref or ''
+    #         if reference:
+    #             reference = "{}-{}".format(reference.split('-')[0],reference.split('-')[1])
+    #         project.sharepoint_folder = "{}/{}/{}/{}{}".format(pre,project.partner_id.altname[0],project.partner_id.altname,reference,post)
+    #         project.show_folder_path = True
     
     def _compute_dates(self):
         for project in self:
@@ -579,3 +585,48 @@ class Project(models.Model):
         for project in self.filtered(lambda p: not p.sale_order_id.parent_id and p.sale_order_id.child_ids): #if we make the change in a parent with childs
             for so in project.sale_order_id.child_ids.filtered(lambda o: o.link_rates): #for linked orders
                 so.map_match()"""
+
+    
+    @api.multi
+    def create_sp_folder(self):
+        self.ensure_one()
+        """
+        As long as the migration in the new Sharepoint Online is not complete, 
+        the client Name should start with AAA (to not interfer in the other folders)
+        """
+        if self.name:
+            client_name = "AAA-TEST-" + str(self.name.split('-', 1)[0])
+            project_name = str(self.name.split('-', 1)[1].split('|', 1)[0])
+            header_to_send = {
+                "Content-Type": "application/json",
+                "Referrer": "https://vcls.odoo.com/create-sp-folder"
+            }
+            data_to_send = {
+                "client": client_name,
+                "project": project_name,
+            }
+            response = requests.post(URL_POWER_AUTOMATE, data=json.dumps(data_to_send), headers=header_to_send)
+
+            if response.status_code in [200, 202]:
+                message = "Sucess"
+                data_back = response.json()
+                self.sp_folder = data_back['clientSiteUrl']
+                message_log = ("The Sharepoint Folder has been created, here is the link: {}".format(self.sp_folder))
+                self.message_post(body=message_log)
+                _logger.info("Call API: Power Automate message: {}, whith the client: {}, for the project : {},and the Sharepoint link is: {}".format(message, client_name, project_name, self.sp_folder))
+                return
+
+            if response.status_code in [400, 403]:
+                _logger.warning("Call API: Power Automate message: {}, whith the client: {}, for the project : {}".format(response.status_code, client_name, project_name))
+                raise UserError(_("Sharepoint didn't respond, Please try again"))
+
+            if response.status_code in [500, 501, 503]:
+                message = "Server error"
+            else:
+                message = response.status_code
+
+            _logger.warning("Call API: Power Automate message: {}, whith the client: {}, for the project : {}".format(message, client_name, project_name))
+            raise UserError(_("Sharepoint didn't respond, Please try again"))
+        
+        else:
+           raise UserError(_("Please make sure that the Project has a name"))

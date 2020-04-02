@@ -1,8 +1,14 @@
 # -*- coding: utf-8 -*-
 from odoo import models, fields, tools, api, _
+from odoo.exceptions import UserError
 
+import requests
+import json
 import logging
+
 _logger = logging.getLogger(__name__)
+
+URL_POWER_AUTOMATE = "https://prod-29.westeurope.logic.azure.com:443/workflows/9f6737616b7047498a61a053cd883fc2/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=W5bnOEb4gMnP_E9_VnzK7c8AuYb2zGovg5BHwIoi-U8"
 
 class SaleOrder(models.Model):
 
@@ -19,6 +25,8 @@ class SaleOrder(models.Model):
         store = True,
         default = 0.0,
     )
+
+    sp_folder = fields.Char('Sharepoint Folder')
 
     @api.multi
     def _get_parent_project_id(self):
@@ -172,3 +180,46 @@ class SaleOrder(models.Model):
                                 'employee_id': map_line.employee_id.id,
                             })
                             _logger.info("map_match | employee {} map created line.".format(map_line.employee_id.name))
+
+    @api.multi
+    def create_sp_folder(self):
+        self.ensure_one()
+        """
+        As long as the migration in the new Sharepoint Online is not complete, 
+        the client Name should start with AAA (to not interfer in the other folders)
+        """
+        if self.internal_ref and self.partner_id.altname:
+            client_name = "AAA-TEST-" + self.partner_id.altname
+            project_name = str(self.internal_ref.split('-', 1)[1].split('|', 1)[0])
+            header_to_send = {
+                "Content-Type": "application/json",
+                "Referrer": "https://vcls.odoo.com/create-sp-folder"
+            }
+            data_to_send = {
+                "client": client_name,
+                "project": project_name,
+            }
+            response = requests.post(URL_POWER_AUTOMATE, data=json.dumps(data_to_send), headers=header_to_send)
+
+            if response.status_code in [200, 202]:
+                message = "Sucess"
+                data_back = response.json()
+                self.sp_folder = data_back['clientSiteUrl']
+                message_log = ("The Sharepoint Folder has been created, here is the link: {}".format(self.sp_folder))
+                self.message_post(body=message_log)
+                _logger.info("Call API: Power Automate message: {}, whith the client: {} and for the project: {}, and the Sharepoint link is: {}".format(message, client_name, project_name, self.sp_folder))
+                return
+
+            if response.status_code in [400, 403]:
+                _logger.warning("Call API: Power Automate message: {}, whith the client: {} and for the project: {}".format(response.status_code, client_name, project_name))
+                raise UserError(_("Sharepoint didn't respond, Please try again"))
+
+            if response.status_code in [500, 501, 503]:
+                message = "Server error"
+            else:
+                message = response.status_code
+
+            _logger.warning("Call API: Power Automate message: {}, whith the client: {} and for the project: {}".format(message, client_name, project_name))
+            raise UserError(_("Sharepoint didn't respond, Please try again"))
+        else:
+           raise UserError(_("Please make sure that the project has an internal reference and an Alt name"))

@@ -3,9 +3,13 @@
 from odoo import models, fields, api, _
 from odoo.exceptions import UserError, ValidationError
 
+import requests
+import json
 import logging
 
 _logger = logging.getLogger(__name__)
+
+URL_POWER_AUTOMATE = "https://prod-29.westeurope.logic.azure.com:443/workflows/9f6737616b7047498a61a053cd883fc2/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=W5bnOEb4gMnP_E9_VnzK7c8AuYb2zGovg5BHwIoi-U8"
 
 
 class CountryGroup(models.Model):
@@ -51,17 +55,19 @@ class ResPartner(models.Model):
         default=2,
     )
 
-    sharepoint_folder = fields.Char(
-        string='Sharepoint Folder',
-        compute='_compute_sharepoint_folder',
-        readonly=True,
-        store=True,
-    )
-    manual_sharepoint_folder = fields.Char()
+    sp_folder = fields.Char('Sharepoint Folder')
 
-    create_folder = fields.Boolean(
-        string="Create Sharepoint Folder",
-    )
+    # sharepoint_folder = fields.Char(
+    #     string='Sharepoint Folder',
+    #     # compute='_compute_sharepoint_folder',
+    #     readonly=True,
+    #     store=True,
+    # )
+    # manual_sharepoint_folder = fields.Char()
+
+    # create_folder = fields.Boolean(
+    #     string="Create Sharepoint Folder",
+    # )
 
     ### THe objective of this field is to assist responsible roles in contact completion exercise and maintain a good data quality
     completion_ratio = fields.Float(
@@ -300,28 +306,28 @@ class ResPartner(models.Model):
             pass
             """ This estimator is related to the type of contact."""
 
-    @api.depends('category_id', 'create_folder','altname','manual_sharepoint_folder')
-    def _compute_sharepoint_folder(self):
-        #manual case
-        manual = self.filtered(lambda p: p.manual_sharepoint_folder)
-        for partner in manual:
-            partner.sharepoint_folder = partner.manual_sharepoint_folder
-            partner.create_folder = True
+    # @api.depends('category_id', 'create_folder','altname','manual_sharepoint_folder')
+    # def _compute_sharepoint_folder(self):
+    #     #manual case
+    #     manual = self.filtered(lambda p: p.manual_sharepoint_folder)
+    #     for partner in manual:
+    #         partner.sharepoint_folder = partner.manual_sharepoint_folder
+    #         partner.create_folder = True
 
-        #suppliers
-        auto_suppliers = self.filtered(lambda p: not p.manual_sharepoint_folder and p.supplier and p.is_company)
-        pre = self.env.ref('vcls-contact.SP_supplier_root_prefix').value
-        for partner in auto_suppliers:
-            partner.sharepoint_folder = "{}/{}".format(pre,partner.name)
-            partner.create_folder = True
+    #     #suppliers
+    #     auto_suppliers = self.filtered(lambda p: not p.manual_sharepoint_folder and p.supplier and p.is_company)
+    #     pre = self.env.ref('vcls-contact.SP_supplier_root_prefix').value
+    #     for partner in auto_suppliers:
+    #         partner.sharepoint_folder = "{}/{}".format(pre,partner.name)
+    #         partner.create_folder = True
 
-        #clients
-        auto_clients = self.filtered(lambda p: not p.manual_sharepoint_folder and p.customer and p.is_company and p.altname)
-        pre = self.env.ref('vcls-contact.SP_client_root_prefix').value
-        post = self.env.ref('vcls-contact.SP_client_root_postfix').value
-        for partner in auto_clients:
-            partner.sharepoint_folder = "{}/{}/{}{}".format(pre,partner.altname[0],partner.altname,post)
-            partner.create_folder = True
+    #     #clients
+    #     auto_clients = self.filtered(lambda p: not p.manual_sharepoint_folder and p.customer and p.is_company and p.altname)
+    #     pre = self.env.ref('vcls-contact.SP_client_root_prefix').value
+    #     post = self.env.ref('vcls-contact.SP_client_root_postfix').value
+    #     for partner in auto_clients:
+    #         partner.sharepoint_folder = "{}/{}/{}{}".format(pre,partner.altname[0],partner.altname,post)
+    #         partner.create_folder = True
 
     # We reset the number of bounced emails to 0 in order to re-detect problems after email change
     @api.onchange('email')
@@ -418,3 +424,46 @@ class ResPartner(models.Model):
                 'default_company_type': 'person'
             }
         }
+
+    @api.multi
+    def create_sp_folder(self):
+        self.ensure_one()
+        """
+        As long as the migration in the new Sharepoint Online is not complete, 
+        the client Name should start with AAA (to not interfer in the other folders)
+        """
+        if self.customer and self.is_company and self.altname:
+            client_name = "AAA-TEST-" + self.altname
+            header_to_send = {
+                "Content-Type": "application/json",
+                "Referrer": "https://vcls.odoo.com/create-sp-folder"
+            }
+            data_to_send = {
+                "client": client_name,
+                "project": "",
+            }
+            response = requests.post(URL_POWER_AUTOMATE, data=json.dumps(data_to_send), headers=header_to_send)
+
+            if response.status_code in [200, 202]:
+                message = "Sucess"
+                data_back = response.json()
+                self.sp_folder = data_back['clientSiteUrl']
+                message_log = ("The Sharepoint Folder has been created, here is the link: {}".format(self.sp_folder))
+                self.message_post(body=message_log)
+                _logger.info("Call API: Power Automate message: {}, whith the client: {}, and the Sharepoint link is: {}".format(message, client_name, self.sp_folder))
+                return
+
+            if response.status_code in [400, 403]:
+                _logger.warning("Call API: Power Automate message: {}, whith the client: {}".format(response.status_code, client_name))
+                raise UserError(_("Sharepoint didn't respond, Please try again"))
+
+            if response.status_code in [500, 501, 503]:
+                message = "Server error"
+            else:
+                message = response.status_code
+
+            _logger.warning("Call API: Power Automate message: {}, whith the client: {}".format(message, client_name))
+            raise UserError(_("Sharepoint didn't respond, Please try again"))
+        
+        else:
+           raise UserError(_("Please make sure that the contact is a Client and a Company and has an Altname"))

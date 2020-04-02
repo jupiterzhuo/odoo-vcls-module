@@ -159,6 +159,12 @@
                 <xpath expr="//field[@name='partner_id']" position="after">
                     <field name="program_id"/>
                 </xpath>
+                <xpath expr="//field[@name='name']" position="after">
+                    <br/>
+                        <field name="sp_folder" widget ="url" style='font-size:medium' text=" Open Sharepoint Folder"/>
+                        <br/>
+                        <button type="object" class = 'btn btn-primary' name="create_sp_folder" string="Create SharePoint Folder" attrs="{'invisible': ['|', ('sp_folder', '!=', False),('parent_id', '!=', False)]}"/>
+                </xpath>
             </field>
         </record> 
 
