@@ -26,9 +26,10 @@ class Project(models.Model):
     cf_hours = fields.Float(string="Carry Forward Hours",readonly=True)
 
     budget_consumed = fields.Float(
-        string="Budget Consumed new",
+        string="Budget Consumed",
         readonly=True,
         compute='compute_budget_consumed',
+        help="realized budget divided by contractual budget",
     )
 
     @api.multi

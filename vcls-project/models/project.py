@@ -57,7 +57,7 @@ class Project(models.Model):
     #ta_ids = fields.Many2many('hr.employee', string='Ta')
     completion_ratio = fields.Float('Task Complete', compute='compute_project_completion_ratio', store=True)
     consummed_completed_ratio = fields.Float('BC / TC',
-                                             compute='compute_project_consummed_completed_ratio', store=True)
+                                             compute='compute_project_consummed_completed_ratio', store=True, help="Task Progress / number of Tasks")
     summary_ids = fields.One2many(
         'project.summary', 'project_id',
         'Project summaries'
@@ -77,6 +77,7 @@ class Project(models.Model):
                               string='Ta')
     controller_id = fields.Many2one('res.users', related='partner_id.controller_id', string='Project Controller')
     invoice_admin_id = fields.Many2one('res.users', related='partner_id.invoice_admin_id', string='Invoice Administrator')
+    account_manager_id = fields.Many2one('res.users', related='sale_order_id.user_id', string='Account Manager')
 
     invoices_count = fields.Integer(
         compute='_get_out_invoice_ids',
@@ -98,6 +99,13 @@ class Project(models.Model):
         'risk', string='Risk',
         compute='_compute_risk_ids',
         store = True,
+    )
+
+    mean_tasks_complete = fields.Integer(
+        help='Mean tasks completion based on tasks stage (manually)',
+        string="%TC",
+        compute='compute_project_mean_tasks_complete',
+        store=True,
     )
 
     risk_score = fields.Integer(
@@ -459,6 +467,13 @@ class Project(models.Model):
         for project in self:
             tasks = project.get_tasks_for_project_sub_project()
             project.consummed_completed_ratio = sum(tasks.mapped('consummed_completed_ratio')) / len(tasks) if tasks else sum(tasks.mapped('consummed_completed_ratio'))
+
+    @api.multi
+    @api.depends('task_ids.completion_ratio')
+    def compute_project_mean_tasks_complete(self):
+        for project in self:
+            tasks = project.get_tasks_for_project_sub_project()
+            project.mean_tasks_complete = sum(tasks.mapped('completion_ratio')) / len(tasks) if tasks else sum(tasks.mapped('completion_ratio'))
 
     @api.multi
     def _get_is_project_manager(self):

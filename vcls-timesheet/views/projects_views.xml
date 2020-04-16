@@ -164,30 +164,38 @@
             <field name="model">project.project</field>
             <field name="arch" type="xml">
                 <tree string="Project">
-                    <field name="name"/>
-                    <field name="partner_id"/>
-                    <field name="user_id"/>
-                    <field name="currency_id" readonly="1"/>
+                    <field name="name" string="Scope"/>
+                    <field name="partner_id" string="Client"/>
+                    <field name="risk_ids" widget="many2many_tags" string="Project Risk Assessment"/>
+                    <field name="risk_score" widget="integer" string="Risk score"/>
+                    <field name="currency_id" string="Currency" readonly="1"/>
+                    <field name="contractual_budget" widget="integer" string="Contractual Amount"/>
+                    <field name="forecasted_budget" widget="integer" string="Internal Budget"/>
+                    <field name="realized_budget" widget="integer" string="Actual amount"/>
+                    <field name="valued_budget" widget="integer" string="Revised Amount"/>
+                    <field name="invoiced_budget" widget="integer" string="Invoiced amount"/>
+                    <field name="pc_budget" widget="integer" string="PC review Amount"/>
+                    <field name="cf_budget" widget="integer" string="CF amount"/>
                     <field name="invoiceable_amount" widget="integer"/>
-                    <field name="pc_budget" widget="integer"/>
-                    <field name="cf_budget" widget="integer"/>
-                    <field name="risk_score"/>
-                    <field name="risk_ids"  widget="many2many_tags"/>
+                    <field name="mean_tasks_complete" widget="integer"/>
+                    <!-- <field name="budget_consumed" widget="integer" string="%BC"/> -->
+                    <field name="consummed_completed_ratio" widget="integer" string="%TC/%BC"/>
+                    <field name="user_id"/>
+                    <field name="valuation_ratio" widget="integer" string="RA ratio"/>
+                    <field name="invoicing_mode"/>
+                    <field name="account_manager_id" string="AM"/>
+                    <field name="invoice_admin_id" string="IA"/>
+                    <field name="controller_id" string="PC"/>
+                    <!-- to add a field: Last risk update (done by PC)  -->
+
+
+                    <!-- <field name="risk_ids"  widget="many2many_tags"/>
                     <field name="completion_ratio"  widget="integer"/>
                     <field name="consummed_completed_ratio" widget="integer"/>
                     <field name="valuation_ratio" widget="integer"/>
-                    <field name="invoicing_mode"/>
-                    <field name="contractual_budget" widget="integer"/>
-                    <field name="forecasted_budget" widget="integer"/>
-                    <field name="realized_budget" widget="integer"/>
-                    <field name="valued_budget" widget="integer"/>
-                    <field name="invoiced_budget" widget="integer"/>
-                    <field name="last_summary_date"/>
+                    <field name="last_summary_date"/> -->
                 </tree>
             </field>
         </record>
-
-        
-
     </data>
 </odoo>

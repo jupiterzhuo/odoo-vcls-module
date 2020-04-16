@@ -63,6 +63,7 @@ class ProjectTask(models.Model):
         string="Budget Consumed new",
         readonly=True,
         compute='compute_budget_consumed',
+        help="realized budget divided by contractual budget",
     )
 
     currency_id = fields.Many2one(
@@ -79,9 +80,9 @@ class ProjectTask(models.Model):
     @api.multi
     @api.depends("realized_budget", "contractual_budget")
     def compute_budget_consumed(self):
-        for project in self:
-            if project.contractual_budget:
-                self.budget_consumed = project.realized_budget / project.contractual_budget
+        for task in self:
+            if task.contractual_budget:
+                self.budget_consumed = task.realized_budget / task.contractual_budget
             else:
                 self.budget_consumed = False
 
