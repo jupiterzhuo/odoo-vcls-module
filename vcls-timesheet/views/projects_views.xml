@@ -177,8 +177,9 @@
                     <field name="pc_budget" widget="integer" string="PC review Amount"/>
                     <field name="cf_budget" widget="integer" string="CF amount"/>
                     <field name="invoiceable_amount" widget="integer"/>
-                    <field name="mean_tasks_complete" widget="integer"/>
+                    <!-- <field name="mean_tasks_complete" widget="integer"/> -->
                     <!-- <field name="budget_consumed" widget="integer" string="%BC"/> -->
+                    <field name="completion_ratio" widget="integer" string="%TC"/>
                     <field name="consummed_completed_ratio" widget="integer" string="%TC/%BC"/>
                     <field name="user_id"/>
                     <field name="valuation_ratio" widget="integer" string="RA ratio"/>
@@ -186,13 +187,12 @@
                     <field name="account_manager_id" string="AM"/>
                     <field name="invoice_admin_id" string="IA"/>
                     <field name="controller_id" string="PC"/>
+                    <field name="risk_last_update"/>
                     <!-- to add a field: Last risk update (done by PC)  -->
 
 
                     <!-- <field name="risk_ids"  widget="many2many_tags"/>
                     <field name="completion_ratio"  widget="integer"/>
-                    <field name="consummed_completed_ratio" widget="integer"/>
-                    <field name="valuation_ratio" widget="integer"/>
                     <field name="last_summary_date"/> -->
                 </tree>
             </field>

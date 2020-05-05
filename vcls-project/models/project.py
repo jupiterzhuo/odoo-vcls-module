@@ -98,24 +98,31 @@ class Project(models.Model):
     risk_ids = fields.Many2many(
         'risk', string='Risk',
         compute='_compute_risk_ids',
-        store = True,
-    )
-
-    mean_tasks_complete = fields.Integer(
-        help='Mean tasks completion based on tasks stage (manually)',
-        string="%TC",
-        compute='compute_project_mean_tasks_complete',
         store=True,
     )
+
+    # mean_tasks_complete = fields.Integer(
+    #     help='Mean tasks completion based on tasks stage (manually)',
+    #     string="%TC",
+    #     compute='compute_project_mean_tasks_complete',
+    #     store=True,
+    # )
 
     risk_score = fields.Integer(
         string='Risk Score',
         compute='_compute_risk_score',
-        store=True,
+        # store=True,
+    )
+
+    risk_last_update = fields.Datetime(
+        string='Risk Last Update',
+        compute='_compute_risk_last_update',
     )
 
     invoiceable_amount = fields.Monetary(
-       related="sale_order_id.invoiceable_amount", readonly=True, store=True
+       related="sale_order_id.invoiceable_amount",
+       readonly=True,
+       store=True,
     )
 
     invoicing_mode = fields.Selection(related="sale_order_id.invoicing_mode", readonly=True)
@@ -133,9 +140,9 @@ class Project(models.Model):
         compute='_compute_dates',
         index=True,
         track_visibility='onchange',
-        ) 
+    ) 
     
-    #accounting fields for legacy integration
+    # accounting fields for legacy integration
     external_account = fields.Char(
         default="/",
     )
@@ -223,7 +230,6 @@ class Project(models.Model):
     @api.depends('sale_order_id.risk_ids')
     def _compute_risk_ids(self):
         for project in self:
-            
             project.risk_ids = self.env['risk'].search([
                 ('resource', '=', 'project.project,{}'.format(project.id)),
             ])
@@ -232,6 +238,31 @@ class Project(models.Model):
     def _compute_risk_score(self):
         for project in self:
             project.risk_score = sum(project.risk_ids.mapped('score'))
+            if project.risk_score != 0:
+                print("risk score ===> ", project.risk_score)
+
+    @api.depends('risk_ids')
+    def _compute_risk_last_update(self):
+        for project in self:
+            print("project.risk_ids", project.risk_ids)
+            last_one = datetime(1970, 1, 1)
+            for individual_risks in project.risk_ids:
+                if individual_risks.score:
+                    print("individual_risks.write_date", individual_risks.write_date)
+                    print("individual_risks.create_date", individual_risks.create_date)
+
+                if individual_risks.write_date > last_one:
+                    last_one = individual_risks.write_date
+                elif individual_risks.create_date > last_one:
+                    last_one = individual_risks.create_date
+                else:
+                    last_one = False
+            if last_one != datetime(1970, 1, 1):
+                project.risk_last_update = last_one
+            else:
+                project.risk_last_update = False
+            print("project.risk_last_update", project.risk_last_update)
+
 
     @api.one
     @api.depends(
@@ -468,12 +499,12 @@ class Project(models.Model):
             tasks = project.get_tasks_for_project_sub_project()
             project.consummed_completed_ratio = sum(tasks.mapped('consummed_completed_ratio')) / len(tasks) if tasks else sum(tasks.mapped('consummed_completed_ratio'))
 
-    @api.multi
-    @api.depends('task_ids.completion_ratio')
-    def compute_project_mean_tasks_complete(self):
-        for project in self:
-            tasks = project.get_tasks_for_project_sub_project()
-            project.mean_tasks_complete = sum(tasks.mapped('completion_ratio')) / len(tasks) if tasks else sum(tasks.mapped('completion_ratio'))
+    # @api.multi
+    # @api.depends('task_ids.completion_ratio')
+    # def compute_project_mean_tasks_complete(self):
+    #     for project in self:
+    #         tasks = project.get_tasks_for_project_sub_project()
+    #         project.mean_tasks_complete = sum(tasks.mapped('completion_ratio')) / len(tasks) if tasks else sum(tasks.mapped('completion_ratio'))
 
     @api.multi
     def _get_is_project_manager(self):

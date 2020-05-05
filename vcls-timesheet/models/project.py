@@ -29,7 +29,7 @@ class Project(models.Model):
         string="Budget Consumed",
         readonly=True,
         compute='compute_budget_consumed',
-        help="realized budget divided by contractual budget",
+        help="Realized Budget divided by Contractual Budget",
     )
 
     @api.multi
