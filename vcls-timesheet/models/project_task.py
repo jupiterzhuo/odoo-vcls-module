@@ -60,10 +60,10 @@ class ProjectTask(models.Model):
     recompute_kpi = fields.Boolean(default="False")
 
     budget_consumed = fields.Float(
-        string="Budget Consumed new",
+        string="Budget Consumed",
         readonly=True,
         compute='compute_budget_consumed',
-        help="realized budget divided by contractual budget",
+        help='realized budget / contract_budget in Percentage'
     )
 
     currency_id = fields.Many2one(
@@ -82,7 +82,7 @@ class ProjectTask(models.Model):
     def compute_budget_consumed(self):
         for task in self:
             if task.contractual_budget:
-                self.budget_consumed = task.realized_budget / task.contractual_budget
+                self.budget_consumed = project.realized_budget / project.contractual_budget * 100
             else:
                 self.budget_consumed = False
 
@@ -131,14 +131,38 @@ class ProjectTask(models.Model):
         self._get_kpi()
         project = self.project_id
         project._get_kpi()
+    
+    @api.multi
+    def zero_out_kpi(self):
+        self.contractual_budget = 0
+        self.forecasted_budget = 0
+        self.realized_budget = 0
+        self.valued_budget = 0
+        self.invoiced_budget = 0
+        self.forecasted_hours = 0
+        self.realized_hours = 0
+        self.valued_hours = 0
+        self.invoiced_hours = 0
+        self.pc_budget = 0
+        self.cf_budget = 0
+        self.pc_hours = 0
+        self.cf_hours = 0
+        self.valuation_ratio = 0
 
     @api.multi
     def _get_kpi(self):
-
+        #gets parent tasks only
         for task in self.filtered(lambda s: not s.parent_id):
+            #this is to fix if a task was added manually and has the same sale_line_id (sale.order.line type) as another task 
+            if task.sale_line_id.task_id != task:
+                #KPIs are run every hour and if they had been calculated before this fix was added, they need to be set to 0
+                task.zero_out_kpi()
+                continue
+            #this gets the timesheets for the parent tasks only
             analyzed_timesheet = task.project_id.timesheet_ids.filtered(lambda t: t.reporting_task_id == task)
 
             task.contractual_budget = task.sale_line_id.price_unit * task.sale_line_id.product_uom_qty
+
             task.forecasted_budget = sum([
                 hourly_rate * resource_hours for hourly_rate, resource_hours in
                 zip(task.forecast_ids.mapped('hourly_rate'), task.forecast_ids.mapped('resource_hours'))
