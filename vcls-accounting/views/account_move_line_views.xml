@@ -36,12 +36,13 @@
         <tree string="Expenses Entries" create="false">
             <field name="journal_code" string="Journal 2"/>
             <field name="external_account" string="AccountCode"/>
-            <field name="move_id" required="0" groups="account.group_account_user" string="ExpenseNumber"/>
-            <field name="name" string="ExpenseName"/>
-            <field name="ref"/>
-            <field name="period_end" string="Date"/>
+            <field name="move_id" required="0" groups="account.group_account_user" string="InvoiceNumber"/>
+            <field name="origin" string="InvoiceName"/>
+            <field name="name" string="LineName"/>
+            <field name="analytic_account_id"/>
+            <field name="period_end" string="PeriodEnd"/>
             <field name="date_maturity" string="DueDate"/>
-            <field name="account_code"/>
+            <field name="account_code" string="Code"/>
             <field name="debit" sum="Total Debit" string="D"/>
             <field name="credit" sum="Total Credit" string="C"/>
             <field name="debit_base_currency" sum="Total Debit EUR" string="D EUR"/>
