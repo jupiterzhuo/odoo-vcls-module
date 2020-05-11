@@ -103,6 +103,7 @@ class Leads(models.Model):
         )
 
     date_closed = fields.Datetime('Closed Date', readonly=False, copy=False)
+    date_deadline = fields.Date(string='Proposal Sending Deadline')
 
     #################
     # CUSTOM FIELDS #
