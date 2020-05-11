@@ -41,6 +41,7 @@
             <field name="name" string="LineName"/>
             <field name="analytic_account_id"/>
             <field name="period_end" string="PeriodEnd"/>
+            <field name="date" string="ValidationDate"/>
             <field name="date_maturity" string="DueDate"/>
             <field name="account_code" string="Code"/>
             <field name="debit" sum="Total Debit" string="D"/>
