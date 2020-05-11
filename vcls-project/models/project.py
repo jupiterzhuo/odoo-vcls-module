@@ -57,7 +57,7 @@ class Project(models.Model):
     #ta_ids = fields.Many2many('hr.employee', string='Ta')
     completion_ratio = fields.Float('Task Complete', compute='compute_project_completion_ratio', store=True)
     consummed_completed_ratio = fields.Float('BC / TC',
-                                             compute='compute_project_consummed_completed_ratio', store=True)
+                                             compute='compute_project_consummed_completed_ratio', store=True, help="Task Progress / number of Tasks")
     summary_ids = fields.One2many(
         'project.summary', 'project_id',
         'Project summaries'
@@ -77,6 +77,7 @@ class Project(models.Model):
                               string='Ta')
     controller_id = fields.Many2one('res.users', related='partner_id.controller_id', string='Project Controller')
     invoice_admin_id = fields.Many2one('res.users', related='partner_id.invoice_admin_id', string='Invoice Administrator')
+    account_manager_id = fields.Many2one('res.users', related='sale_order_id.user_id', string='Account Manager')
 
     invoices_count = fields.Integer(
         compute='_get_out_invoice_ids',
@@ -97,17 +98,25 @@ class Project(models.Model):
     risk_ids = fields.Many2many(
         'risk', string='Risk',
         compute='_compute_risk_ids',
-        store = True,
+        # store=True,
     )
 
     risk_score = fields.Integer(
         string='Risk Score',
         compute='_compute_risk_score',
-        store=True,
+        # store=True,
+    )
+
+    risk_last_update = fields.Datetime(
+        string='Risk Last Update',
+        compute='_compute_risk_last_update',
+        # store=True,
     )
 
     invoiceable_amount = fields.Monetary(
-       related="sale_order_id.invoiceable_amount", readonly=True, store=True
+       related="sale_order_id.invoiceable_amount",
+       readonly=True,
+       store=True,
     )
 
     invoicing_mode = fields.Selection(related="sale_order_id.invoicing_mode", readonly=True)
@@ -125,9 +134,9 @@ class Project(models.Model):
         compute='_compute_dates',
         index=True,
         track_visibility='onchange',
-        ) 
+    ) 
     
-    #accounting fields for legacy integration
+    # accounting fields for legacy integration
     external_account = fields.Char(
         default="/",
     )
@@ -215,7 +224,6 @@ class Project(models.Model):
     @api.depends('sale_order_id.risk_ids')
     def _compute_risk_ids(self):
         for project in self:
-            
             project.risk_ids = self.env['risk'].search([
                 ('resource', '=', 'project.project,{}'.format(project.id)),
             ])
@@ -224,6 +232,21 @@ class Project(models.Model):
     def _compute_risk_score(self):
         for project in self:
             project.risk_score = sum(project.risk_ids.mapped('score'))
+
+    @api.depends('risk_ids')
+    def _compute_risk_last_update(self):
+        for project in self:
+            last_one = datetime(1970, 1, 1)
+            for individual_risks in project.risk_ids:
+                if not last_one or individual_risks.write_date > last_one:
+                    last_one = individual_risks.write_date
+                elif not last_one or individual_risks.create_date > last_one:
+                    last_one = individual_risks.create_date
+            if last_one != datetime(1970, 1, 1):
+                project.risk_last_update = last_one
+            else:
+                project.risk_last_update = False
+
 
     @api.one
     @api.depends(

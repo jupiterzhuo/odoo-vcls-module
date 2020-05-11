@@ -89,7 +89,8 @@
                     <field name="description_evolutions" type="html"/>
                         <div class="oe_clear"/>
                     </page>
-                    <page string="Related Tickets" attrs="{'invisible':[('ticket_ids','=',False)]}">
+                    <page string="Related Tickets" attrs="{'invisible':[('total_ticket_effort','=',0)]}">
+                        <field name="total_ticket_effort"/>
                         <field name="ticket_ids" mode='tree'>
                         <tree string="Related Tickets" default_order="date">
                             <field name="name"/>
