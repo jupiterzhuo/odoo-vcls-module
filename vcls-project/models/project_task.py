@@ -59,7 +59,7 @@ class ProjectTask(models.Model):
     @api.depends ('ticket_ids','ticket_ids.planned_effort')
     def _compute_total_ticket_effort(self):
         for task in self.filtered(lambda t: t.ticket_ids):
-            task.total_ticket_effort = sum(task.ticked_ids.mapped('planned_effort'))
+            task.total_ticket_effort = sum(task.ticket_ids.mapped('planned_effort'))
 
     @api.depends('parent_id', 'project_id.project_type')
     def _compute_task_type(self):
