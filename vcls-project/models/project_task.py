@@ -6,21 +6,12 @@ from odoo import models, fields, api
 class ProjectTask(models.Model):
     _inherit = 'project.task'
     
-    """business_value = fields.Selection([
-        ('1', 'Minor'),
-        ('2', 'Moderate'),
-        ('3', 'Strong'),
-        ('4', 'Major')],
-        string='Business Value',
+    total_ticket_effort = fields.Float(
+        compute='_compute_total_ticket_effort',
+        store=True,
+        default=0.0,
+        group_operator='sum',
     )
-
-    dev_effort = fields.Selection([
-        ('1', 'Small'),
-        ('2', 'Medium'),
-        ('3', 'Large'),
-        ('4', 'Xtra Large')],
-        string='Effort Assumption',
-    )"""
 
     ticket_ids = fields.One2many(
         'helpdesk.ticket',
@@ -65,6 +56,10 @@ class ProjectTask(models.Model):
     ###################
     # COMPUTE METHODS #
     ###################
+    @api.depends ('ticket_ids','ticket_ids.planned_effort')
+    def _compute_total_ticket_effort(self):
+        for task in self.filtered(lambda t: t.ticket_ids):
+            task.total_ticket_effort = sum(task.ticked_ids.mapped('planned_effort'))
 
     @api.depends('parent_id', 'project_id.project_type')
     def _compute_task_type(self):
