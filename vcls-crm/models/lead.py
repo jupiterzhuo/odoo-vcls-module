@@ -103,6 +103,7 @@ class Leads(models.Model):
         )
 
     date_closed = fields.Datetime('Closed Date', readonly=False, copy=False)
+    date_deadline = fields.Date(string='Proposal Sending Deadline')
 
     #################
     # CUSTOM FIELDS #
@@ -250,6 +251,12 @@ class Leads(models.Model):
                                       ('workorder', 'Work Order'),
                                       ('termandcondition', 'Terms and conditions'),])
 
+    risk_ids = fields.Many2many(
+        'risk',
+        string='Risk',
+        store=True,
+        compute='_compute_risk_ids'
+    )
 
     #is_support_user = fields.Boolean(compute='_compute_is_support_user', store=False)
 
@@ -747,6 +754,12 @@ class Leads(models.Model):
         for record in self:
             self.env['risk']._raise_risk(self.env.ref('vcls-crm.risk_go_nogo'), '{},{}'.format(record._name, record.id))
             record.risk_raised = True
+
+    def _compute_risk_ids(self):
+        for record in self:
+            record.risk_ids = self.env['risk'].search([
+                ('resource', '=', 'crm.lead,{}'.format(record.id)),
+            ])
             
     def open_related_risks(self):
         return {

@@ -116,3 +116,22 @@ class Risk(models.Model):
                 raise ValidationError(_('Resource model is not valid'))
             if not res_id.isdigit() or not self.env[res_model].browse(int(res_id)).exists():
                 raise ValidationError(_('Resource id is not valid'))
+
+    @api.model
+    def create(self, vals):
+        risk = super(Risk, self).create(vals)
+        risk_resource = risk.resource
+        model = risk_resource.split(',')[0]
+        model_id = risk_resource.split(',')[1]
+        obj = self.env[model].browse(int(model_id))
+        obj._compute_risk_ids()
+        return risk
+
+    def write(self, vals):
+        risk = super(Risk, self).write(vals)
+        risk_resource = self.resource
+        model = risk_resource.split(',')[0]
+        model_id = risk_resource.split(',')[1]
+        obj = self.env[model].browse(int(model_id))
+        obj._compute_risk_ids()
+        return risk

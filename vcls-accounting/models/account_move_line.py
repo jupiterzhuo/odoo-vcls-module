@@ -7,6 +7,16 @@ class Move(models.Model):
     _inherit = 'account.move'
 
     period_end = fields.Date()
+    origin = fields.Char()
+
+    @api.multi
+    def _get_source_info(self):
+        for move in self:
+            invoice = self.env['account.invoice'].search([('number','=',move.name)],limit=1)
+            if invoice:
+                move.period_end = invoice.timesheet_limit_date
+                move.origin = invoice.origin
+
 
 class AccountAnalyticLine(models.Model):
     _inherit = 'account.move.line'
@@ -30,6 +40,10 @@ class AccountAnalyticLine(models.Model):
     
     period_end = fields.Date(
         related = 'move_id.period_end',
+    )
+
+    origin = fields.Char(
+        related = 'move_id.origin',
     )
 
     @api.depends('debit','credit')
@@ -80,6 +94,8 @@ class Invoice(models.Model):
     def action_invoice_open(self):
         result = super(Invoice, self).action_invoice_open()
         #we edit the date of the moves with the period end account.move.line account.move
-        self.move_id.period_end = self.timesheet_limit_date
+        for invoice in self:
+            invoice.move_id.period_end = invoice.timesheet_limit_date
+            invoice.move_id.origin = invoice.origin
 
         return result
