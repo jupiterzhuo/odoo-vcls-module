@@ -17,16 +17,11 @@
                     </header>
                     <sheet string="Project">
                         <div class="oe_button_box" name="button_box" groups="base.group_user">
-                            <!-- <field name="risk_ids" invisible="1"/> -->
-                            <field name="risk_ids" />
+                            <field name="risk_ids" invisible="1"/>
                             <button class="oe_stat_button " name="show_risks"
                                 string="Risk Analysis" type="object"
                                 icon="fa-exclamation-triangle"
                                 attrs="{'invisible': [('risk_ids', '=', [])]}"
-                            />
-                            <button class="oe_stat_button " name="show_risks"
-                                string="Risk Analysis" type="object"
-                                icon="fa-exclamation-triangle"
                             />
                             <button class="oe_stat_button" name="sale_orders_tree_view" type="object" icon="fa-barcode">
                                 <field string="Quotation(s)" name="orders_count" widget="statinfo"/>
