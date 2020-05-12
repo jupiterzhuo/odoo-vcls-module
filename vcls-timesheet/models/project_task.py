@@ -119,12 +119,27 @@ class ProjectTask(models.Model):
             _logger.info("KPI | {} forced tasks.".format(len(tasks)))
         else:
             tasks = self.search([('project_id.project_type','=','client'),('recompute_kpi','=',True)])
+            parents = tasks.filtered(lambda t: t.parent_id).mapped('parent_id') #we also recompute the parent
+            parents.write({'recompute_kpi':True})
+            tasks |= parents
 
         projects |= tasks.mapped('project_id')   
         _logger.info("KPI | {} tasks to recompute in {} projects".format(len(tasks),len(projects)))
 
+        end_time = datetime.now() + timedelta(seconds=duration_sec)
+        i=0
         for project in projects:
-            pass
+            i += 1
+            childs = project.task_ids.filtered(lambda t: t.parent_id and t.recompute_kpi)
+            childs._get_kpi()
+            parents = project.task_ids.filtered(lambda t: not t.parent_id and t.recompute_kpi)
+            parents._get_kpi()
+            project._get_kpi()
+            _logger.info("KPI | Porject Processed {}/{}".format(i,len(projects)))
+            
+            if datetime.now() > end_time:
+                break
+            
 
 
         """#Force is to force all client and non cancelled tasks to be calculated
