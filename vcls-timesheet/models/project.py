@@ -32,6 +32,11 @@ class Project(models.Model):
         help='realised budget / contractual budget percentage'
     )
 
+    currency_id = fields.Many2one(
+        comodel_name = 'res.currency',
+        related = 'sale_order_id.currency_id',
+    )
+
     @api.multi
     @api.depends("realized_budget", "contractual_budget")
     def compute_budget_consumed(self):
