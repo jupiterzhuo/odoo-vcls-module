@@ -135,8 +135,8 @@ class ProjectTask(models.Model):
             parents = project.task_ids.filtered(lambda t: not t.parent_id and t.recompute_kpi)
             parents._get_kpi()
             project._get_kpi()
-            _logger.info("KPI | Porject Processed {}/{}".format(i,len(projects)))
-            
+            _logger.info("KPI | Project Processed {}/{}".format(i,len(projects)))
+
             if datetime.now() > end_time:
                 break
             
@@ -289,6 +289,8 @@ class ProjectTask(models.Model):
                 task.invoiced_budget = False
                 task.pc_budget = False
                 task.cf_budget = False
+            
+            task.recompute_kpi = False
 
     @api.onchange('parent_id')
     def onchange_allow_budget_modification(self):
