@@ -2,6 +2,7 @@
 
 from odoo import models, fields, api
 from datetime import datetime
+from datetime import timedelta
 
 
 class ProjectTask(models.Model):
@@ -43,7 +44,7 @@ class ProjectTask(models.Model):
     valued_hours = fields.Float(string="Valued Hours",readonly=True)
     invoiced_hours = fields.Float(string="Invoiced Hours",readonly=True)
     valuation_ratio = fields.Float(string="Valuation Ratio",readonly=True)
-    recompute_kpi = fields.Boolean(compute='_get_to_recompute', store=True)
+    # recompute_kpi = fields.Boolean(compute='_get_to_recompute')
 
     pc_budget = fields.Float(string="PC Review Budget",readonly=True)
     cf_budget = fields.Float(string="Carry Forward Budget",readonly=True)
@@ -63,7 +64,7 @@ class ProjectTask(models.Model):
         string="Budget Consumed",
         readonly=True,
         compute='compute_budget_consumed',
-        help='realized budget / contract_budget in Percentage'
+        help='realized budget / contractual_budget in Percentage'
     )
 
     currency_id = fields.Many2one(
@@ -82,9 +83,9 @@ class ProjectTask(models.Model):
     def compute_budget_consumed(self):
         for task in self:
             if task.contractual_budget:
-                self.budget_consumed = project.realized_budget / project.contractual_budget * 100
+                self.budget_consumed = task.realized_budget / task.contractual_budget * 100
             else:
-                self.budget_consumed = False
+                self.budget_consumed = task.realized_budget / 0.01 * 100
 
     @api.depends('date_end')
     def _compute_deadline(self):
@@ -106,18 +107,39 @@ class ProjectTask(models.Model):
             task.recompute_kpi = True
 
     @api.model
-    def _cron_compute_kpi(self,force=False):
+    def _cron_compute_kpi(self,force=False,clear=False):
+        #Force is to force all client and non cancelled tasks to be calculated
         if force:
             tasks = self.search([])
+            #clear is to force all tasks to false (to be run once so you dont recalulate non client/cancelled tasks everytime)
+            if clear:
+                for task in tasks:
+                    task.recompute_kpi = False
+            tasks = tasks.filtered(lambda t : t.project_id.project_type == 'client' and t.stage_id.display_name != 'Cancelled')
+
+            for task in tasks:
+                task.recompute_kpi = True
         else:
             tasks = self.search([('recompute_kpi', '=', True)])
-            
+
         projects = self.env['project.project']
         tasks._get_kpi()
         for task in tasks:
-            task.recompute_kpi = False
             projects |= task.project_id
-        projects._get_kpi()
+        #set the length of time to limit project kpi calculation
+        end_time = datetime.now() + timedelta(seconds=20)
+
+        for project in projects:
+            project._get_kpi()
+
+            for task in project.task_ids:
+                task.recompute_kpi = False
+
+                for child in task.child_ids:
+                    child.recompute_kpi = False
+
+            if datetime.now() > end_time:
+                break
         # self._cr.execute('update project_task set ')
 
     @api.onchange('allow_budget_modification', 'recompute_kpi')
@@ -126,12 +148,6 @@ class ProjectTask(models.Model):
         project = self.project_id
         project._get_kpi()
 
-    @api.multi
-    def button_get_kpi(self):
-        self._get_kpi()
-        project = self.project_id
-        project._get_kpi()
-    
     @api.multi
     def zero_out_kpi(self):
         self.contractual_budget = 0
@@ -158,7 +174,7 @@ class ProjectTask(models.Model):
                 #KPIs are run every hour and if they had been calculated before this fix was added, they need to be set to 0
                 task.zero_out_kpi()
                 continue
-            #this gets the timesheets for the parent tasks only
+            #gets all child and parent timesheets for this task. if "task" is a child task, skips it.
             analyzed_timesheet = task.project_id.timesheet_ids.filtered(lambda t: t.reporting_task_id == task)
 
             task.contractual_budget = task.sale_line_id.price_unit * task.sale_line_id.product_uom_qty
