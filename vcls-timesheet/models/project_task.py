@@ -123,7 +123,8 @@ class ProjectTask(models.Model):
             parents.write({'recompute_kpi':True})
             tasks |= parents"""
 
-        projects |= tasks.mapped('project_id')   
+        projects |= tasks.mapped('project_id') 
+        projects = projects.sorted(key=lambda r: r.id)
         _logger.info("KPI | {} tasks to recompute in {} projects".format(len(tasks),len(projects)))
         _logger.info("{}".format(projects))
 
