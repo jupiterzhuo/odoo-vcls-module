@@ -81,7 +81,7 @@ class ProjectTask(models.Model):
     @api.depends('completion_elligible', 'stage_id','progress')
     def compute_consummed_completed_ratio(self):
         for task in self:
-            task.consummed_completed_ratio = task.budget_consumed / task.completion_ratio * 100 if task.completion_ratio > 0 else task.budget_consumed / 0.1 * 100
+            task.consummed_completed_ratio = (task.budget_consumed / task.completion_ratio) * 100 if task.completion_ratio > 0 else task.budget_consumed / 0.1 * 100
 
     # We Override below method in order to take the unit_amount_rounded amount rather than the initial unit_amount
     @api.depends('timesheet_ids.unit_amount_rounded')
