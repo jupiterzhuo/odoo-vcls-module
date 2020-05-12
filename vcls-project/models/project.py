@@ -234,7 +234,7 @@ class Project(models.Model):
         for project in self:
             project.risk_score = sum(project.risk_ids.mapped('score'))
 
-    @api.depends('risk_ids')
+    @api.depends('risk_ids.write_date')
     def _compute_risk_last_update(self):
         for project in self:
             last_one = datetime(1970, 1, 1)

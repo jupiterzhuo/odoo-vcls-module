@@ -42,9 +42,9 @@ class Project(models.Model):
     def compute_budget_consumed(self):
         for project in self:
             if project.contractual_budget:
-                self.budget_consumed = project.realized_budget / project.contractual_budget * 100
+                project.budget_consumed = project.realized_budget / project.contractual_budget * 100
             else:
-                self.budget_consumed = False
+                project.budget_consumed = False
 
     @api.multi
     def _get_kpi(self):
