@@ -40,7 +40,7 @@
         'sale_timesheet',
         'sale_purchase',
         'sale_subscription',
-        'vcls_subscription',
+        # 'vcls_subscription',
         'vcls_security',
         
     ],
