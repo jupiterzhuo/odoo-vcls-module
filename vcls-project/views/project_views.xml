@@ -86,6 +86,7 @@
                                 <field name="assistant_id"/>
                                 <field name="controller_id"/>
                                 <field name="invoice_admin_id"/>
+                                <field name="account_manager_id"/>
                             </group>
                             <group string="Operations">
                                 <field name="date_start" string="Est. Start Date"/>
