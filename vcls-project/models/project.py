@@ -14,6 +14,7 @@ class Project(models.Model):
 
     _name = 'project.project'
     _inherit = ['project.project', 'mail.thread', 'mail.activity.mixin']
+    _order = 'name'
 
     # We Override this method from 'project_task_default_stage
     def _get_default_type_common(self):
