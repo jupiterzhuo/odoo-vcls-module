@@ -137,6 +137,7 @@ class ProjectTask(models.Model):
             to_compute = project.task_ids.filtered(lambda t: t.recompute_kpi)
             to_compute._get_kpi()
             project._get_kpi()
+            project.task_ids.write({'recompute_kpi':False}) #we ensure childs to be False too
             _logger.info("KPI | Project Processed {}/{}".format(i,len(projects)))
 
             if datetime.now() > end_time:
