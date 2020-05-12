@@ -114,26 +114,27 @@ class ProjectTask(models.Model):
         projects = self.env['project.project']
 
         if force:
-            tasks = self.search([('project_id.project_type','=','client')])
+            tasks = self.search([('project_id.project_type','=','client'),('parent_id','=',False)])
             tasks.write({'recompute_kpi':True})
             _logger.info("KPI | {} forced tasks.".format(len(tasks)))
         else:
-            tasks = self.search([('project_id.project_type','=','client'),('recompute_kpi','=',True)])
-            parents = tasks.filtered(lambda t: t.parent_id).mapped('parent_id') #we also recompute the parent
+            tasks = self.search([('project_id.project_type','=','client'),('recompute_kpi','=',True),('parent_id','=',False)])
+            """parents = tasks.filtered(lambda t: t.parent_id).mapped('parent_id') #we also recompute the parent
             parents.write({'recompute_kpi':True})
-            tasks |= parents
+            tasks |= parents"""
 
         projects |= tasks.mapped('project_id')   
         _logger.info("KPI | {} tasks to recompute in {} projects".format(len(tasks),len(projects)))
+        _logger.info("{}".format(projects))
 
         end_time = datetime.now() + timedelta(seconds=duration_sec)
         i=0
         for project in projects:
             i += 1
-            childs = project.task_ids.filtered(lambda t: t.parent_id and t.recompute_kpi)
-            childs._get_kpi()
-            parents = project.task_ids.filtered(lambda t: not t.parent_id and t.recompute_kpi)
-            parents._get_kpi()
+            """childs = project.task_ids.filtered(lambda t: t.parent_id and t.recompute_kpi)
+            childs._get_kpi()"""
+            to_compute = project.task_ids.filtered(lambda t: t.recompute_kpi)
+            to_compute._get_kpi()
             project._get_kpi()
             _logger.info("KPI | Project Processed {}/{}".format(i,len(projects)))
 
