@@ -17,6 +17,7 @@ class SaleOrderLine(models.Model):
     @api.onchange('name','price_unit')
     def _onchange_replicate(self):
         for line in self.filtered(lambda l: l.vcls_type=='rate' and not l.order_id.parent_id): #if this is a rate in a parent quotations
+            _logger.info("Linked Rate Line Modification | {} {}".format(line.name,line.order_id.name))
             #we search for child quotations
             for child in line.order_id.child_ids.filtered(lambda c: c.link_rates):
                 to_update = child.order_line.filtered(lambda f: f.product_id == line.product_id)
@@ -42,9 +43,10 @@ class SaleOrderLine(models.Model):
         
         to_replicate = lines.filtered(lambda p: not p.order_id.parent_id and p.vcls_type == 'rate') #if we create a rate line in a parent quotation
         update = self.prepare_linked_line(to_replicate,'create')
-
         for child in line.order_id.child_ids.filtered(lambda c: c.link_rates):
             child.order_line = update
+            _logger.info("Linked Rate Line Creation | {} in {}".format(update,child.name))
+
         return lines
 
     def _timesheet_create_task_prepare_values(self, project):
