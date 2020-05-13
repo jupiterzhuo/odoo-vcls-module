@@ -482,6 +482,8 @@ class SaleOrder(models.Model):
             order_lines = []
             #we remove the newly created lines
             tmpl_rate_lines = self.order_line.filtered(lambda l: l.vcls_type == 'rate')
+            _logger.info("KPI | found rate lines {}".format(tmpl_rate_lines))
+            
             if tmpl_rate_lines:
                  order_lines =[(3, line_id, 0) for line_id in tmpl_rate_lines.ids]
 
@@ -493,17 +495,16 @@ class SaleOrder(models.Model):
                     'product_uom_qty':rl.product_uom_qty,
                     'product_uom':rl.product_uom.id,
                     'price_unit':rl.price_unit,
-                    'order_id':self.id,
                 }
                 #_logger.info("New Line:{}".format(vals))
                 order_lines.append((0, 0, vals))
             
             _logger.info("KPI | {}".format(order_lines))
             
-            self.write({
+            """self.write({
                 'order_line' : order_lines,
             })
-            self.order_line._compute_tax_id()
+            self.order_line._compute_tax_id()"""
     
     
 
