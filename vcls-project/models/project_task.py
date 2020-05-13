@@ -27,6 +27,12 @@ class ProjectTask(models.Model):
         string='Task Type',
         compute='_compute_task_type',
         store=True,)
+    
+    reporting_task_id = fields.Many2one(
+        comodel_name = 'project.task',
+        compute = '_compute_reporting_task_id',
+        store = True,
+    )
 
     info_string = fields.Char(
         compute='_get_info_string',
@@ -56,6 +62,11 @@ class ProjectTask(models.Model):
     ###################
     # COMPUTE METHODS #
     ###################
+    @api.depends ('parent_id')
+    def _compute_reporting_task_id(self):
+        for task in self:
+            task.reporting_task_id = task.parent_id if task.parent_id else task
+
     @api.depends ('ticket_ids','ticket_ids.planned_effort')
     def _compute_total_ticket_effort(self):
         for task in self.filtered(lambda t: t.ticket_ids):
