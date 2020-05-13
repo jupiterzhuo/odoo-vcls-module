@@ -14,6 +14,7 @@ class Project(models.Model):
 
     _name = 'project.project'
     _inherit = ['project.project', 'mail.thread', 'mail.activity.mixin']
+    _order = 'name'
 
     # We Override this method from 'project_task_default_stage
     def _get_default_type_common(self):
@@ -55,9 +56,9 @@ class Project(models.Model):
 
     #consultant_ids = fields.Many2many('hr.employee', string='Consultants')
     #ta_ids = fields.Many2many('hr.employee', string='Ta')
-    completion_ratio = fields.Float('Task Complete', compute='compute_project_completion_ratio', store=True)
+    completion_ratio = fields.Float('Task Complete', compute='compute_project_completion_ratio', store=True, help='All parent tasks completion %, weighted by contractual budget')
     consummed_completed_ratio = fields.Float('BC / TC',
-                                             compute='compute_project_consummed_completed_ratio', store=True, help="Task Progress / number of Tasks")
+                                             compute='compute_project_consummed_completed_ratio', store=True, help='BC/TC in Percentage, lower is "better", 100 is on target')
     summary_ids = fields.One2many(
         'project.summary', 'project_id',
         'Project summaries'
@@ -233,7 +234,7 @@ class Project(models.Model):
         for project in self:
             project.risk_score = sum(project.risk_ids.mapped('score'))
 
-    @api.depends('risk_ids')
+    @api.depends('risk_ids.write_date')
     def _compute_risk_last_update(self):
         for project in self:
             last_one = datetime(1970, 1, 1)
@@ -275,14 +276,12 @@ class Project(models.Model):
     # CUSTOM METHODS #
     ##################
     @api.multi
-    def get_tasks_for_project_sub_project(self):
-        """This function will return all the tasks and subtasks found in the main and Child
-        Projects which participates in KPI's"""
+    def get_tasks_not_cancelled_and_completable(self):
+        """This function will return all the tasks and subtasks that can be completed and is not cancelled"""
         self.ensure_one()
-        tasks = self.task_ids + self.child_id.mapped('task_ids')
-        all_tasks = tasks + tasks.mapped('child_ids')
-        return all_tasks.filtered(lambda task: task.sale_line_id.product_id.completion_elligible and
-                                  task.stage_id.status not in  ['not_started','cancelled'])
+        all_tasks = self.task_ids
+        return all_tasks.filtered(lambda task: task.sale_line_id.product_id.product_tmpl_id.completion_elligible and
+                                  task.stage_id.status not in  ['cancelled'])
 
     @api.multi
     def action_raise_new_invoice(self):
@@ -473,15 +472,22 @@ class Project(models.Model):
     @api.depends('task_ids.completion_ratio')
     def compute_project_completion_ratio(self):
         for project in self:
-            tasks = project.get_tasks_for_project_sub_project()
-            project.completion_ratio = sum(tasks.mapped('completion_ratio')) / len(tasks) if tasks else sum(tasks.mapped('completion_ratio'))
+            tasks = project.get_tasks_not_cancelled_and_completable()
+            weight_sum = 0
+            num_times_weight_factor = 0
+            #this weights the tasks complete with the contractual budget
+            for task in tasks:
+                weight_sum += task.contractual_budget
+                num_times_weight_factor += ( task.completion_ratio / 100) * task.contractual_budget
+            project.completion_ratio = num_times_weight_factor * 100 / weight_sum if weight_sum > 0 else 0
+
 
     @api.multi
     @api.depends('task_ids.consummed_completed_ratio')
     def compute_project_consummed_completed_ratio(self):
         for project in self:
-            tasks = project.get_tasks_for_project_sub_project()
-            project.consummed_completed_ratio = sum(tasks.mapped('consummed_completed_ratio')) / len(tasks) if tasks else sum(tasks.mapped('consummed_completed_ratio'))
+            project.consummed_completed_ratio = (project.budget_consumed / project.completion_ratio) * 100 if project.completion_ratio > 0 else project.budget_consumed / 0.01 * 100
+
 
     @api.multi
     def _get_is_project_manager(self):

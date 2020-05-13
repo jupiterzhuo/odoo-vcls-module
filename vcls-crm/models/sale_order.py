@@ -232,6 +232,9 @@ class SaleOrder(models.Model):
                     so.expected_end_date = expected_start_date + (so.expected_end_date - so.expected_start_date)
         ret = super(SaleOrder, self).write(vals)
         self.remap()
+        """#we take in account changes in the rate products to be reported in childs
+        if vals.get('order_line',False):
+            _logger.info("Write SO lines: {}".format(vals['order_line']))"""
         return ret 
 
     ###################
@@ -344,11 +347,6 @@ class SaleOrder(models.Model):
                 'target': 'current',
                 'res_id': new_order.id,
             }
-
-    """ @api.multi
-    def copy_data(self, default=None):
-        default['name']="I DO TEST"
-        return super(SaleOrder, self).copy_data(default)"""
 
     @api.model
     def get_alpha_index(self, index):
@@ -475,6 +473,36 @@ class SaleOrder(models.Model):
             self.update({
                'partner_shipping_id': partner_shipping_id,
             })
+    
+    @api.onchange('sale_order_template_id')
+    def onchange_sale_order_template_id(self):
+        """
+         We override this to manage the case of link_rates=True.
+         In the case of Linked Rates, the parent order is defineing the rates, not the template.
+        """
+        super(SaleOrder,self).onchange_sale_order_template_id()
+        if self.link_rates and self.parent_id and self.sale_order_template_id:
+
+            #we remove the newly created rate lines
+            self.order_line = self.order_line.filtered(lambda l: l.vcls_type != 'rate')
+
+            order_lines = []
+            #then copy the parent_ones
+            for rl in self.parent_id.order_line.filtered(lambda l: l.vcls_type == 'rate'):
+                vals = {
+                    'product_id':rl.product_id.id,
+                    'name':rl.name,
+                    'product_uom_qty':rl.product_uom_qty,
+                    'product_uom':rl.product_uom.id,
+                    'price_unit':rl.price_unit,
+                }
+                #_logger.info("New Line:{}".format(vals))
+                order_lines.append((0, 0, vals))
+            
+            _logger.info("KPI | {}".format(order_lines))
+          
+            self.order_line = order_lines
+            self.order_line._compute_tax_id()
     
     
 
