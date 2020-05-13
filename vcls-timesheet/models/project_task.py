@@ -119,6 +119,7 @@ class ProjectTask(models.Model):
             _logger.info("KPI | {} forced tasks.".format(len(tasks)))
         else:
             tasks = self.search([('project_id.project_type','=','client'),('recompute_kpi','=',True),('parent_id','=',False)])
+            _logger.info("KPI | Tasks {}".format(tasks.ids))
             """parents = tasks.filtered(lambda t: t.parent_id).mapped('parent_id') #we also recompute the parent
             parents.write({'recompute_kpi':True})
             tasks |= parents"""

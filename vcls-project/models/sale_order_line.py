@@ -42,6 +42,7 @@ class SaleOrderLine(models.Model):
             for child in line.order_id.child_ids.filtered(lambda c: c.link_rates):
                 to_delete = child.order_line.filtered(lambda f: f.product_id == line.product_id)
                 to_delete.unlink()
+                _logger.info("Linked Rate Line Deletion | {} in {}".format(to_delete.mapped('name'),child.name))
         super().unlink()
 
     
