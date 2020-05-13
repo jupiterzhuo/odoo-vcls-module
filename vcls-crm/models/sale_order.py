@@ -479,13 +479,15 @@ class SaleOrder(models.Model):
         """
         super(SaleOrder,self).onchange_sale_order_template_id()
         if self.link_rates and self.parent_id and self.sale_order_template_id:
-            order_lines = []
-            #we remove the newly created lines
-            tmpl_rate_lines = self.order_line.filtered(lambda l: l.vcls_type == 'rate')
+
+            #we remove the newly created rate lines
+            self.order_line = self.order_line.filtered(lambda l: l.vcls_type != 'rate')
+            
+            """tmpl_rate_lines = self.order_line.filtered(lambda l: l.vcls_type == 'rate')
             _logger.info("KPI | found rate lines {}".format(tmpl_rate_lines))
 
             if tmpl_rate_lines:
-                 order_lines =[(3, line_id, 0) for line_id in tmpl_rate_lines.ids]
+                 order_lines =[(3, line_id, 0) for line_id in tmpl_rate_lines.ids]"""
 
             order_lines = []
             #then copy the parent_ones
@@ -501,10 +503,7 @@ class SaleOrder(models.Model):
                 order_lines.append((0, 0, vals))
             
             _logger.info("KPI | {}".format(order_lines))
-            
-            """self.write({
-                'order_line' : order_lines,
-            })"""
+          
             self.order_line = order_lines
             self.order_line._compute_tax_id()
     
