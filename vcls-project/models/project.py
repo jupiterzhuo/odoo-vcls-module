@@ -479,7 +479,7 @@ class Project(models.Model):
             for task in tasks:
                 weight_sum += task.contractual_budget
                 num_times_weight_factor += ( task.completion_ratio / 100) * task.contractual_budget
-            project.completion_ratio = round( num_times_weight_factor * 100 / weight_sum , 2) 
+            project.completion_ratio = num_times_weight_factor * 100 / weight_sum if weight_sum > 0 else 0
 
 
     @api.multi
