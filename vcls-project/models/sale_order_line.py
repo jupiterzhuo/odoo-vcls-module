@@ -20,6 +20,7 @@ class SaleOrderLine(models.Model):
             _logger.info("Linked Rate Line Modification | {} {}".format(line.name,line.order_id.name))
             #we search for child quotations
             for child in line.order_id.child_ids.filtered(lambda c: c.link_rates):
+                _logger.info("Linked Rate Child Found | {}".format(child.name))
                 to_update = child.order_line.filtered(lambda f: f.product_id == line.product_id)
                 if to_update:
                     _logger.info("Linked Rate Line Updated | {} {} linked to {} {}".format(to_update.name,to_update.order_id.name,line.name,line.order_id.name))
