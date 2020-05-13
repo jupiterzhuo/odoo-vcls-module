@@ -345,11 +345,6 @@ class SaleOrder(models.Model):
                 'res_id': new_order.id,
             }
 
-    """ @api.multi
-    def copy_data(self, default=None):
-        default['name']="I DO TEST"
-        return super(SaleOrder, self).copy_data(default)"""
-
     @api.model
     def get_alpha_index(self, index):
         map = {1:'A', 2:'B', 3:'C', 4:'D', 5:'E', 6:'F', 7:'G', 8:'H', 9:'I', 10:'J',
@@ -475,6 +470,33 @@ class SaleOrder(models.Model):
             self.update({
                'partner_shipping_id': partner_shipping_id,
             })
+    
+    @api.onchange('sale_order_template_id')
+    def onchange_sale_order_template_id(self):
+        """
+         We override this to manage the case of link_rates=True.
+         In the case of Linked Rates, the parent order is defineing the rates, not the template.
+        """
+        super(SaleOrder,self).onchange_sale_order_template_id()
+        if self.link_rates and self.parent_id:
+            #we remove the newly created lines
+            tmpl_rate_lines = self.order_line.filtered(lambda l: l.vcls_type == 'rate')
+            tmpl_rate_lines.unlink()
+            #then copy the parent_ones
+            new_lines = []
+            for rl in self.parent_id.order_line.filtered(lambda l: l.vcls_type == 'rate'):
+                vals = {
+                    'product_id':rl.product_id.id,
+                    'name':rl.name,
+                    'product_uom_qty':rl.product_uom_qty,
+                    'product_uom':rl.product_uom.id,
+                    'price_unit':rl.price_unit,
+                }
+                #_logger.info("New Line:{}".format(vals))
+                new_lines.append((0, 0, data))
+            
+            self.order_line += new_lines
+            self.order_line._compute_tax_id()
     
     
 
