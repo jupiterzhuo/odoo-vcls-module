@@ -502,9 +502,10 @@ class SaleOrder(models.Model):
             
             _logger.info("KPI | {}".format(order_lines))
             
-            self.write({
+            """self.write({
                 'order_line' : order_lines,
-            })
+            })"""
+            self.order_line = order_lines
             self.order_line._compute_tax_id()
     
     
