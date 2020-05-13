@@ -501,7 +501,7 @@ class SaleOrder(models.Model):
             
             self.write({
                 'order_line' : order_lines,
-            }
+            })
             self.order_line._compute_tax_id()
     
     
