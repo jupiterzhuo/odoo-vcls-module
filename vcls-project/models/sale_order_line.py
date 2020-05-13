@@ -39,7 +39,12 @@ class SaleOrderLine(models.Model):
         for line in lines:
             if line.product_id.seniority_level_id: #if there's a seniority level defined, it means this is a rate
                 line.product_uom_qty = 0
+        
+        to_replicate = lines.filtered(lambda p: not p.order_id.parent_id and p.vcls_type == 'rate') #if we create a rate line in a parent quotation
+        update = self.prepare_linked_line(to_replicate,'create')
 
+        for child in line.order_id.child_ids.filtered(lambda c: c.link_rates):
+            child.order_line = update
         return lines
 
     def _timesheet_create_task_prepare_values(self, project):
@@ -60,4 +65,21 @@ class SaleOrderLine(models.Model):
             for item in forecasts:
                 total += item.resource_hours*item.hourly_rate
             sol.forecasted_amount = total
+
+    def prepare_linked_line(self,source_lines=False,mode='create'):
+        updated_lines = []
+        if mode == 'create':
+            for rl in source_lines:
+                vals = {
+                        'product_id':rl.product_id.id,
+                        'name':rl.name,
+                        'product_uom_qty':rl.product_uom_qty,
+                        'product_uom':rl.product_uom.id,
+                        'price_unit':rl.price_unit,
+                    }
+                updated_lines.append((0, 0, vals))
+
+        return updated_lines
+
+
 
