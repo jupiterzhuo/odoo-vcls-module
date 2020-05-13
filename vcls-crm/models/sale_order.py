@@ -493,7 +493,7 @@ class SaleOrder(models.Model):
                     'price_unit':rl.price_unit,
                 }
                 #_logger.info("New Line:{}".format(vals))
-                new_lines.append((0, 0, data))
+                new_lines.append((0, 0, vals))
             
             self.order_line += new_lines
             self.order_line._compute_tax_id()
