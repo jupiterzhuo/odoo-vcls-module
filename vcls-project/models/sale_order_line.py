@@ -35,6 +35,16 @@ class SaleOrderLine(models.Model):
             if line.product_id.seniority_level_id: #if there's a seniority level defined, it means this is a rate
                 line.product_uom_qty = 0
     
+    @api.multi
+    def unlink(self):
+        for line in self.filtered(lambda p: not p.order_id.parent_id and p.vcls_type == 'rate'):
+            #we delete any linked rate product if we find it
+            for child in line.order_id.child_ids.filtered(lambda c: c.link_rates):
+                to_delete = child.order_line.filtered(lambda f: f.product_id == line.product_id)
+                to_delete.unlink()
+        super().unlink()
+
+    
     @api.model_create_multi
     def create(self, vals_list):
         lines = super().create(vals_list)
