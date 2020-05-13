@@ -484,7 +484,7 @@ class SaleOrder(models.Model):
             tmpl_rate_lines = self.order_line.filtered(lambda l: l.vcls_type == 'rate')
             if tmpl_rate_lines:
                  order_lines =[(3, line_id, 0) for line_id in tmpl_rate_lines.ids]
-                 
+
             #then copy the parent_ones
             for rl in self.parent_id.order_line.filtered(lambda l: l.vcls_type == 'rate'):
                 vals = {
@@ -496,6 +496,8 @@ class SaleOrder(models.Model):
                 }
                 #_logger.info("New Line:{}".format(vals))
                 order_lines.append((0, 0, vals))
+            
+            _logger.info("KPI | {}".format(order_lines))
             
             self.order_line += order_lines
             self.order_line._compute_tax_id()
