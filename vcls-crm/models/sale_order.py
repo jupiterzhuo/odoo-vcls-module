@@ -232,9 +232,9 @@ class SaleOrder(models.Model):
                     so.expected_end_date = expected_start_date + (so.expected_end_date - so.expected_start_date)
         ret = super(SaleOrder, self).write(vals)
         self.remap()
-        #we take in account changes in the rate products to be reported in childs
+        """#we take in account changes in the rate products to be reported in childs
         if vals.get('order_line',False):
-            _logger.info("Write SO lines: {}".format(vals['order_line']))
+            _logger.info("Write SO lines: {}".format(vals['order_line']))"""
         return ret 
 
     ###################
