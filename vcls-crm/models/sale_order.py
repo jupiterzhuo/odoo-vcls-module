@@ -232,6 +232,9 @@ class SaleOrder(models.Model):
                     so.expected_end_date = expected_start_date + (so.expected_end_date - so.expected_start_date)
         ret = super(SaleOrder, self).write(vals)
         self.remap()
+        #we take in account changes in the rate products to be reported in childs
+        if vals.get('order_line',False):
+            _logger.info("Write SO lines: {}".format(vals['order_line']))
         return ret 
 
     ###################
@@ -482,12 +485,6 @@ class SaleOrder(models.Model):
 
             #we remove the newly created rate lines
             self.order_line = self.order_line.filtered(lambda l: l.vcls_type != 'rate')
-            
-            """tmpl_rate_lines = self.order_line.filtered(lambda l: l.vcls_type == 'rate')
-            _logger.info("KPI | found rate lines {}".format(tmpl_rate_lines))
-
-            if tmpl_rate_lines:
-                 order_lines =[(3, line_id, 0) for line_id in tmpl_rate_lines.ids]"""
 
             order_lines = []
             #then copy the parent_ones

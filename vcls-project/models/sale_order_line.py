@@ -61,6 +61,3 @@ class SaleOrderLine(models.Model):
                 total += item.resource_hours*item.hourly_rate
             sol.forecasted_amount = total
 
-"""class ProjectSaleLineEmployeeMap(models.Model):
-
-    _inherit = 'project.sale.line.employee.map'"""
