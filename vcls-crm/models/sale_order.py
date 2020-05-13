@@ -478,10 +478,11 @@ class SaleOrder(models.Model):
          In the case of Linked Rates, the parent order is defineing the rates, not the template.
         """
         super(SaleOrder,self).onchange_sale_order_template_id()
-        if self.link_rates and self.parent_id:
+        if self.link_rates and self.parent_id and self.sale_order_template_id:
             #we remove the newly created lines
             tmpl_rate_lines = self.order_line.filtered(lambda l: l.vcls_type == 'rate')
-            tmpl_rate_lines.unlink()
+            if tmpl_rate_lines:
+                tmpl_rate_lines.unlink()
             #then copy the parent_ones
             new_lines = []
             for rl in self.parent_id.order_line.filtered(lambda l: l.vcls_type == 'rate'):
