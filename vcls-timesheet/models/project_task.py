@@ -76,6 +76,12 @@ class ProjectTask(models.Model):
     )
 
     @api.multi
+    def write(self,vals):
+        if vals.get('stage_id'):
+            vals['recompute_kpi'] = True
+        return super().write(vals)
+
+    @api.multi
     @api.depends("project_id.invoicing_mode")
     def compute_invoicing_mode(self):
         for task in self:
@@ -118,11 +124,11 @@ class ProjectTask(models.Model):
             tasks.write({'recompute_kpi':True})
             _logger.info("KPI | {} forced tasks.".format(len(tasks)))
         else:
+            childs_to_recompute = self.search([('project_id.project_type','=','client'),('recompute_kpi','=',True),('parent_id','!=',False)])
+            #we set the parents to be recomputed
+            childs_to_recompute.mapped('parent_id').write({'recompute_kpi':True})
             tasks = self.search([('project_id.project_type','=','client'),('recompute_kpi','=',True),('parent_id','=',False)])
             _logger.info("KPI | Tasks {}".format(tasks.ids))
-            """parents = tasks.filtered(lambda t: t.parent_id).mapped('parent_id') #we also recompute the parent
-            parents.write({'recompute_kpi':True})
-            tasks |= parents"""
 
         projects |= tasks.mapped('project_id') 
         projects = projects.sorted(key=lambda r: r.id)

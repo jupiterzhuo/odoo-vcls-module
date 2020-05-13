@@ -245,7 +245,11 @@ class AnalyticLine(models.Model):
             main_project_id = project_id.parent_id or project_id
             vals['main_project_id'] = main_project_id.id
 
-        return super(AnalyticLine, self).create(vals)
+        line = super(AnalyticLine, self).create(vals)
+        if line.task_id:
+            line.task_id.recompute_kpi=True
+
+        return line
 
     @api.multi
     def write(self, vals):
@@ -316,6 +320,10 @@ class AnalyticLine(models.Model):
         if vals.get('timesheet_invoice_id'):
             vals['stage_id'] = 'invoiced'
         ok = super(AnalyticLine, self).write(vals)
+
+        if ok: #we trigger the kpi recompute
+            to_recompute = self.filtered(lambda t: t.task_id)
+            to_recompute.mapped('task_id').write({'recompute_kpi':True})
 
         if ok and so_update:
             orders._compute_timesheet_ids()
