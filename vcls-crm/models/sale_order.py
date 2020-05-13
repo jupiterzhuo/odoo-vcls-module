@@ -479,12 +479,13 @@ class SaleOrder(models.Model):
         """
         super(SaleOrder,self).onchange_sale_order_template_id()
         if self.link_rates and self.parent_id and self.sale_order_template_id:
+            order_lines = []
             #we remove the newly created lines
             tmpl_rate_lines = self.order_line.filtered(lambda l: l.vcls_type == 'rate')
             if tmpl_rate_lines:
-                tmpl_rate_lines.unlink()
+                 order_lines =[(3, line_id, 0) for line_id in tmpl_rate_lines.ids]
+                 
             #then copy the parent_ones
-            new_lines = []
             for rl in self.parent_id.order_line.filtered(lambda l: l.vcls_type == 'rate'):
                 vals = {
                     'product_id':rl.product_id.id,
@@ -494,9 +495,9 @@ class SaleOrder(models.Model):
                     'price_unit':rl.price_unit,
                 }
                 #_logger.info("New Line:{}".format(vals))
-                new_lines.append((0, 0, vals))
+                order_lines.append((0, 0, vals))
             
-            self.order_line += new_lines
+            self.order_line += order_lines
             self.order_line._compute_tax_id()
     
     
