@@ -23,8 +23,8 @@
                                 <field name="project_id"/>
                                 <field name="name"/>
                                 <field name="user_id"/>
-                                <field name="date_start"/>
-                                <field name="date_end"/>
+                                <field name="date_start" widget="date"/>
+                                <field name="date_end" widget="date"/>
                             </tree>
                         </field>
                     </group>
