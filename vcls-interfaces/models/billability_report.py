@@ -69,8 +69,8 @@ class BillabilityReport(models.Model):
         with the current week included
         :return:
         """
-        this_week = datetime.date.today().isocalendar()[1]
-        self.search([('week_number', '>', this_week - last_weeks_count)]).unlink()
+        time_start_recalc = datetime.datetime.now() - datetime.timedelta(weeks=last_weeks_count)
+        self.search([('start_date', '>', time_start_recalc)]).unlink()
 
         assert last_weeks_count > 0
         billability = self.env['export.billability']
