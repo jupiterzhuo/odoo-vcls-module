@@ -70,10 +70,11 @@
             <field name="name">Projects</field>
             <field name="res_model">project.project</field>
             <field name="view_type">form</field>
-            <field name="view_mode">kanban,form</field>
+            <field name="view_mode">kanban,form,tree</field>
             <field name="view_ids" eval="[(5, 0, 0),
                 (0, 0, {'view_mode': 'kanban', 'view_id': ref('vcls-project.view_project_kanban_2')}),
-                (0, 0, {'view_mode': 'form', 'view_id': ref('vcls-project.vcls_specific_project_form')})]"/>
+                (0, 0, {'view_mode': 'form', 'view_id': ref('vcls-project.vcls_specific_project_form')}),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('vcls-project.vcls_project_tree')})]"/>
             <field name="domain">[('user_id','=', uid),('project_type','=', 'client'), ('parent_id','=', False)]</field>
             <field name="context">{}</field>
         </record>

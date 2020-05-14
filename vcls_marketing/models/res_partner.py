@@ -29,6 +29,12 @@ class Contacts(models.Model):
         domain = [('task_type','=','marketing')]
     )
 
+    marketing_task_ids = fields.Many2many(
+        comodel_name = 'project.task',
+        string = "Campaigns",
+        domain = [('task_type','=','marketing')]
+    )
+
     opted_in_date = fields.Datetime(
         string = 'Opted In Date',
         #default = lambda self: self.create_date,

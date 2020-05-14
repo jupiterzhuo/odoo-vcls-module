@@ -11,7 +11,7 @@
     'website': "http://www.voisinconsulting.com",
     'category': 'Uncategorized',
 
-    'version': '0.1.9',
+    'version': '0.1.12',
   
     'depends': [
         'crm',

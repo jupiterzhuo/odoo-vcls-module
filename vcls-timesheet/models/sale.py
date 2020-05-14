@@ -109,6 +109,12 @@ class SaleOrder(models.Model):
         action['domain'] = [('project_id', 'in', family_project_ids.ids)]
         action['context'] = {}
         return action
+    
+    def action_sync(self):
+        super().action_sync()
+        for line in self.order_line.filtered(lambda t: t.task_id):
+            #we get the default timecategories from the product_template
+            line.task_id.time_category_ids = line.product_id.product_tmpl_id.time_category_ids
 
 
 class SaleOrderLine(models.Model):

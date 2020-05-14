@@ -76,6 +76,12 @@ class ProjectTask(models.Model):
     )
 
     @api.multi
+    def write(self,vals):
+        if vals.get('stage_id'):
+            vals['recompute_kpi'] = True
+        return super().write(vals)
+
+    @api.multi
     @api.depends("project_id.invoicing_mode")
     def compute_invoicing_mode(self):
         for task in self:
@@ -118,10 +124,11 @@ class ProjectTask(models.Model):
             tasks.write({'recompute_kpi':True})
             _logger.info("KPI | {} forced tasks.".format(len(tasks)))
         else:
+            childs_to_recompute = self.search([('project_id.project_type','=','client'),('recompute_kpi','=',True),('parent_id','!=',False)])
+            #we set the parents to be recomputed
+            childs_to_recompute.mapped('parent_id').write({'recompute_kpi':True})
             tasks = self.search([('project_id.project_type','=','client'),('recompute_kpi','=',True),('parent_id','=',False)])
-            """parents = tasks.filtered(lambda t: t.parent_id).mapped('parent_id') #we also recompute the parent
-            parents.write({'recompute_kpi':True})
-            tasks |= parents"""
+            _logger.info("KPI | Tasks {}".format(tasks.ids))
 
         projects |= tasks.mapped('project_id') 
         projects = projects.sorted(key=lambda r: r.id)
@@ -132,12 +139,10 @@ class ProjectTask(models.Model):
         i=0
         for project in projects:
             i += 1
-            """childs = project.task_ids.filtered(lambda t: t.parent_id and t.recompute_kpi)
-            childs._get_kpi()"""
-            to_compute = project.task_ids.filtered(lambda t: t.recompute_kpi)
+            to_compute = project.tasks.filtered(lambda t: t.recompute_kpi)
             to_compute._get_kpi()
             project._get_kpi()
-            project.task_ids.write({'recompute_kpi':False}) #we ensure childs to be False too
+            project.tasks.write({'recompute_kpi':False}) #we ensure childs to be False too
             _logger.info("KPI | Project Processed {}/{}".format(i,len(projects)))
 
             if datetime.now() > end_time:
@@ -185,8 +190,7 @@ class ProjectTask(models.Model):
     @api.onchange('allow_budget_modification', 'recompute_kpi')
     def onchange_allow_budget_modification_get_kpi(self):
         self._get_kpi()
-        project = self.project_id
-        project._get_kpi()
+        self.project_id._get_kpi()
 
     @api.multi
     def zero_out_kpi(self):
@@ -284,7 +288,7 @@ class ProjectTask(models.Model):
 
             task.valuation_ratio = 100.0*(task.valued_hours / task.realized_hours) if task.realized_hours else False
 
-            if task.allow_budget_modification is False:
+            if  not task.allow_budget_modification:
                 task.contractual_budget = False
                 task.forecasted_budget = False
                 task.realized_budget = False
@@ -297,7 +301,7 @@ class ProjectTask(models.Model):
 
     @api.onchange('parent_id')
     def onchange_allow_budget_modification(self):
-        if self.parent_id.id is not False:
+        if self.parent_id:
             self.allow_budget_modification = False
         else:
             self.allow_budget_modification = True
@@ -359,7 +363,7 @@ class ProjectTask(models.Model):
             if date_end:
                 task.date_end = datetime.fromordinal(date_end.toordinal())
 
-        if task.parent_id.id is not False:
+        if task.parent_id:
             task.allow_budget_modification = False
         else:
             task.allow_budget_modification = True
