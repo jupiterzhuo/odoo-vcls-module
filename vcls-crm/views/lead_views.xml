@@ -289,7 +289,8 @@
                             </field>
                         </group>
                         <group string="Client Stakeholders" colspan="2">
-                            <field name="stakeholder_ids" nolabel="1" domain="[('id','=',partner_id)]" options="{'no_quick_create': True, 'no_create_edit': True, 'no_create': True}" string="">
+                            <field name="child_ids" invisible="1"/>
+                            <field name="stakeholder_ids" nolabel="1" domain="['|',('id', '=', partner_id),('id', '=', child_ids)]" options="{'no_quick_create': True, 'no_create_edit': True, 'no_create': True}" string="">
                                 <tree editable="bottom" create = '1'>
                                     <field name="name" />
                                 </tree>

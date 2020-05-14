@@ -111,6 +111,11 @@ class Leads(models.Model):
 
     manual_probability = fields.Boolean()
 
+    child_ids = fields.Many2many(
+        'res.partner',
+        compute='_compute_child_ids',
+    )
+
     # Related fields in order to avoid mismatch & errors
     opted_in = fields.Boolean(
         related = 'partner_id.opted_in',
@@ -411,6 +416,10 @@ class Leads(models.Model):
     ###################
     # COMPUTE METHODS #
     ###################
+
+    def _compute_child_ids(self):
+           for partner in self.partner_id:
+               self.child_ids = partner.child_ids if partner.child_ids else False
 
     @api.depends('tag_ids')
     def _compute_sig_opp(self):
