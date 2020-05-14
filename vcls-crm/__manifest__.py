@@ -14,8 +14,8 @@
     'category': 'Uncategorized',
 
 
-
     'version': '1.3.5',
+
 
     # any module necessary for this one to work correctly
     'depends': [
