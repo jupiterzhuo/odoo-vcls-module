@@ -20,6 +20,18 @@
                             <field name="opted_out_date" widget="date" attrs="{'invisible':['|',('marketing_task_id','=',False),('company_type','=','company')]}"/>
                             <field name="gdpr_status" attrs="{'invisible':[('company_type','=','company')]}"/>
                         </group>
+                        <group string = 'Other Campaigns'>
+                            <field name="marketing_task_ids">
+                                <tree>
+                                    <field name="project_id"/>
+                                    <field name="name"/>
+                                    <field name="user_id"/>
+                                    <field name="date_start"/>
+                                    <field name="date_end"/>
+                                </tree>
+                            </field>
+                        </group>
+                        <!--
                         <group string = 'All Participated Events' attrs="{'invisible':[('company_type','=','company')]}">
                             <button name = "all_campaigns_pop_up" 
                                 string = "OPEN" 
@@ -27,7 +39,7 @@
                                 icon="fa-bar-chart"
                                 class = 'btn btn-primary'
                             />
-                        </group>
+                        </group>-->
                     </group>
                     </page>
                 </xpath>
