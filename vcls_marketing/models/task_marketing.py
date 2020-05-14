@@ -140,7 +140,7 @@ class Task(models.Model):
 
     def _compute_lead_participated(self):
         for task in self.filtered(lambda t: t.task_type == 'marketing'):
-            leads = self.env['crm.lead'].search(['|',('marketing_task_id.id','=',task.id),('marketing_task_ids','in',task),('type','=','lead')])
+            leads = self.env['crm.lead'].search(['|',('marketing_task_id.id','=',task.id),('marketing_task_ids','in',task.id),('type','=','lead')])
             task.lead_participated = len(leads) if leads else 0
 
 
@@ -162,7 +162,7 @@ class Task(models.Model):
     
     def _compute_contact_participated(self):
         for task in self.filtered(lambda t: t.task_type == 'marketing'):
-            contacts = self.env['res.partner'].search(['|',('marketing_task_id.id','=',task.id),('marketing_task_ids','in',task)])
+            contacts = self.env['res.partner'].search(['|',('marketing_task_id.id','=',task.id),('marketing_task_ids','in',task.id)])
             task.contact_participated = len(contacts) if contacts else 0
 
     def _compute_convertion_ratio(self):
@@ -192,7 +192,7 @@ class Task(models.Model):
     def action_open_leads(self):
         self.ensure_one()
         action = self.env.ref('crm.crm_lead_all_leads').read()[0]
-        lead_ids = self.env['crm.lead'].search([('type','=','lead'),'|',('marketing_task_ids','in',self.id),('marketing_task_id','=',self.id)]).ids
+        lead_ids = self.env['crm.lead'].search([('type','=','lead'),'|',('marketing_task_ids','in',self.id),('marketing_task_id.id','=',self.id)]).ids
         action['domain'] = [('id', '=', lead_ids)]
         #action['context'] = {}
         return action
@@ -201,7 +201,7 @@ class Task(models.Model):
     def action_open_opps(self):
         self.ensure_one()
         action = self.env.ref('crm.crm_lead_opportunities_tree_view').read()[0]
-        opp_ids = self.env['crm.lead'].search([('type','=','opportunity'),('marketing_task_id','=',self.id)]).ids
+        opp_ids = self.env['crm.lead'].search([('type','=','opportunity'),('marketing_task_id.id','=',self.id)]).ids
         action['domain'] = [('id', '=', opp_ids)]
         #action['context'] = {}
         return action
@@ -210,7 +210,7 @@ class Task(models.Model):
     def action_open_contacts(self):
         self.ensure_one()
         action = self.env.ref('vcls-contact.action_contact_all_externals').read()[0]
-        contact_ids = self.env['res.partner'].search(['|',('marketing_task_ids','in',self.id),('marketing_task_id','=',self.id)]).ids
+        contact_ids = self.env['res.partner'].search(['|',('marketing_task_ids','in',self.id),('marketing_task_id.id','=',self.id)]).ids
         action['domain'] = [('id', '=', contact_ids)]
         #action['context'] = {}
         return action

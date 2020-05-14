@@ -311,12 +311,14 @@
                         <page string="KPIs">
                             <group>
                                 <group>
+                                    <field name="lead_participated"/>
                                     <field name="lead_count"/>
                                     <field name="opp_count"/>
                                     <field name="convertion_ratio" widget="percentage"/>
                                     <field name="lead_lost"/>
                                 </group>
                                 <group>
+                                    <field name="contact_participated"/>
                                     <field name="contact_count"/>
                                     <field name="contact_lost"/>
                                 </group>
