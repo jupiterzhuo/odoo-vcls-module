@@ -2,6 +2,10 @@
 
 from odoo import models, fields, api
 from datetime import datetime
+from datetime import timedelta
+
+import logging
+_logger = logging.getLogger(__name__)
 
 
 class ProjectTask(models.Model):
@@ -43,7 +47,7 @@ class ProjectTask(models.Model):
     valued_hours = fields.Float(string="Valued Hours",readonly=True)
     invoiced_hours = fields.Float(string="Invoiced Hours",readonly=True)
     valuation_ratio = fields.Float(string="Valuation Ratio",readonly=True)
-    recompute_kpi = fields.Boolean(compute='_get_to_recompute', store=True)
+    # recompute_kpi = fields.Boolean(compute='_get_to_recompute')
 
     pc_budget = fields.Float(string="PC Review Budget",readonly=True)
     cf_budget = fields.Float(string="Carry Forward Budget",readonly=True)
@@ -60,10 +64,10 @@ class ProjectTask(models.Model):
     recompute_kpi = fields.Boolean(default="False")
 
     budget_consumed = fields.Float(
-        string="Budget Consumed new",
+        string="Budget Consumed",
         readonly=True,
         compute='compute_budget_consumed',
-        help="realized budget divided by contractual budget",
+        help='realized budget / contractual_budget in Percentage'
     )
 
     currency_id = fields.Many2one(
@@ -72,19 +76,25 @@ class ProjectTask(models.Model):
     )
 
     @api.multi
+    def write(self,vals):
+        if vals.get('stage_id'):
+            vals['recompute_kpi'] = True
+        return super().write(vals)
+
+    @api.multi
     @api.depends("project_id.invoicing_mode")
     def compute_invoicing_mode(self):
         for task in self:
-            self.invoicing_mode = task.project_id.invoicing_mode
+            task.invoicing_mode = task.project_id.invoicing_mode
 
     @api.multi
     @api.depends("realized_budget", "contractual_budget")
     def compute_budget_consumed(self):
         for task in self:
             if task.contractual_budget:
-                self.budget_consumed = task.realized_budget / task.contractual_budget
+                task.budget_consumed = task.realized_budget / task.contractual_budget * 100
             else:
-                self.budget_consumed = False
+                task.budget_consumed = task.realized_budget / 0.01 * 100
 
     @api.depends('date_end')
     def _compute_deadline(self):
@@ -106,39 +116,114 @@ class ProjectTask(models.Model):
             task.recompute_kpi = True
 
     @api.model
-    def _cron_compute_kpi(self,force=False):
+    def _cron_compute_kpi(self,force=False,duration_sec=20):
+        projects = self.env['project.project']
+
+        if force:
+            tasks = self.search([('project_id.project_type','=','client'),('parent_id','=',False)])
+            tasks.write({'recompute_kpi':True})
+            _logger.info("KPI | {} forced tasks.".format(len(tasks)))
+        else:
+            childs_to_recompute = self.search([('project_id.project_type','=','client'),('recompute_kpi','=',True),('parent_id','!=',False)])
+            #we set the parents to be recomputed
+            childs_to_recompute.mapped('parent_id').write({'recompute_kpi':True})
+            tasks = self.search([('project_id.project_type','=','client'),('recompute_kpi','=',True),('parent_id','=',False)])
+            _logger.info("KPI | Tasks {}".format(tasks.ids))
+
+        projects |= tasks.mapped('project_id') 
+        projects = projects.sorted(key=lambda r: r.id)
+        _logger.info("KPI | {} tasks to recompute in {} projects".format(len(tasks),len(projects)))
+        _logger.info("{}".format(projects))
+
+        end_time = datetime.now() + timedelta(seconds=duration_sec)
+        i=0
+        for project in projects:
+            i += 1
+            to_compute = project.tasks.filtered(lambda t: t.recompute_kpi)
+            to_compute._get_kpi()
+            project._get_kpi()
+            project.tasks.write({'recompute_kpi':False}) #we ensure childs to be False too
+            _logger.info("KPI | Project Processed {}/{}".format(i,len(projects)))
+
+            if datetime.now() > end_time:
+                break
+            
+
+
+        """#Force is to force all client and non cancelled tasks to be calculated
         if force:
             tasks = self.search([])
+            #clear is to force all tasks to false (to be run once so you dont recalulate non client/cancelled tasks everytime)
+            if clear:
+                for task in tasks:
+                    task.recompute_kpi = False
+            tasks = tasks.filtered(lambda t : t.project_id.project_type == 'client' and t.stage_id.display_name != 'Cancelled')
+
+            #tasks.write({'recompute_kpi':True})
+            for task in tasks:
+                task.recompute_kpi = True
         else:
             tasks = self.search([('recompute_kpi', '=', True)])
-            
+
         projects = self.env['project.project']
         tasks._get_kpi()
+        #projects  |= (tasks.mapped('project_id'))
         for task in tasks:
-            task.recompute_kpi = False
             projects |= task.project_id
-        projects._get_kpi()
-        # self._cr.execute('update project_task set ')
+        #set the length of time to limit project kpi calculation
+        end_time = datetime.now() + timedelta(seconds=20)
+
+        for project in projects:
+            project._get_kpi()
+
+
+            for task in project.task_ids:
+                task.recompute_kpi = False
+
+                for child in task.child_ids:
+                    child.recompute_kpi = False
+
+            if datetime.now() > end_time:
+                break
+        # self._cr.execute('update project_task set ')"""
 
     @api.onchange('allow_budget_modification', 'recompute_kpi')
     def onchange_allow_budget_modification_get_kpi(self):
         self._get_kpi()
-        project = self.project_id
-        project._get_kpi()
+        self.project_id._get_kpi()
 
     @api.multi
-    def button_get_kpi(self):
-        self._get_kpi()
-        project = self.project_id
-        project._get_kpi()
+    def zero_out_kpi(self):
+        for task in self:
+            task.contractual_budget = 0
+            task.forecasted_budget = 0
+            task.realized_budget = 0
+            task.valued_budget = 0
+            task.invoiced_budget = 0
+            task.forecasted_hours = 0
+            task.realized_hours = 0
+            task.valued_hours = 0
+            task.invoiced_hours = 0
+            task.pc_budget = 0
+            task.cf_budget = 0
+            task.pc_hours = 0
+            task.cf_hours = 0
+            task.valuation_ratio = 0
 
     @api.multi
     def _get_kpi(self):
-
+        #gets parent tasks only
         for task in self.filtered(lambda s: not s.parent_id):
+            #this is to fix if a task was added manually and has the same sale_line_id (sale.order.line type) as another task 
+            if task.sale_line_id.task_id != task:
+                #KPIs are run every hour and if they had been calculated before this fix was added, they need to be set to 0
+                task.zero_out_kpi()
+                continue
+            #gets all child and parent timesheets for this task. if "task" is a child task, skips it.
             analyzed_timesheet = task.project_id.timesheet_ids.filtered(lambda t: t.reporting_task_id == task)
 
             task.contractual_budget = task.sale_line_id.price_unit * task.sale_line_id.product_uom_qty
+
             task.forecasted_budget = sum([
                 hourly_rate * resource_hours for hourly_rate, resource_hours in
                 zip(task.forecast_ids.mapped('hourly_rate'), task.forecast_ids.mapped('resource_hours'))
@@ -203,7 +288,7 @@ class ProjectTask(models.Model):
 
             task.valuation_ratio = 100.0*(task.valued_hours / task.realized_hours) if task.realized_hours else False
 
-            if task.allow_budget_modification is False:
+            if  not task.allow_budget_modification:
                 task.contractual_budget = False
                 task.forecasted_budget = False
                 task.realized_budget = False
@@ -211,10 +296,12 @@ class ProjectTask(models.Model):
                 task.invoiced_budget = False
                 task.pc_budget = False
                 task.cf_budget = False
+            
+            task.recompute_kpi = False
 
     @api.onchange('parent_id')
     def onchange_allow_budget_modification(self):
-        if self.parent_id.id is not False:
+        if self.parent_id:
             self.allow_budget_modification = False
         else:
             self.allow_budget_modification = True
@@ -276,7 +363,7 @@ class ProjectTask(models.Model):
             if date_end:
                 task.date_end = datetime.fromordinal(date_end.toordinal())
 
-        if task.parent_id.id is not False:
+        if task.parent_id:
             task.allow_budget_modification = False
         else:
             task.allow_budget_modification = True

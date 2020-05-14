@@ -33,11 +33,11 @@ class BillabilityReport(models.Model):
 
     days = fields.Integer(string='Days [d]')
     weekends = fields.Integer(string='Weekends [d]')
-    bank_holiday = fields.Integer(string='Bank Holiday [d]')
+    bank_holiday = fields.Integer(string='Bank Holiday [h]')
     out_of_contract = fields.Integer(string='Out of Contract [d]')
     days_duration = fields.Integer(string='Day Duration [d]')
     offs = fields.Integer(string='Offs [d]')
-    leaves = fields.Integer(string='Leaves [d]')
+    leaves = fields.Integer(string='Leaves [h]')
     worked = fields.Integer(string='Worked [d]')
     effective_capacity = fields.Integer(string='Effective Capacity [d]')
     control = fields.Integer(string='Control [d]')
@@ -69,6 +69,9 @@ class BillabilityReport(models.Model):
         with the current week included
         :return:
         """
+        time_start_recalc = datetime.datetime.now() - datetime.timedelta(weeks=last_weeks_count)
+        self.search([('start_date', '>', time_start_recalc)]).unlink()
+
         assert last_weeks_count > 0
         billability = self.env['export.billability']
         time_sheet = self.env['account.analytic.line']
@@ -111,6 +114,10 @@ class BillabilityReport(models.Model):
                 week_data_line['billability_percent'] = week_data_line['valued_billable_hours'] / week_data_line['Effective Capacity [h]'] * 100
                 week_data_line['non_billability_percent'] = week_data_line['valued_non_billable_hours'] / week_data_line['Effective Capacity [h]'] * 100
                 week_data_line['total_time_coded_percent'] = week_data_line['total_time_coded'] / week_data_line['Effective Capacity [h]'] * 100
+
+                #convert Days to Hours
+                week_data_line['Bank Holiday [d]'] *= 8
+                week_data_line['Leaves [d]'] *= 8
 
             data += week_data
         field_mapping = self._get_field_mapping()

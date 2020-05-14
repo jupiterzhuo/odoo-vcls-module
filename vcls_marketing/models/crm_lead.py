@@ -25,6 +25,12 @@ class Leads(models.Model):
         domain = [('task_type','=','marketing')]
     )
 
+    marketing_task_ids = fields.Many2many(
+        comodel_name = 'project.task',
+        string = "Campaigns",
+        domain = [('task_type','=','marketing')]
+    )
+
     opted_in_date = fields.Datetime(
         string = 'Opted In Date',
         #default = lambda self: self.create_date,
@@ -71,6 +77,7 @@ class Leads(models.Model):
         for lead in self:
             lead.marketing_project_id = lead.partner_id.marketing_project_id
             lead.marketing_task_id = lead.partner_id.marketing_task_id
+            lead.marketing_task_ids = lead.partner_id.marketing_task_ids
             lead.marketing_task_out_id = lead.partner_id.marketing_task_out_id
             lead.opted_in_date = lead.partner_id.opted_in_date
             lead.opted_out_date = lead.partner_id.opted_out_date
@@ -87,6 +94,7 @@ class Leads(models.Model):
         data['origin_lead_id'] = self.id
         data['marketing_project_id'] = self.marketing_project_id.id
         data['marketing_task_id'] = self.marketing_task_id.id
+        data['marketing_task_ids'] = [(6, 0, self.marketing_task_ids.ids)]
         
         if is_company:
             pass

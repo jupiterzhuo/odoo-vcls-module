@@ -307,7 +307,7 @@
                 'grid_anchor': '3000-01-01'}
             </field>
             <field name="view_mode">tree</field>
-            <field name="view_id" ref="vcls_timesheet_read_view" />
+            <field name="view_id" ref="vcls_timesheet_pc_view_tree"/>
             <field name="domain">[('project_id.project_type','=', 'client')]</field>
         </record>
 

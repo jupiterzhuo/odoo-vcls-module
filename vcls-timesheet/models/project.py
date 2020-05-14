@@ -29,7 +29,12 @@ class Project(models.Model):
         string="Budget Consumed",
         readonly=True,
         compute='compute_budget_consumed',
-        help="Realized Budget divided by Contractual Budget",
+        help='realised budget / contractual budget percentage'
+    )
+
+    currency_id = fields.Many2one(
+        comodel_name = 'res.currency',
+        related = 'sale_order_id.currency_id',
     )
 
     @api.multi
@@ -37,9 +42,9 @@ class Project(models.Model):
     def compute_budget_consumed(self):
         for project in self:
             if project.contractual_budget:
-                self.budget_consumed = project.realized_budget / project.contractual_budget
+                project.budget_consumed = project.realized_budget / project.contractual_budget * 100
             else:
-                self.budget_consumed = False
+                project.budget_consumed = False
 
     @api.multi
     def _get_kpi(self):
