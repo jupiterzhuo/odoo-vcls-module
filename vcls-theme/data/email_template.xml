@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <template id="message_notification_email_vcls" name="Message Email Notification" inherit_id="mail.message_notification_email">
+    <!-- <template id="message_notification_email_vcls" name="Message Email Notification" inherit_id="mail.message_notification_email">
         <xpath expr="//div" position="replace">
             <div>
                 <div t-raw="message.body"/>
@@ -12,5 +12,5 @@
             <div t-if="signature" t-raw="signature" style="font-size: 13px;"/>
         </div>
         </xpath>
-    </template>
+    </template> -->
 </odoo>
