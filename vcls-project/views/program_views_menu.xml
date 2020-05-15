@@ -211,7 +211,8 @@
             parent="project.menu_main_pm"
             sequence="3"
             action="vcls-project.action_pre_project"
-            groups="vcls_security.vcls_account_manager"
+            groups="vcls_security.vcls_account_manager,vcls_security.vcls_lc"
+           
         />
 
         <menuitem
