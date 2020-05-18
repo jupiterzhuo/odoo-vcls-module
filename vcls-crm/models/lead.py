@@ -344,7 +344,7 @@ class Leads(models.Model):
         compute = '_compute_gdpr'
     )"""
 
-    contact_us_message = fields.Char()
+    contact_us_message = fields.Html()
 
     @api.model
     def create(self, vals):
