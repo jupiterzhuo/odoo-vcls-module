@@ -65,19 +65,6 @@
                   action="action_pc_all_timesheet_pivot"
         />
 
-        <menuitem id="hr_timesheet.menu_timesheets_reports"
-            name="Reporting"
-            parent="hr_timesheet.timesheet_menu_root"
-            groups="hr_timesheet.group_timesheet_manager,vcls-contact.vcls_group_ceo,vcls-hr.vcls_group_head"
-            sequence="99"
-        />
-
-        <menuitem id="hr_timesheet.menu_timesheets_reports_timesheet"
-            name="Timesheet"
-            parent="hr_timesheet.menu_timesheets_reports"
-            groups="hr_timesheet.group_timesheet_manager,vcls-contact.vcls_group_ceo,vcls-hr.vcls_group_head"
-            sequence="10"/>
-
         <!--
         <menuitem id="menu_lm_timesheet_tree"
             name="Pivot View"
