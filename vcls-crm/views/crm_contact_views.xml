@@ -31,9 +31,11 @@
                     <field name="vat"/>
                 </field>
 
-                <field name="description" position="after">
-                    <field name="contact_us_message"/>
-                </field>
+                <xpath expr="//field[@name='description']/.." position="after">
+                    <page string="Contact Us Message">
+                        <field name="contact_us_message"/>
+                    </page>
+                </xpath>
 
                 <!--
                 <field name="invoice_admin_id" position="after">
