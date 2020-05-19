@@ -235,7 +235,7 @@ class Invoice(models.Model):
         for parent_task, list_tasks in list_timesheet_to_compute.items():
             number_tasks = len(list_tasks)
             for task_individual in list_tasks:
-                for timesheet_id in task_individual.timesheet_ids:
+                for timesheet_id in task_individual.timesheet_ids.filtered(lambda t: t.timesheet_invoice_id.id == self.id):
                     if self.merge_subtask and timesheet_id.task_id.parent_id:  # if the task has a parent and we want to merge
                         current_task_id = timesheet_id.task_id.parent_id
                     else:
