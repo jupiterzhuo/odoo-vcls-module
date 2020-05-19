@@ -154,6 +154,7 @@
                         <field name="lc_comment" />
                         <field name="adjustment_reason_id" attrs="{'required': [('adj_reason_required', '=', True)]}"/>
                         <field name="adj_reason_required" invisible="1" />
+                        <field name="stage_id" groups="vcls_security.group_project_controller"/>
                     </group>
                 </form>
             </field>
