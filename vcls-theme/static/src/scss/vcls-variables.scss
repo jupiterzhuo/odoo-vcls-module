@@ -3,5 +3,6 @@ $o-enterprise-color: rgb(8, 32, 110); // VCLS blue logo
 
 // Increase table contrast ingrid view
 //$o-gray-100: #dee2e6; // This is BS default
-$white:    #fff !default;
-$table-dark-accent-bg:        rgba($white, .15) !default;
+//$white:    #fff !default;
+$black:    #000 !default;
+$table-accent-bg: rgba($black, 0.75);
