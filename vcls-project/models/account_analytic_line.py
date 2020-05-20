@@ -70,10 +70,10 @@ class AccountAnalyticLine(models.Model):
             for so_line in so_mapped_seniority:
                 so_product = so_line.product_id
                 for default_rate in list_default_rate:
-                    #_logger.info("Product {} {} | Rate {} {}".format(so_product.product_tmpl_id.id,so_product.product_tmpl_id.name,default_rate.id,default_rate.name))
+                    _logger.info("Product {} {} | Rate {} {}".format(so_product.product_tmpl_id.id,so_product.product_tmpl_id.name,default_rate.id,default_rate.name))
                     if so_product.product_tmpl_id.name == default_rate.name or so_product.seniority_level_id.code == '00': #we match on names to cover the case of multiproducts with the same name
                         matched = True 
-                        #_logger.info("FOUND Product {} {} | Rate {} {}".format(so_product.product_tmpl_id.id,so_product.product_tmpl_id.name,default_rate.id,default_rate.name))
+                        _logger.info("FOUND Product {} {} | Rate {} {}".format(so_product.product_tmpl_id.id,so_product.product_tmpl_id.name,default_rate.id,default_rate.name))
                         break
                 if matched:
                     break
