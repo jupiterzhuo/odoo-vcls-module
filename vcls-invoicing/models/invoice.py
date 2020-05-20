@@ -244,7 +244,7 @@ class Invoice(models.Model):
                     rate_product_id = timesheet_id.so_line.product_id
                     rate_product_ids |= rate_product_id
                     time_category_id = timesheet_id.time_category_id
-                    unit_amount = timesheet_id.unit_amount
+                    unit_amount = timesheet_id.unit_amount_rounded
 
                     # project matrix data
                     project_rate_matrix_key = (project_id, rate_product_id)
