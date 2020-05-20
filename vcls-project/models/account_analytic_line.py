@@ -82,7 +82,7 @@ class AccountAnalyticLine(models.Model):
                 # no line found, Find a line on the sale order with the same seniority level
                 for so_line in so_mapped_seniority:
                     line_seniority = so_line.product_id.seniority_level_id
-                    #we add the code 00 condition to cover the uniformized rate usecase (i.e. everyone to code with the same rate)
+                    _logger.info("SO LINE seniority {} for employee {}".format(line_seniority.name,employee.seniority_level_id.name))                    #we add the code 00 condition to cover the uniformized rate usecase (i.e. everyone to code with the same rate)
                     if line_seniority == employee.seniority_level_id:
                         break
                 else:
