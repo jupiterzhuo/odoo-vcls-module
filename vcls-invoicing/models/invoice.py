@@ -140,14 +140,15 @@ class Invoice(models.Model):
 
     @api.multi
     def compute_program_name(self):
-        list_projects = self.origin.split(', ')
-        for invoice in self:
-            if len(list_projects) > 1:
-                self.invoice_is_program = True
-            program_name = ""
-            for project in invoice.project_ids:
-                if project.program_id.name:
-                    invoice.program_name = project.program_id.name
+        if self.origin:
+            list_projects = self.origin.split(', ')
+            for invoice in self:
+                if len(list_projects) > 1:
+                    self.invoice_is_program = True
+                program_name = ""
+                for project in invoice.project_ids:
+                    if project.program_id.name:
+                        invoice.program_name = project.program_id.name
 
     @api.multi
     def compute_program_description(self):
