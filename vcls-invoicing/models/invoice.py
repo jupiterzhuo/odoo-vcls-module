@@ -81,7 +81,9 @@ class Invoice(models.Model):
     )"""
 
     partner_bank_id = fields.Many2one(
-        'res.partner.bank', string='Partner Bank Account',
+        'res.partner.bank',
+        string='Partner Bank Account with Invoiced Currency',
+        compute='_get_bank_by_currency',
     )
 
     merge_subtask = fields.Boolean()
@@ -89,6 +91,10 @@ class Invoice(models.Model):
     parent_analytic_account_id = fields.Many2one(
         'account.analytic.account',
     )
+
+    def _get_bank_by_currency(self):
+        for rec in self:
+            self.partner_bank_id = self.env['res.partner.bank'].search([('company_id', '=', self.company_id.id),('currency_id', '=', self.currency_id.id)])
 
     @api.multi
     def get_last_report(self):
