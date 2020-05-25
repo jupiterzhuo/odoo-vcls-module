@@ -154,6 +154,7 @@
                         <field name="lc_comment" />
                         <field name="adjustment_reason_id" attrs="{'required': [('adj_reason_required', '=', True)]}"/>
                         <field name="adj_reason_required" invisible="1" />
+                        <field name="stage_id" groups="vcls_security.group_project_controller"/>
                     </group>
                 </form>
             </field>
@@ -522,6 +523,9 @@
                 <field name="task_id" position="before">
                     <!--<field name="main_project_id" context="{'related_core_team_projects':True}" required="1"/>-->
                     <field name="main_project_id" context="{'related_core_team_projects':True}" required="1" domain="[('allow_timesheets','=',True)]"/>
+                </field>
+                <field name="task_id" position="after">
+                    <field name="time_category_id" string="Time Catagory"/>
                 </field>
             </field>
         </record>

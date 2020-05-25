@@ -368,6 +368,7 @@
                 </xpath>
                 <xpath expr="//field[@name='partner_id']" position="after">
                     <field name="risk_score"/>
+                    <field name="show_folder_path"/>
                 </xpath>
                 <!--
                 <xpath expr="//field[@name='sequence']" position="replace">
@@ -376,6 +377,12 @@
                      <span class="badge badge-pill badge-danger" style="border: none;" t-if="record.risk_score.value > 0">
                         Risk Score : <t t-esc="record.risk_score.value" />
                     </span>
+                </xpath>
+                <xpath expr="//div[@class='o_primary']" position="inside">
+                    <t t-if="record.show_folder_path.raw_value">
+                    <br/>
+                        <field name="sharepoint_folder" widget="url" text="Sharepoint Folder" />
+                    </t>
                 </xpath>
                 <a name="action_view_timesheet" position="replace"/>
             </field>

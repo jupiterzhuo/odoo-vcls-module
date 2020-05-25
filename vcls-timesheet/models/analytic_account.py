@@ -108,7 +108,11 @@ class AnalyticLine(models.Model):
         store = True,
         default = 'na',
         )
-    
+
+    employee_type = fields.Selection(
+        related='employee_id.employee_type',
+    )
+ 
     @api.depends('task_id','task_id.parent_id')
     def _compute_reporting_task(self):
         for ts in self:

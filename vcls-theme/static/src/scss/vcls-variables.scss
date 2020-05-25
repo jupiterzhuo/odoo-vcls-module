@@ -1,2 +1,9 @@
 // Main color used by Odoo
 $o-enterprise-color: rgb(8, 32, 110); // VCLS blue logo
+
+// Increase table contrast ingrid view
+//$o-gray-100: #dee2e6; // This is BS default
+//$white:    #fff !default;
+$black:    #000 !default;
+$red:     #FF0039 !default;
+$table-accent-bg: rgba($red, 1.0);
