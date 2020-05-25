@@ -78,14 +78,16 @@ class CustomerPortal(CustomerPortal):
                 ('state', '=', 'draft')
             ], limit=1)
             if not sheet_id:
-                # create a new sheet
-                sheet_id = sheet_sudo.create({
+                vals = {
                     'name': kw.get('name'),
                     'project_id': int(project_id),
                     'employee_id': employee_id.id,
                     'type': 'project',
                     'analytic_account_id': project_sudo.analytic_account_id.id,
-                })
+                }
+                vals = sheet_sudo._get_info_from_employee(employee_id,vals)
+                # create a new sheet
+                sheet_id = sheet_sudo.create(vals)
             kw.update({
                 'employee_id': employee_id.id,
                 'sheet_id': sheet_id.id,

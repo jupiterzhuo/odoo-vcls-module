@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<odoo>
+  <data>
+    <record model="ir.ui.view" id="view_billability_overview_tree">
+        <field name="name">view_billability_overview_tree</field>
+        <field name="model">billability.report</field>
+        <field name="arch" type="xml">
+            <tree>
+                <field name="employee_name"/>
+                <field name="billability_percent"/>
+                <field name="non_billability_percent"/>
+                <field name="start_date"/>
+                <field name="end_date"/>
+                <field name="week_number"/>
+                <field name="non_billable_hours"/>
+            </tree>
+        </field>
+    </record>
+
+
+    <record model="ir.ui.view" id="view_billability_overview_graph">
+        <field name="name">view_billability_overview_graph</field>
+        <field name="model">billability.report</field>
+        <field name="arch" type="xml">
+            <graph string="Billability by employee">
+                <field name="employee_name"/>
+                <field name="billability_percent" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+
+    <record model="ir.ui.view" id="view_billability_overview_pivot">
+        <field name="name">view_billability_overview_pivot</field>
+        <field name="model">billability.report</field>
+        <field name="arch" type="xml">
+            <pivot string="Billability Report">
+                <field name="employee_name" type="row"/>
+                <field name="week_number" string="Week number" type="col"/>
+                <field name="billability_percent" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+
+    <record model="ir.ui.view" id="view_billability_overview_cohort">
+        <field name="name">view_billability_overview_cohort</field>
+        <field name="model">billability.report</field>
+        <field name="arch" type="xml">
+                <cohort date_start="start_date"
+                    date_stop="end_date"
+                    interval="day"
+                    measure="billability_percent"
+                    string="billability Cohort" />
+        </field>
+    </record>
+
+
+     <record model="ir.ui.view" id="view_billability_overview_form">
+        <field name="name">view_billability_overview_form</field>
+        <field name="model">billability.report</field>
+        <field name="arch" type="xml">
+            <form>
+                <group>
+                <field name="name"/>
+                <field name="employee_name"/>
+                <field name="employee_id"/>
+                <field name="company"/>
+                </group>
+                <group>
+                <field name="employee_name"/>
+                <field name="Office"/>
+                <field name="employee_start_date"/>
+                <field name="employee_end_date"/>
+                <field name="valued_billable_hours"/>
+                <field name="valued_non_billable_hours"/>
+                </group>
+                <group>
+                <field name="effective_capacity"/>
+                <field name="worked"/>
+                <field name="leaves"/>
+                <field name="offs"/>
+                <field name="days_duration"/>
+                <field name="out_of_contract"/>
+                <field name="bank_holiday"/>
+                <field name="weekends"/>
+                <field name="days"/>
+                </group>
+                <group>
+                <field name="raw_weekly_capacity"/>
+                <field name="working_percentage"/>
+                <field name="contract_start"/>
+                <field name="contract_end"/>
+                <field name="week_number"/>
+                <field name="start_date"/> 
+                <field name="end_date"/>
+                </group>
+                <group>
+                <field name="billable_hours"/>
+                <field name="non_billable_hours"/>
+                <field name="billability_percent"/>
+                <field name="non_billability_percent"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    </data>
+</odoo>

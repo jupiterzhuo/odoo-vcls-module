@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+   
+        <record id="action_billability_overview_display" model="ir.actions.act_window">
+            <field name="name">Billability overview</field>
+            <field name="res_model">billability.report</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">pivot,graph,tree,form,cohort</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('vcls-interfaces.view_billability_overview_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('vcls-interfaces.view_billability_overview_form')}),
+                (0, 0, {'view_mode': 'pivot', 'view_id': ref('vcls-interfaces.view_billability_overview_pivot')}),
+                (0, 0, {'view_mode': 'graph', 'view_id': ref('vcls-interfaces.view_billability_overview_graph')}),
+                (0, 0, {'view_mode': 'cohort', 'view_id': ref('vcls-interfaces.view_billability_overview_cohort')}),
+            ]"/>
+        </record>
+        
+        <menuitem
+            id="menu_billability_overview"
+            name="Billability Overview"
+            parent="vcls-theme.menu_pc_root"
+            sequence="34"
+            action="action_billability_overview_display"
+            groups="vcls_security.group_project_controller"
+        />
+ 
+    </data>
+</odoo>

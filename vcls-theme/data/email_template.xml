@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="message_notification_email_vcls" name="Message Email Notification" inherit_id="mail.message_notification_email">
+        <xpath expr="//div" position="replace">
+            <div>
+                <div t-raw="message.body"/>
+                <ul t-if="tracking_values">
+                    <t t-foreach="tracking_values" t-as="tracking">
+                        <li><t t-esc="tracking[0]"/>: <t t-esc="tracking[1]"/> -&gt; <t t-esc="tracking[2]"/></li>
+                    </t>
+                </ul>
+            <div t-if="signature" t-raw="signature" style="font-size: 13px;"/>
+        </div>
+        </xpath>
+    </template>
+</odoo>

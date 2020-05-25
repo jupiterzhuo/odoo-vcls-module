@@ -91,7 +91,7 @@ class ExpenseSheet(models.Model):
     # COMPUTE METHODS #
     ###################
 
-    @api.depends('type', 'project_id', 'employee_id')
+    @api.depends('type', 'project_id', 'employee_id','sale_order_id')
     def _compute_user_id(self):
         for record in self:
 
@@ -111,6 +111,10 @@ class ExpenseSheet(models.Model):
                         record.user_id = record.project_id.partner_id.controller_id
                     else:
                         record.user_id = record.project_id.user_id
+                elif record.sale_order_id:
+                    record.user_id = record.sale_order_id.core_team_id.lead_consultant.user_id if record.sale_order_id.core_team_id.lead_consultant.user_id else False
+                    if not record.user_id:
+                        raise ValidationError("Please add a lead consultant to the core team of the sale order {}".format(record.sale_order_id.name))
                 else:
                     record.user_id = False
 
@@ -175,11 +179,24 @@ class ExpenseSheet(models.Model):
     """ We override this to ensure a default journal to be properly updated """
     @api.onchange('employee_id')
     def _onchange_employee_id(self):
-        self.address_id = self.employee_id.sudo().address_home_id
-        self.department_id = self.employee_id.department_id
-        #self.user_id = self.employee_id.expense_manager_id or self.employee_id.parent_id.user_id
-        self.journal_id = self.env['account.journal'].search([('type', '=', 'purchase'),('name', '=', 'Expenses'),('company_id', '=', self.employee_id.company_id.id)], limit=1)
-        self.bank_journal_id = self.env['account.journal'].search([('type', 'in', ['cash', 'bank']),('company_id', '=', self.employee_id.company_id.id)], limit=1)
+        #self.write(self._get_info_from_employee(self.employee_id))
+        if self.employee_id:
+            new_vals = self._get_info_from_employee(self.employee_id)
+            self.address_id = new_vals['address_id']
+            self.department_id = new_vals['department_id']
+            self.journal_id = new_vals['journal_id']
+            self.bank_journal_id = new_vals['bank_journal_id']
+
+    def _get_info_from_employee(self,employee_id,vals={}):
+        ''' this function is separated from _onchange_employee so it can be called before you create a sheet to avoid conflicts '''
+        new_vals = {
+            'address_id' : employee_id.address_home_id.id,
+            'department_id' : employee_id.department_id.id,
+            'journal_id' : self.env['account.journal'].search([('type', '=', 'purchase'),('name', '=', 'Expenses'),('company_id', '=', employee_id.company_id.id)], limit=1).id,
+            'bank_journal_id' : self.env['account.journal'].search([('type', 'in', ['cash', 'bank']),('company_id', '=', employee_id.company_id.id)], limit=1).id,
+        }
+        vals.update(new_vals)
+        return vals
 
     @api.multi
     def action_submit_sheet(self):
@@ -190,5 +207,3 @@ class ExpenseSheet(models.Model):
                         'tax_ids': False,
                     })
         return super(ExpenseSheet, self).action_submit_sheet()
-
-

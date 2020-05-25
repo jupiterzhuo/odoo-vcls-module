@@ -34,7 +34,7 @@
                         <td><t t-esc="rate_sale_line_id.name"/></td>
                         <td class="text-right">
                             <t t-esc="rate_values['qty']"/>&amp;nbsp;
-                            <t t-esc="rate_values['uom_id'].name"/>
+                            <t t-esc="rate_values['unit_of_measure']"/>
                         </td>
                         <td class="text-right"><t t-esc="rate_values['price']"
                         t-options='{"widget": "monetary", "display_currency": currency_id}'/></td>

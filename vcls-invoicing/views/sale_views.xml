@@ -6,6 +6,15 @@
             <field name="priority">4000</field>
             <field name="inherit_id" ref="sale.view_order_form"/>
             <field name="arch" type="xml">
+
+                <xpath expr="//form[1]/sheet[1]/notebook[1]/page[@name='order_lines']/field[@name='order_line']/tree[1]/field[@name='price_unit']" position="attributes">
+                    <attribute name="attrs">{"readonly": []}</attribute>
+                </xpath>
+
+                <field name="fiscal_position_id" position="attributes">
+                    <attribute name="options">{'no_open': True,'no_quick_create': True, 'no_create_edit' : True}</attribute>
+                </field>
+
                 <xpath expr="//div[@name='button_box']" position="inside">
                     
                     <button class="oe_stat_button" type="object" name="action_risk" icon="fa-exclamation-triangle" attrs="{'invisible': [('risk_score', '=', 0)]}" string="Risk Score">
@@ -25,7 +34,7 @@
                     <field name="activity_report_template" attrs="{'readonly': [('financial_config_readonly', '!=', True)]}" force_save="1"/>
                     -->
                     <field name="invoiceable_amount"/>
-                    <field name="po_id" domain="[('partner_id','=',partner_id)]"/>
+                    <field name="po_id" domain="[('partner_id','=',partner_id)]" options="{'no_open':True}"/>
                     <field name="risk_score" invisible="1"/>
                     <field name="timesheet_limit_date"/>
                     <field name="financial_config_readonly" invisible="1"/>
@@ -44,9 +53,9 @@
                     <attribute name="force_save">1</attribute>
                 </xpath>
                 <xpath expr="//field[@name='fiscal_position_id']" position="after">
-                    <field name="invoice_template" attrs="{'readonly': [('financial_config_readonly', '!=', True)]}" force_save="1" options="{'no_create_edit': True}"/>
+                    <field name="invoice_template" attrs="{'readonly': [('financial_config_readonly', '!=', True)]}" force_save="1" options="{'no_create_edit': True,'no_open':True}"/>
                     <field name="merge_subtask"/>
-                    <field name="activity_report_template" attrs="{'readonly': [('financial_config_readonly', '!=', True)]}" force_save="1" options="{'no_create_edit': True}"/>
+                    <field name="activity_report_template" attrs="{'readonly': [('financial_config_readonly', '!=', True)]}" force_save="1" options="{'no_create_edit': True,'no_open':True}"/>
                 </xpath>
                 <xpath expr="//field[@name='pricelist_id']" position="attributes">
                     <attribute name="attrs">{'readonly': [('financial_config_readonly', '!=', True)]}</attribute>
@@ -109,7 +118,7 @@
                 <separator/>
                 <filter string="My IA orders" name="ia_orders" domain="[('partner_id.invoice_admin_id','=', uid)]"/>
                 <separator/>
-                <filter string="To Be Invoiced" name="to_be_invoiced" domain="[('invoiceable_amount','&gt;', 0)]"/>
+                <filter string="To Be Invoiced" name="to_be_invoiced" domain="[('invoice_status','in', ['to invoice','upselling'])]"/>
             </xpath>
 
         </field>

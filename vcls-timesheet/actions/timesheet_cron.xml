@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
-    <data>
+    <data noupdate = "1">
         <record id="cron_timesheet" model="ir.cron">
             <field name="name">Approve Timesheet</field>
             <field name="active" eval="True" />

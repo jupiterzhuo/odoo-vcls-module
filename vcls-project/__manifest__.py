@@ -15,8 +15,7 @@
     # Check https://github.com/odoo/odoo/blob/12.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
     'category': 'Uncategorized',
-    'version': '0.8.10',
-
+    'version': '1.0.4',
     # any module necessary for this one to work correctly
     'depends': [
         'base',
@@ -38,6 +37,7 @@
         'vcls_security',
         'vcls-risk',
         'vcls-invoicing',
+        'vcls-helpdesk',
     ],
 
     # always loaded
@@ -69,6 +69,8 @@
         'views/project_views.xml',
         'views/program_views_menu.xml',
         'views/task_views.xml',
+
+        'views/helpdesk_ticket_views.xml',
 
         ### SEQUENCES ###
         'sequences/project_sequences.xml',

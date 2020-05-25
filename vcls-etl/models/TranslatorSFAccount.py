@@ -91,6 +91,9 @@ class TranslatorSFAccount(TranslatorSFGeneral.TranslatorSFGeneral):
             result['project_supplier_type_id'] = mapOdoo.convertRef(SF_Account['Supplier_Project__c'],odoo,'project.supplier.type',False)
         if SF_Account['Area_of_expertise__c']:
             result['expertise_area_ids'] = [(6, 0, mapOdoo.convertRef(SF_Account['Area_of_expertise__c'],odoo,'expertise.area',True))]
+        if SF_Account['NumberOfEmployees']:
+            result['number_of_employee'] = TranslatorSFAccount.convertEmployees(SF_Account['NumberOfEmployees'])
+
 
         result['category_id'] =  [(6, 0, TranslatorSFAccount.convertCategory(SF_Account,odoo))]
         result['message_ids'] = [(0, 0, TranslatorSFAccount.generateLog(SF_Account))]
@@ -139,6 +142,21 @@ class TranslatorSFAccount(TranslatorSFGeneral.TranslatorSFGeneral):
             return 2
         else: # Undefined
             return 1
+    
+    @staticmethod
+    def convertEmployees(sf_value):
+        if sf_value <= 10:
+            return '1_10'
+        elif 11 <= sf_value <= 50:
+            return '11_50'
+        elif 51 <= sf_value <= 200:
+            return '51_200'
+        elif 201 <= sf_value <= 500:
+            return '201_500'
+        elif 501 <= sf_value <= 2000:
+            return '501_2000'
+        else:
+            return '2000'
     
     @staticmethod
     def generateLog(SF_Account):

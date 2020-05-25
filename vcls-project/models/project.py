@@ -14,6 +14,7 @@ class Project(models.Model):
 
     _name = 'project.project'
     _inherit = ['project.project', 'mail.thread', 'mail.activity.mixin']
+    _order = 'name'
 
     # We Override this method from 'project_task_default_stage
     def _get_default_type_common(self):
@@ -55,9 +56,9 @@ class Project(models.Model):
 
     #consultant_ids = fields.Many2many('hr.employee', string='Consultants')
     #ta_ids = fields.Many2many('hr.employee', string='Ta')
-    completion_ratio = fields.Float('Task Complete', compute='compute_project_completion_ratio', store=True)
+    completion_ratio = fields.Float('Task Complete', compute='compute_project_completion_ratio', store=True, help='All parent tasks completion %, weighted by contractual budget')
     consummed_completed_ratio = fields.Float('BC / TC',
-                                             compute='compute_project_consummed_completed_ratio', store=True)
+                                             compute='compute_project_consummed_completed_ratio', store=True, help='BC/TC in Percentage, lower is "better", 100 is on target')
     summary_ids = fields.One2many(
         'project.summary', 'project_id',
         'Project summaries'
@@ -75,6 +76,9 @@ class Project(models.Model):
                                       string='Consultants')
     ta_ids = fields.Many2many('hr.employee', relation='rel_project_tas', related='core_team_id.ta_ids',
                               string='Ta')
+    controller_id = fields.Many2one('res.users', related='partner_id.controller_id', string='Project Controller')
+    invoice_admin_id = fields.Many2one('res.users', related='partner_id.invoice_admin_id', string='Invoice Administrator')
+    account_manager_id = fields.Many2one('res.users', related='sale_order_id.user_id', string='Account Manager')
 
     invoices_count = fields.Integer(
         compute='_get_out_invoice_ids',
@@ -94,18 +98,26 @@ class Project(models.Model):
 
     risk_ids = fields.Many2many(
         'risk', string='Risk',
-        compute='_get_risks',
-        store = True,
+        compute='_compute_risk_ids',
+        # store=True,
     )
 
     risk_score = fields.Integer(
         string='Risk Score',
         compute='_compute_risk_score',
-        store=True,
+        # store=True,
+    )
+
+    risk_last_update = fields.Datetime(
+        string='Risk Last Update',
+        compute='_compute_risk_last_update',
+        # store=True,
     )
 
     invoiceable_amount = fields.Monetary(
-       related="sale_order_id.invoiceable_amount", readonly=True, store=True
+       related="sale_order_id.invoiceable_amount",
+       readonly=True,
+       store=True,
     )
 
     invoicing_mode = fields.Selection(related="sale_order_id.invoicing_mode", readonly=True)
@@ -123,9 +135,9 @@ class Project(models.Model):
         compute='_compute_dates',
         index=True,
         track_visibility='onchange',
-        ) 
+    ) 
     
-    #accounting fields for legacy integration
+    # accounting fields for legacy integration
     external_account = fields.Char(
         default="/",
     )
@@ -210,7 +222,8 @@ class Project(models.Model):
             if project.summary_ids:
                 project.last_summary_date = project.summary_ids.sorted(lambda s: s.create_date, reverse=True)[0].create_date
 
-    def _get_risks(self):
+    @api.depends('sale_order_id.risk_ids')
+    def _compute_risk_ids(self):
         for project in self:
             project.risk_ids = self.env['risk'].search([
                 ('resource', '=', 'project.project,{}'.format(project.id)),
@@ -220,6 +233,21 @@ class Project(models.Model):
     def _compute_risk_score(self):
         for project in self:
             project.risk_score = sum(project.risk_ids.mapped('score'))
+
+    @api.depends('risk_ids.write_date')
+    def _compute_risk_last_update(self):
+        for project in self:
+            last_one = datetime(1970, 1, 1)
+            for individual_risks in project.risk_ids:
+                if not last_one or individual_risks.write_date > last_one:
+                    last_one = individual_risks.write_date
+                elif not last_one or individual_risks.create_date > last_one:
+                    last_one = individual_risks.create_date
+            if last_one != datetime(1970, 1, 1):
+                project.risk_last_update = last_one
+            else:
+                project.risk_last_update = False
+
 
     @api.one
     @api.depends(
@@ -248,14 +276,12 @@ class Project(models.Model):
     # CUSTOM METHODS #
     ##################
     @api.multi
-    def get_tasks_for_project_sub_project(self):
-        """This function will return all the tasks and subtasks found in the main and Child
-        Projects which participates in KPI's"""
+    def get_tasks_not_cancelled_and_completable(self):
+        """This function will return all the tasks and subtasks that can be completed and is not cancelled"""
         self.ensure_one()
-        tasks = self.task_ids + self.child_id.mapped('task_ids')
-        all_tasks = tasks + tasks.mapped('child_ids')
-        return all_tasks.filtered(lambda task: task.sale_line_id.product_id.completion_elligible and
-                                  task.stage_id.status not in  ['not_started','cancelled'])
+        all_tasks = self.task_ids
+        return all_tasks.filtered(lambda task: task.sale_line_id.product_id.product_tmpl_id.completion_elligible and
+                                  task.stage_id.status not in  ['cancelled'])
 
     @api.multi
     def action_raise_new_invoice(self):
@@ -446,15 +472,22 @@ class Project(models.Model):
     @api.depends('task_ids.completion_ratio')
     def compute_project_completion_ratio(self):
         for project in self:
-            tasks = project.get_tasks_for_project_sub_project()
-            project.completion_ratio = sum(tasks.mapped('completion_ratio')) / len(tasks) if tasks else sum(tasks.mapped('completion_ratio'))
+            tasks = project.get_tasks_not_cancelled_and_completable()
+            weight_sum = 0
+            num_times_weight_factor = 0
+            #this weights the tasks complete with the contractual budget
+            for task in tasks:
+                weight_sum += task.contractual_budget
+                num_times_weight_factor += ( task.completion_ratio / 100) * task.contractual_budget
+            project.completion_ratio = num_times_weight_factor * 100 / weight_sum if weight_sum > 0 else 0
+
 
     @api.multi
     @api.depends('task_ids.consummed_completed_ratio')
     def compute_project_consummed_completed_ratio(self):
         for project in self:
-            tasks = project.get_tasks_for_project_sub_project()
-            project.consummed_completed_ratio = sum(tasks.mapped('consummed_completed_ratio')) / len(tasks) if tasks else sum(tasks.mapped('consummed_completed_ratio'))
+            project.consummed_completed_ratio = (project.budget_consumed / project.completion_ratio) * 100 if project.completion_ratio > 0 else project.budget_consumed / 0.01 * 100
+
 
     @api.multi
     def _get_is_project_manager(self):
@@ -540,3 +573,9 @@ class Project(models.Model):
         parent_project_id = self.parent_id or self
         family_project_ids = parent_project_id | parent_project_id.child_id
         return family_project_ids
+
+    """@api.onchange('sale_line_employee_ids')
+    def _onchange_sale_line_employee_ids(self):
+        for project in self.filtered(lambda p: not p.sale_order_id.parent_id and p.sale_order_id.child_ids): #if we make the change in a parent with childs
+            for so in project.sale_order_id.child_ids.filtered(lambda o: o.link_rates): #for linked orders
+                so.map_match()"""

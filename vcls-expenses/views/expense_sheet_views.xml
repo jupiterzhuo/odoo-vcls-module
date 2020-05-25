@@ -108,7 +108,8 @@
 
                 <xpath expr="//field[@name='employee_id']" position="before">
                     <field name='type'/>
-                    <field name='project_id' required="1" options='{"no_open": True,"no_create": 1, "no_create_edit": 1}' context="{'search_type':type}"/>
+                    <field name='project_id' options='{"no_open": True,"no_create": 1, "no_create_edit": 1}' context="{'search_type':type}"
+                        attrs="{'invisible': [('sale_order_id', '!=', False),('project_id','=',False)], 'required': [('sale_order_id', '=', False),('project_id','=',False)]}" />
                     <!--<field name = 'project_id' attrs="{'invisible': [('type', '!=', 'project')], 'required': [('type', '=', 'project')]}" />-->
                 </xpath>
 

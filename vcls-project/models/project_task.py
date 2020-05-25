@@ -6,21 +6,17 @@ from odoo import models, fields, api
 class ProjectTask(models.Model):
     _inherit = 'project.task'
     
-    """business_value = fields.Selection([
-        ('1', 'Minor'),
-        ('2', 'Moderate'),
-        ('3', 'Strong'),
-        ('4', 'Major')],
-        string='Business Value',
+    total_ticket_effort = fields.Float(
+        compute='_compute_total_ticket_effort',
+        store=True,
+        default=0.0,
+        group_operator='sum',
     )
 
-    dev_effort = fields.Selection([
-        ('1', 'Small'),
-        ('2', 'Medium'),
-        ('3', 'Large'),
-        ('4', 'Xtra Large')],
-        string='Effort Assumption',
-    )"""
+    ticket_ids = fields.One2many(
+        'helpdesk.ticket',
+        'task_id',
+        )
 
     task_type = fields.Selection([
         ('gen', 'Generic'),
@@ -31,6 +27,12 @@ class ProjectTask(models.Model):
         string='Task Type',
         compute='_compute_task_type',
         store=True,)
+    
+    reporting_task_id = fields.Many2one(
+        comodel_name = 'project.task',
+        compute = '_compute_reporting_task_id',
+        store = True,
+    )
 
     info_string = fields.Char(
         compute='_get_info_string',
@@ -43,7 +45,7 @@ class ProjectTask(models.Model):
         group_operator='avg',
     )
     completion_elligible = fields.Boolean(string='Completion eligibility')
-    consummed_completed_ratio = fields.Float(compute='compute_consummed_completed_ratio', store=True, string="BC/TC")
+    consummed_completed_ratio = fields.Float(compute='compute_consummed_completed_ratio', store=True, string="BC/TC", help='BC/TC percent, 100 is normal, lower is "better"')
 
     stage_allow_ts = fields.Boolean(
         related = 'stage_id.allow_timesheet', string='Stage allow timesheets'
@@ -60,6 +62,15 @@ class ProjectTask(models.Model):
     ###################
     # COMPUTE METHODS #
     ###################
+    @api.depends ('parent_id')
+    def _compute_reporting_task_id(self):
+        for task in self:
+            task.reporting_task_id = task.parent_id if task.parent_id else task
+
+    @api.depends ('ticket_ids','ticket_ids.planned_effort')
+    def _compute_total_ticket_effort(self):
+        for task in self.filtered(lambda t: t.ticket_ids):
+            task.total_ticket_effort = sum(task.ticket_ids.mapped('planned_effort'))
 
     @api.depends('parent_id', 'project_id.project_type')
     def _compute_task_type(self):
@@ -80,18 +91,8 @@ class ProjectTask(models.Model):
     
     @api.depends('completion_elligible', 'stage_id','progress')
     def compute_consummed_completed_ratio(self):
-        task_not_started = self.env['project.task.type'].search(
-            [('status', '=', 'not_started')])
-        task_0_progres = self.env['project.task.type'].search(
-            [('status', '=', 'progress_0')])
         for task in self:
-            if not task.completion_elligible or task.stage_id in task_not_started:
-                task.consummed_completed_ratio = 0.0
-            elif task.stage_id in task_0_progres:
-                task.consummed_completed_ratio = 100
-            else:
-                task.consummed_completed_ratio = 100*(task.progress/task.completion_ratio if task.completion_ratio else \
-                    task.progress)
+            task.consummed_completed_ratio = (task.budget_consumed / task.completion_ratio) * 100 if task.completion_ratio > 0 else task.budget_consumed / 0.1 * 100
 
     # We Override below method in order to take the unit_amount_rounded amount rather than the initial unit_amount
     @api.depends('timesheet_ids.unit_amount_rounded')

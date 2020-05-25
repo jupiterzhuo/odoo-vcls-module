@@ -11,7 +11,7 @@
                 <form string="Project" create="false">
                     <header>
                         <button name="action_raise_new_invoice" string="Raise a new Invoice" type="object"
-                                class="oe_highlight oe_read_only"/>
+                                class="oe_highlight oe_read_only" invisible="1"/>
                         <button name="action_raise_new_risk" string="Raise a new Risk" type="object"
                                 class="oe_highlight oe_read_only"/>
                     </header>
@@ -84,6 +84,9 @@
                                 <field name="lead_consultant" string="Lead Consultant"/>
                                 <field name="lead_backup"/>
                                 <field name="assistant_id"/>
+                                <field name="controller_id"/>
+                                <field name="invoice_admin_id"/>
+                                <field name="account_manager_id"/>
                             </group>
                             <group string="Operations">
                                 <field name="date_start" string="Est. Start Date"/>
@@ -230,6 +233,19 @@
             </field>
         </record>
 
+        
+        <record id="vcls_specific_project_form_changing_project_name_group" model="ir.ui.view">
+            <field name="name">vcls.specific.project.form</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="vcls_specific_project_form"/>
+            <field name="groups_id" eval="[(4,ref('vcls-hr.vcls_group_superuser_lvl1')),(4,ref('vcls_security.group_bd_admin')), (4,ref('vcls-hr.vcls_group_superuser_lvl2'))]"/>
+            <field name="arch" type="xml">
+                <field name="name" position="attributes">
+                    <attribute name="readonly">0</attribute>
+                </field>
+            </field>
+        </record>
+
         <!--
         <record id="view_project_formm_inherit" model="ir.ui.view">
             <field name="name">project.form</field>
@@ -347,7 +363,7 @@
             <field name="arch" type="xml">
                 <xpath expr="//kanban" position="attributes">
                     <attribute name="create">0</attribute>
-                    <attribute name="default_order">sequence asc</attribute>
+                    <attribute name="default_order">name asc</attribute>
                     <attribute name="class">oe_background_grey o_kanban_dashboard o_project_kanban o_emphasize_colors o_vcls_open_form</attribute>
                 </xpath>
                 <xpath expr="//field[@name='partner_id']" position="after">

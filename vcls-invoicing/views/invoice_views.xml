@@ -29,7 +29,7 @@
             <field name="model">account.invoice</field>
             <field name="inherit_id" ref="sale_timesheet_limit_date.invoice_form"/>
             <field name="mode">primary</field>
-            <field name="priority" eval="5000" />
+            <field name="priority" eval="2" />
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='number']" position="after">
                     <field name="temp_name" readonly="1" class="oe_inline" attrs="{'invisible': [('state','not in',('draft',))]}"/>
@@ -108,6 +108,10 @@
 
                 <xpath expr="//button[@name='preview_invoice']" position="attributes">
                     <attribute name="invisible">1</attribute>
+                </xpath>
+
+                <xpath expr="//button[@name='action_invoice_open']" position="attributes">
+                    <attribute name="groups">vcls_security.group_finance_invoice_administrator</attribute>
                 </xpath>
                 
                 <xpath expr="//button[@id='account_invoice_payment_btn']" position="attributes">
@@ -197,8 +201,9 @@
             <field name="view_type">form</field>
             <field name="view_mode">tree,form</field>
             <field name="view_ids" eval="[(5, 0, 0),
-                (0, 0, {'view_mode': 'form', 'view_id': ref('vcls-invoicing.view_invoice_form')}),
                 (0, 0, {'view_mode': 'tree', 'view_id': ref('vcls-invoicing.ia_invoices_view_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('vcls-invoicing.view_invoice_form')}),
+            
             ]"/>
             <field name="domain">[('partner_id.user_id','=', uid)]</field>
             <field name="context">{'search_default_draft':1,'group_by':['commercial_partner_id']}</field>

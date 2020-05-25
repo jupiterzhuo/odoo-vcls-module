@@ -44,6 +44,56 @@ class Ticket(models.Model):
         string='Subcategory',
         required=True,)
     
+    #change management fields
+    change_score = fields.Integer(
+        store=True,
+        compute='_compute_change_score',
+    )
+
+    approval_type = fields.Selection([
+        ('no', 'None'),
+        ('owner', 'Business Owner'),
+        ('board', 'Change Management Board')],
+    )
+
+    business_value = fields.Selection([
+        (1, 'Minor'),
+        (2, 'Moderate'),
+        (3, 'Strong'),
+        (4, 'Major')],
+        string='Business Value',
+        help='Evaluate taking in account the number of involved people and the added value (time, quality, security, etc.)'
+    )
+    business_value_description = fields.Text()
+
+    related_effort = fields.Selection([
+        (1, 'Minor'),
+        (2, 'Moderate'),
+        (3, 'Strong'),
+        (4, 'Major')],
+        string='Effort Assumption',
+        help='Evaluate taking into account the developement, training and suport, etc.')
+    related_effort_description = fields.Text()
+    planned_effort = fields.Integer(
+        default = 0,
+    )
+
+    related_risk = fields.Selection([
+        (1, 'Minor'),
+        (2, 'Moderate'),
+        (3, 'Strong'),
+        (4, 'Major')],
+        string='Risk Assumption',)
+    related_risk_description = fields.Text()
+
+    @api.depends('business_value','related_effort','related_risk')
+    def _compute_change_score(self):
+        for change in self:
+            if change.business_value and change.related_effort and change.related_risk:
+                change.change_score = change.business_value * change.related_effort * change.related_risk
+            else:
+                change.change_score = False
+    
     #overrides for renaming purpose
     name = fields.Char(
         compute='_get_name',

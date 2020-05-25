@@ -82,6 +82,11 @@ class SaleOrder(models.Model):
         'Child Quotations'
     )
 
+    link_rates = fields.Boolean(
+        default = False,
+        help="If ticked, rates of the parent quotation will be copied to childs, and linked during the life of the projects",
+    )
+
     # Used as a hack to get the parent_id value
     # as for odoo default_parent_id in context is assigned
     # message.message parent_id
@@ -150,6 +155,7 @@ class SaleOrder(models.Model):
 
     @api.model
     def create(self, vals):
+        _logger.info("SO CREATE: {}".format(vals))
         if self.env.user.context_data_integration:
             _logger.info("SO CREATE: {}".format(vals))
         # if we force the creation of a quotation with an exiting internal ref (e.g. during migration)
@@ -176,6 +182,7 @@ class SaleOrder(models.Model):
             if vals.get('parent_sale_order_id') and not vals.get('parent_id'):
                 vals['parent_id'] = vals['parent_sale_order_id']
                 vals.pop('parent_sale_order_id')
+                
 
             if 'parent_id' in vals: #in this case, we are upselling and add a numerical index to the reference of the original quotation
                 parent_id = vals.get('parent_id')
@@ -211,7 +218,7 @@ class SaleOrder(models.Model):
             if expected_start_date:
                 vals['expected_start_date'] = expected_start_date
                 #vals['expected_end_date'] = expected_start_date + relativedelta(months=+3)
-                
+        #_logger.info("{}".format(vals))     
         order = super(SaleOrder, self).create(vals)
         return order
 
@@ -225,6 +232,9 @@ class SaleOrder(models.Model):
                     so.expected_end_date = expected_start_date + (so.expected_end_date - so.expected_start_date)
         ret = super(SaleOrder, self).write(vals)
         self.remap()
+        """#we take in account changes in the rate products to be reported in childs
+        if vals.get('order_line',False):
+            _logger.info("Write SO lines: {}".format(vals['order_line']))"""
         return ret 
 
     ###################
@@ -337,11 +347,6 @@ class SaleOrder(models.Model):
                 'target': 'current',
                 'res_id': new_order.id,
             }
-
-    """ @api.multi
-    def copy_data(self, default=None):
-        default['name']="I DO TEST"
-        return super(SaleOrder, self).copy_data(default)"""
 
     @api.model
     def get_alpha_index(self, index):
@@ -468,3 +473,36 @@ class SaleOrder(models.Model):
             self.update({
                'partner_shipping_id': partner_shipping_id,
             })
+    
+    @api.onchange('sale_order_template_id')
+    def onchange_sale_order_template_id(self):
+        """
+         We override this to manage the case of link_rates=True.
+         In the case of Linked Rates, the parent order is defineing the rates, not the template.
+        """
+        super(SaleOrder,self).onchange_sale_order_template_id()
+        if self.link_rates and self.parent_id and self.sale_order_template_id:
+
+            #we remove the newly created rate lines
+            self.order_line = self.order_line.filtered(lambda l: l.vcls_type != 'rate')
+
+            order_lines = []
+            #then copy the parent_ones
+            for rl in self.parent_id.order_line.filtered(lambda l: l.vcls_type == 'rate'):
+                vals = {
+                    'product_id':rl.product_id.id,
+                    'name':rl.name,
+                    'product_uom_qty':rl.product_uom_qty,
+                    'product_uom':rl.product_uom.id,
+                    'price_unit':rl.price_unit,
+                }
+                #_logger.info("New Line:{}".format(vals))
+                order_lines.append((0, 0, vals))
+            
+            _logger.info("KPI | {}".format(order_lines))
+          
+            self.order_line = order_lines
+            self.order_line._compute_tax_id()
+    
+    
+

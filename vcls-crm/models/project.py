@@ -16,6 +16,11 @@ class Project(models.Model):
         store=True
     )
 
+    link_rates = fields.Boolean(
+        default = True,
+        help="If ticked, rates of the parent quotation will be copied to childs, and linked during the life of the projects",
+    )
+
     @api.multi
     def core_team(self):
         self.ensure_one()

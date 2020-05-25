@@ -22,7 +22,7 @@
                             groups="sales_team.group_sale_salesman"
                             attrs="{'invisible': [('customer', '=', False)]}"
                             icon="fa-usd">
-                            <field string="Sales" name="sale_order_count" widget="statinfo"/>
+                            <field string="Sales" name="sale_order_count_without_cancelled" widget="statinfo"/>
                         </button>
                     </button>
                 </data>

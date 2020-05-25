@@ -126,7 +126,7 @@
 
                             <group>
                                 <field name="date_deadline" string="Proposal Sending Deadline"/>
-                                <field name="date_closed" attrs="{'readonly': ['|',('probability', '=', 100),('probability', '=', 0)]}"/>
+                                <field name="date_closed" attrs="{'readonly': ['|',('probability', '=', 99),('probability', '=', 0)]}"/>
                             </group>
 
                             <group>

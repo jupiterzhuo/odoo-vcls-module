@@ -84,7 +84,34 @@ class BillabilityExport(models.Model):
             contracts = self.env['hr.contract'].search([('employee_id.employee_type','=','internal'),('company_id.id','=',company.id),('date_start','<=',end_date),
                                                         '|',('date_end','>=',start_date),('date_end','=',False),
                                                         '|',('employee_id.employee_end_date','>=',start_date),('employee_id.employee_end_date','=',False)])
+            
+            #TODO: check if contract started during this week, and if so, add last contract
+     
+            name_dict = {}
+            #makes a dict with names as keys and contracts as values
             for contract in contracts:
+                name = contract.employee_id.name
+                if name not in name_dict:    
+                    name_dict[name] = []
+                name_dict[name].append(contract)
+            #keeps names with more than 1 contract
+            extra_contracts = {k:v for (k,v) in name_dict.items() if len(v) > 1}
+            #finds most recent contract and removes 
+            for name, values in extra_contracts.items():
+                difference = {}
+                for contract in values:
+                    difference[contract] =  date.today() - contract.date_start
+                
+                correct_contract = min(difference, key=difference.get)
+                values.remove(correct_contract)
+            extra_contracts_list = [v for k,v in extra_contracts.items()]
+            extra_contracts_list_flat = [item for sublist in extra_contracts_list for item in sublist]
+
+                
+            for contract in contracts:
+                #if the contract is in extra_contracts, its a duplicate then dont add them to the data
+                if contract in extra_contracts_list_flat:
+                    continue
                 
                 if not (contract.resource_calendar_id):
                     raise ValidationError('The contract {} has no working schedule configured.'.format(contract.name))

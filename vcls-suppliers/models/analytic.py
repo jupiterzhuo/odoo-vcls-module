@@ -28,12 +28,14 @@ class AnalyticLine(models.Model):
         if not sale_line_id:
             return
         # look for a purchase line corresponding to this sale line
+        supplier = user_id.partner_id.parent_id if user_id.partner_id.parent_id else user_id.partner_id
+
         purchase_line_obj = self.env['purchase.order.line']
         purchase_obj = self.env['purchase.order']
         purchase_line = purchase_line_obj.search([
             # ('is_rebilled', '=', False),
             ('sale_line_id', '=', sale_line_id.id),
-            ('partner_id', '=', user_id.partner_id.id),
+            ('partner_id', '=', supplier.id),
             ('state', 'not in', ['cancel']),
         ], limit=1)
 

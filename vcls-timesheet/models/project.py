@@ -26,9 +26,15 @@ class Project(models.Model):
     cf_hours = fields.Float(string="Carry Forward Hours",readonly=True)
 
     budget_consumed = fields.Float(
-        string="Budget Consumed new",
+        string="Budget Consumed",
         readonly=True,
         compute='compute_budget_consumed',
+        help='realised budget / contractual budget percentage'
+    )
+
+    currency_id = fields.Many2one(
+        comodel_name = 'res.currency',
+        related = 'sale_order_id.currency_id',
     )
 
     @api.multi
@@ -36,9 +42,9 @@ class Project(models.Model):
     def compute_budget_consumed(self):
         for project in self:
             if project.contractual_budget:
-                self.budget_consumed = project.realized_budget / project.contractual_budget
+                project.budget_consumed = project.realized_budget / project.contractual_budget * 100
             else:
-                self.budget_consumed = False
+                project.budget_consumed = False
 
     @api.multi
     def _get_kpi(self):
@@ -72,3 +78,23 @@ class Project(models.Model):
         action['domain'] = [('project_id', 'in', family_project_ids.ids)]
         action['context'] = {}
         return action
+    
+    @api.model
+    def clean_pre_project(self):
+        completed = self.env['project.task.type'].search([('name','=','Completed'),('case_default','=',True),('project_type_default','=',False)],limit=1)
+        pre_project = self.env.ref('vcls-timesheet.default_project')
+        for task in pre_project.task_ids.filtered(lambda t: t.active):
+            related_opp = self.env['crm.lead'].search([('name','=',task.name),('type', '=', 'opportunity')],limit=1)
+            if related_opp:
+                if related_opp.probability == 100  and completed: #closed won state, the task is completed
+                    _logger.info("PP TASK COMPLETED | {}".format(task.name))
+                    task.stage_id = completed
+            else: #task is archived if timesheets or deleted if not
+                if task.timesheet_ids:
+                    _logger.info("PP TASK ARCHIVE | {}".format(task.name))
+                    task.active = False #archived
+                else:
+                    _logger.info("PP TASK UNLINK | {}".format(task.name))
+                    task.unlink()
+
+

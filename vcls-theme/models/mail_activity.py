@@ -98,6 +98,7 @@ class MailActivity(models.Model):
             {'name':'project.task','id':'project_task'},
             {'name':'crm.lead','id':'crm_lead'},
             {'name':'sale.order','id':'sale_order'},
+            {'name':'purchase.order','id':'purchase_order'},
             ]
         
         for model in models_to_clean:

@@ -100,7 +100,7 @@
                 'search_default_past_leaves': 1,
                     
             }</field>
-            <field name="domain">[('lm_user_id','=',uid),('holiday_type','=','employee')]</field>
+            <field name="domain">[('lm_user_id','=',uid),('holiday_type','=','employee'),('employee_id.active','=',True)]</field>
         </record>
 
         <!-- HR SUMMARY MENU ACTION -->

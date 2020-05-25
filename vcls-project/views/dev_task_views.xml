@@ -1,5 +1,15 @@
 <odoo>
     <data>
+        <record id="quick_create_task_form_parent" model="ir.ui.view">
+            <field name="name">project.task.form.quick_create_parent</field>
+            <field name="model">project.task</field>
+            <field name="inherit_id" ref="project.quick_create_task_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='user_id']" position="after">
+                    <field name="parent_id" invisible="1"/>
+                </xpath>
+            </field>
+        </record>
 
         <!-- Project Task Kanban View -->
         <record model="ir.ui.view" id="view_dev_task_kanban_v2">

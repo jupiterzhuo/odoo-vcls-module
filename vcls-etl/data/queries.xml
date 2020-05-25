@@ -5,7 +5,7 @@
             <field name="value">
                 SELECT 
                 Id, Name, VCLS_Alt_Name__c, ParentId, Supplier_Description__c, Key_Information__c,
-                Supplier_Status__c, Supplier_Category__c, Is_supplier__c, Supplier__c, To_be_Reviewed__c,
+                Supplier_Status__c, Supplier_Category__c, Is_supplier__c, Supplier__c, To_be_Reviewed__c,NumberOfEmployees,
                 BillingAddress, ShippingAddress,
                 OwnerId, Project_Assistant__c, Project_Controller__c,  Invoice_Administrator__c, VCLS_Main_Contact__c,
                 Website,  Phone, Fax, 

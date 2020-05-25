@@ -44,12 +44,6 @@ class AnalyticLine(models.Model):
         store=True,
     )
 
-    reporting_task_id = fields.Many2one(
-        comodel_name = 'project.task',
-        compute = '_compute_reporting_task',
-        store = True,
-    )
-
     # Used in order to group by client
     partner_id = fields.Many2one(
         'res.partner',
@@ -82,7 +76,7 @@ class AnalyticLine(models.Model):
     required_lc_comment = fields.Boolean(compute='get_required_lc_comment')
 
     rate_id = fields.Many2one(
-        comodel_name='product.product',
+        comodel_name='product.template',
         default = False,
         readonly = True,
     )
@@ -115,11 +109,6 @@ class AnalyticLine(models.Model):
         default = 'na',
         )
     
-    @api.depends('task_id','task_id.parent_id')
-    def _compute_reporting_task(self):
-        for ts in self:
-            ts.reporting_task_id = ts.task_id.parent_id if ts.task_id.parent_id else ts.task_id
-
     @api.depends('task_id','task_id.parent_id')
     def _compute_reporting_task(self):
         for ts in self:
@@ -232,28 +221,35 @@ class AnalyticLine(models.Model):
 
     @api.model
     def create(self, vals):
-        if vals.get('employee_id', False) and vals.get('project_id', False):
-            # rounding to 15 mins
-            if vals['unit_amount'] % 0.25 != 0:
-                old = vals.get('unit_amount', 0)
-                vals['unit_amount'] = math.ceil(old * 4) / 4
+        if not self._context.get('migration_mode',False):
+            if vals.get('employee_id', False) and vals.get('project_id', False):
+                # rounding to 15 mins
+                if vals['unit_amount'] % 0.25 != 0:
+                    old = vals.get('unit_amount', 0)
+                    vals['unit_amount'] = math.ceil(old * 4) / 4
 
-            # check if this is a timesheet at risk
-            vals['at_risk'] = self.sudo()._get_at_risk_values(vals.get('project_id'),
-                                                       vals.get('employee_id'))
+                # check if this is a timesheet at risk
+                vals['at_risk'] = self.sudo()._get_at_risk_values(vals.get('project_id'),
+                                                        vals.get('employee_id'))
 
-        if vals.get('time_category_id') == self.env.ref('vcls-timesheet.travel_time_category').id:
-            task = self.env['project.task'].browse(vals['task_id'])
-            if task.sale_line_id:
-                unit_amount_rounded = vals['unit_amount'] * task.sale_line_id.order_id.travel_invoicing_ratio
-                vals.update({'unit_amount_rounded': unit_amount_rounded})
+            if vals.get('time_category_id') == self.env.ref('vcls-timesheet.travel_time_category').id:
+                task = self.env['project.task'].browse(vals['task_id'])
+                if task.sale_line_id:
+                    unit_amount_rounded = vals['unit_amount'] * task.sale_line_id.order_id.travel_invoicing_ratio
+                    vals.update({'unit_amount_rounded': unit_amount_rounded})
+        #else:
+            #_logger.info("TS FAST create")
                 
         if not vals.get('main_project_id') and vals.get('project_id'):
             project_id = self.env['project.project'].browse(vals['project_id'])
             main_project_id = project_id.parent_id or project_id
             vals['main_project_id'] = main_project_id.id
 
-        return super(AnalyticLine, self).create(vals)
+        line = super(AnalyticLine, self).create(vals)
+        if line.task_id:
+            line.task_id.recompute_kpi=True
+
+        return line
 
     @api.multi
     def write(self, vals):
@@ -305,8 +301,12 @@ class AnalyticLine(models.Model):
                         vals.get('so_line', line.so_line.id))
 
                     if task.sale_line_id != so_line:  # if we map to a rate based product
-                        vals['so_line_unit_price'] = so_line.price_unit
-                        vals['rate_id'] = so_line.product_id.id
+                        #we check if the line unit is hours or days to ensure the hourly price
+                        if so_line.product_uom == self.env.ref('uom.product_uom_day'): #if we are in daily
+                            vals['so_line_unit_price'] = round((so_line.price_unit/8.0),2)
+                        else:
+                            vals['so_line_unit_price'] = so_line.price_unit
+                        vals['rate_id'] = so_line.product_id.product_tmpl_id.id
                         so_update = True
                         orders |= line.so_line.order_id
 
@@ -321,9 +321,14 @@ class AnalyticLine(models.Model):
             vals['stage_id'] = 'invoiced'
         ok = super(AnalyticLine, self).write(vals)
 
+        if ok: #we trigger the kpi recompute
+            to_recompute = self.filtered(lambda t: t.task_id)
+            to_recompute.mapped('task_id').write({'recompute_kpi':True})
+
         if ok and so_update:
             orders._compute_timesheet_ids()
             # force recompute
+            #_logger.info("SO UPDATE {} CONTEXT MIG {}".format(orders.mapped('name'),self._context.get('migration_mode',False)))
             for order in orders:
                 order.timesheet_limit_date = order.timesheet_limit_date
 
@@ -516,6 +521,18 @@ class AnalyticLine(models.Model):
             write({'stage_id': 'invoiceable'})
 
     @api.model
+    def _clean_0_ts(self):
+        to_clean = self.search([
+            ('is_timesheet', '=', True),
+            ('validated', '=', True),
+            ('unit_amount','=',0.0),
+            ('timesheet_invoice_id','=',False),
+        ])
+
+        if to_clean:
+            to_clean.unlink()
+
+    @api.model
     def _smart_timesheeting_cron(self,hourly_offset=0):
         days = hourly_offset//24
         remainder = hourly_offset%24
@@ -546,25 +563,9 @@ class AnalyticLine(models.Model):
                     'project_id': task.project_id.id,
                     'main_project_id': parent_project_id.id,
                     'employee_id': employee.id,
-                    'name': "Smart Timesheeting",
+                    'name': "/",
                 })
 
-
-        """# We look for timesheets of the previous week
-        tasks = self.env['project.task'].search([
-            ('project_id', '!=', False),
-            ('effective_hours', '>', 0),
-            ('timesheet_ids.date', '>', fields.Datetime.now() - timedelta(days=7)),
-            ('timesheet_ids.date', '<', fields.Datetime.now()),
-        ])
-        for task in tasks:
-            self.create({
-                'date': fields.Date.today(),
-                'task_id': task.id,
-                'amount': 0,
-                'company_id': task.company_id,
-                'project_id': task.project_id.id,
-            })"""
 
     def _timesheet_preprocess(self, vals):
         vals = super(AnalyticLine, self)._timesheet_preprocess(vals)
@@ -590,3 +591,16 @@ class AnalyticLine(models.Model):
                       'timesheets (linked to a Sales order '
                       'items invoiced on Time and material).')
                 )
+
+    @api.model
+    def _force_rate_id(self):
+        timesheets = self.search([('is_timesheet','=',True),('employee_id','!=',False),('project_id','!=',False)])
+
+        for project in timesheets.mapped('project_id'):
+            _logger.info("Processing Rate_id for project {}".format(project.name))
+            for map_line in project.sale_line_employee_ids:
+                rate_id = map_line.sale_line_id.product_id.product_tmpl_id
+                ts = timesheets.filtered(lambda t: t.so_line == map_line.sale_line_id)
+                if ts:
+                    _logger.info("Processing Rate_id for map line for {} as {} with {} timesheets".format(map_line.employee_id.name,rate_id.name,len(ts)))
+                    ts.write({'rate_id':rate_id.id})

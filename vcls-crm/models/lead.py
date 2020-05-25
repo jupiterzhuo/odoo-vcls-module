@@ -103,6 +103,7 @@ class Leads(models.Model):
         )
 
     date_closed = fields.Datetime('Closed Date', readonly=False, copy=False)
+    date_deadline = fields.Date(string='Proposal Sending Deadline')
 
     #################
     # CUSTOM FIELDS #
@@ -250,6 +251,12 @@ class Leads(models.Model):
                                       ('workorder', 'Work Order'),
                                       ('termandcondition', 'Terms and conditions'),])
 
+    risk_ids = fields.Many2many(
+        'risk',
+        string='Risk',
+        store=True,
+        compute='_compute_risk_ids'
+    )
 
     #is_support_user = fields.Boolean(compute='_compute_is_support_user', store=False)
 
@@ -520,7 +527,7 @@ class Leads(models.Model):
             items = ref.split('-')
             if len(items)==2:
                 index = int(items[1])
-                if (items[0].lower() == client.altname.lower()) and index:
+                if client.altname and (items[0].lower() == client.altname.lower()) and index:
                     if index > client.core_process_index:
                         client.write({
                             'altname':items[0].upper(),
@@ -585,20 +592,19 @@ class Leads(models.Model):
             return False
     
     def build_opp_name(self,reference=False,name=False):
-        try:
-            #if the name already contains the ref
-            offset = name.upper().find(reference.upper())
-            if offset == -1 and reference:
-                if len(name)>0:
-                    return "{} | {}".format(reference,name)
-                else:
-                    return reference
-            else:
-                return name
+        _logger.info("Build opp name {} {}".format(reference,name))
+        
+        #we assume the pipe '|' to be the separator of ref and name
+        parts = name.split('| ')
+        parts.reverse()
+        name_without_ref = parts[0]
 
-        except:
-            #_logger.info("Unable to extract ref from opp name {}".format(name))
-            return name
+        if reference and name_without_ref:
+            return "{} | {}".format(reference,name_without_ref)
+        elif reference and not name_without_ref:
+            return reference
+        else:
+            return name_without_ref
 
 
     @api.multi
@@ -748,6 +754,12 @@ class Leads(models.Model):
         for record in self:
             self.env['risk']._raise_risk(self.env.ref('vcls-crm.risk_go_nogo'), '{},{}'.format(record._name, record.id))
             record.risk_raised = True
+
+    def _compute_risk_ids(self):
+        for record in self:
+            record.risk_ids = self.env['risk'].search([
+                ('resource', '=', 'crm.lead,{}'.format(record.id)),
+            ])
             
     def open_related_risks(self):
         return {

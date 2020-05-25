@@ -23,17 +23,19 @@ class SaleOrder(models.Model):
         milestone_tasks = self.get_milestone_tasks()
         rate_order_lines = self.get_rate_tasks()
         for order_line in rate_order_lines:
-            for task in milestone_tasks:
-                employee = order_line.product_id.forecast_employee_id
-                sen_level = order_line.product_id.seniority_level_id
-                if not employee:
+            employee = order_line.product_id.forecast_employee_id
+            _logger.info("SYNC | Forecast for line {} with employee {}".format(order_line.product_id.name,employee.name))
+            """if not employee:
                     employee = self.env['hr.employee'].search(
-                        [('seniority_level_id', '=', sen_level)], limit=1)
-                if not employee:
-                    raise UserError(
-                        _("No Employee available for Seniority level \
-                        {}").format(sen_level.name)
-                    )
+                        [('seniority_level_id', '=', sen_level)], limit=1)"""
+            if not employee:
+                sen_level = order_line.product_id.seniority_level_id
+                raise UserError(
+                    _("No Employee available for Seniority level \
+                    {}").format(sen_level.name)
+                )
+
+            for task in milestone_tasks:
                 existing_forecast = self.env['project.forecast'].search([
                     ('project_id', '=', task.project_id.id),
                     ('task_id', '=', task.id),
@@ -43,22 +45,28 @@ class SaleOrder(models.Model):
                     self.env['project.forecast'].create({
                         'project_id': task.project_id.id,
                         'task_id': task.id,
-                        'employee_id': employee.id
+                        'employee_id': employee.id,
+                        'rate_id': order_line.product_id.product_tmpl_id.id,
                     })
-            employee = order_line.product_id.forecast_employee_id
+                    #_logger.info("SYNC | Forecast created in task {}".format(task.name))
             project = self.mapped('tasks_ids.project_id')
+            _logger.info("Mapping For Product {} Employee {} Line {}".format(order_line.product_id.name,employee.name,order_line.name))
             if len(project) == 1:
                 existing_mapping = self.env['project.sale.line.employee.map'].search([
                     ('project_id', '=', project.id),
-                    ('sale_line_id', '=', order_line.id),
+                    #('sale_line_id', '=', order_line.id),
                     ('employee_id', '=', employee.id)
                 ], limit=1)
+                
                 if not existing_mapping:
+                    _logger.info("SYNC | MAP CREATE For Product {} Employee {} Line {} in project {}".format(order_line.product_id.name,employee.name,order_line.name,project.name))
                     self.env['project.sale.line.employee.map'].sudo().create({
                         'project_id': project.id,
                         'sale_line_id': order_line.id,
                         'employee_id': employee.id,
                     })
+                else:
+                    _logger.info("SYNC | MAP FOUND For Product {} Employee {} Line {} in project {}".format(order_line.product_id.name,employee.name,order_line.name,project.name))
 
     @api.multi
     def get_milestone_tasks(self):
@@ -88,4 +96,14 @@ class SaleOrderLine(models.Model):
         'Service Policy',
         related='product_id.service_policy',
         readonly=True,
+    )
+
+class Forecast(models.Model):
+
+    _inherit = "project.forecast"
+
+    rate_id = fields.Many2one(
+        comodel_name='product.template',
+        default = False,
+        readonly = True,
     )

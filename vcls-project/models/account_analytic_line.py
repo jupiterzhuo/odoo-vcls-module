@@ -71,7 +71,7 @@ class AccountAnalyticLine(models.Model):
                 so_product = so_line.product_id
                 for default_rate in list_default_rate:
                     #_logger.info("Product {} {} | Rate {} {}".format(so_product.product_tmpl_id.id,so_product.product_tmpl_id.name,default_rate.id,default_rate.name))
-                    if so_product.product_tmpl_id.name == default_rate.name: #we match on names to cover the case of multiproducts with the same name
+                    if so_product.product_tmpl_id.name == default_rate.name or so_product.seniority_level_id.code == '00': #we match on names to cover the case of multiproducts with the same name
                         matched = True 
                         #_logger.info("FOUND Product {} {} | Rate {} {}".format(so_product.product_tmpl_id.id,so_product.product_tmpl_id.name,default_rate.id,default_rate.name))
                         break
@@ -82,6 +82,7 @@ class AccountAnalyticLine(models.Model):
                 # no line found, Find a line on the sale order with the same seniority level
                 for so_line in so_mapped_seniority:
                     line_seniority = so_line.product_id.seniority_level_id
+                    #we add the code 00 condition to cover the uniformized rate usecase (i.e. everyone to code with the same rate)
                     if line_seniority == employee.seniority_level_id:
                         break
                 else:

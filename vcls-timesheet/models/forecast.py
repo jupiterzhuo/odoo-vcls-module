@@ -11,6 +11,8 @@ class Forecast(models.Model):
         store = True
     )
 
+    
+
     @api.depends('employee_id')
     def _compute_product_name(self):
         for record in self:

@@ -39,8 +39,8 @@
                     <!--<field name="core_team_id" />-->
                 </field>
                 <field name="internal_ref" position="after">
-                    <field name="amount_untaxed" />
-                    <field name="forecasted_amount" />
+                    <field name="amount_untaxed" string="Contractual Budget" />
+                    <field name="forecasted_amount"/>
                 </field>
                 <xpath expr="//tree//field[@name='discount']" position="after">
                     <field name="forecasted_amount"/>

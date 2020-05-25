@@ -6,7 +6,13 @@ from odoo.exceptions import UserError, ValidationError
 
 class Contact(models.Model):
     _inherit = 'res.partner'
-    risk_ids = fields.Many2many('risk', string='Risk')
+
+    risk_ids = fields.Many2many(
+        'risk',
+        string='Risk',
+        store=True,
+        compute='_compute_risk_ids'
+        )
 
     communication_rate = fields.Selection([ ('0.0', '0%'), 
                                             ('0.005', '0.5%'), 
@@ -64,3 +70,9 @@ class Contact(models.Model):
             'context': {"default_id": po_ids, 
                 "search_default_id": [po_ids], },
         } 
+    
+    def _compute_risk_ids(self):
+        for partner in self:
+            partner.risk_ids = self.env['risk'].search([
+                ('resource', '=', 'res.partner,{}'.format(partner.id)),
+            ])

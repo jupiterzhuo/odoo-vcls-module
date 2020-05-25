@@ -61,15 +61,40 @@
                                 <t t-esc="sum([project_rate_matrix_data.get((project_id, rate_product_id), 0) for rate_product_id in rate_product_ids])"/>
                             </td>
                         </tr>
+                        <t t-set="prev_ancestor_id" t-value=""/>
                         <t t-foreach="list(tasks_row_data)" t-as="task_id">
-                            <t t-set="time_category_row_data" t-value="tasks_row_data[task_id]"/>
+                            <t t-set="time_category_row_data" t-value="tasks_row_data[task_id][0]"/>
                             <tr>
-                                <td class="pl-3"><t t-esc="task_id.name"/></td>
+                                <t t-set="ancestor_id" t-value=""/>
+                                <t t-set="ancestor_id" t-value="tasks_row_data[task_id][1]"/>
+                                <t t-set="nb_tasks" t-value="tasks_row_data[task_id][2]"/>
+                                <t t-set="merge_subtask" t-value="tasks_row_data[task_id][3]"/>
+
+                                <t t-if="prev_ancestor_id != ancestor_id and nb_tasks > 1 and not merge_subtask">
+                                <tr>
+                                    <td class="pl-3" style="font-weight: bold;"><t t-esc="ancestor_id.name"/></td>
+                                    <td t-foreach="rate_product_ids" t-as="rate_product_id" class="text-right">
+                                        <t t-esc="task_rate_matrix_data.get((project_id, ancestor_id, rate_product_id), ['-', '-'])[1]"/>
+                                    </td>
+                                    <td class="text-right">
+                                        <t t-esc="sum([task_rate_matrix_data.get((project_id, ancestor_id, rate_product_id), [0, 0])[1] for rate_product_id in rate_product_ids])"/>
+                                    </td>
+                                </tr>
+                                    <td class="pl-4"><t t-esc="task_id.name"/></td>
+                                </t>
+                                <t t-elif="prev_ancestor_id == ancestor_id and nb_tasks > 1">
+                                    <td class="pl-4"><t t-esc="task_id.name"/></td>
+                                </t>
+                                <t t-else="" >
+                                    <td class="pl-3" style="font-weight: bold;"><t t-esc="task_id.name"/></td>
+                                </t>
+                                <t t-set="prev_ancestor_id" t-value="ancestor_id"/>
+
                                 <td t-foreach="rate_product_ids" t-as="rate_product_id" class="text-right">
-                                    <t t-esc="task_rate_matrix_data.get((project_id, task_id, rate_product_id), '-')"/>
+                                    <t t-esc="task_rate_matrix_data.get((project_id, task_id, rate_product_id), ['-', '-'])[0]"/>
                                 </td>
                                 <td class="text-right">
-                                    <t t-esc="sum([task_rate_matrix_data.get((project_id, task_id, rate_product_id), 0) for rate_product_id in rate_product_ids])"/>
+                                    <t t-esc="sum([task_rate_matrix_data.get((project_id, task_id, rate_product_id), [0, 0])[0] for rate_product_id in rate_product_ids])"/>
                                 </td>
                             </tr>
                         </t>

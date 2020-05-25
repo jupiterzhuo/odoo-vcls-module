@@ -64,8 +64,16 @@ class Risk(models.Model):
     @api.model
     def _raise_risk(self, risk_type, resource):
         risk = self.create({'risk_type_id': risk_type.id, 'resource': resource})
+        risk._populate_risk_ids()
         risk.send_notification()
         return risk
+    
+    def _populate_risk_ids(self):
+        for risk in self:
+            parts = risk.resource.split(',')
+            target = self.env[parts[0]].browse(int(parts[1]))
+            if target:
+                target._compute_risk_ids()
 
     def send_notification(self):
         risk_type = self.risk_type_id
@@ -108,3 +116,22 @@ class Risk(models.Model):
                 raise ValidationError(_('Resource model is not valid'))
             if not res_id.isdigit() or not self.env[res_model].browse(int(res_id)).exists():
                 raise ValidationError(_('Resource id is not valid'))
+
+    @api.model
+    def create(self, vals):
+        risk = super(Risk, self).create(vals)
+        risk_resource = risk.resource
+        model = risk_resource.split(',')[0]
+        model_id = risk_resource.split(',')[1]
+        obj = self.env[model].browse(int(model_id))
+        obj._compute_risk_ids()
+        return risk
+
+    def write(self, vals):
+        risk = super(Risk, self).write(vals)
+        risk_resource = self.resource
+        model = risk_resource.split(',')[0]
+        model_id = risk_resource.split(',')[1]
+        obj = self.env[model].browse(int(model_id))
+        obj._compute_risk_ids()
+        return risk

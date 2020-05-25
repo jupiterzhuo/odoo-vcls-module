@@ -29,6 +29,7 @@ class Invoice(models.Model):
 
     po_id = fields.Many2one('invoicing.po',
                             #default = _get_default_po_id,
+                            help="This field will appear on the invoice",
                             string ='Client PO ref.')
 
     user_id = fields.Many2one(
@@ -52,9 +53,8 @@ class Invoice(models.Model):
 
 
     period_start = fields.Date()
-    lc_laius = fields.Text()
-    scope_of_work = fields.Text()
-
+    lc_laius = fields.Text(help="If this will appear on the invoice")
+    scope_of_work = fields.Text(help="This field will NOT appear on the invoice. Changing the field here will not change the project Scope of Word")
     vcls_due_date = fields.Date(string='Custom Due Date', compute='_compute_vcls_due_date')
     #origin_sale_orders = fields.Char(compute='compute_origin_sale_orders',string='Origin')
 
@@ -182,7 +182,6 @@ class Invoice(models.Model):
 
         #loop in projects
         for project in self.project_ids:
-
             #get last  as laius if non exists
             if not vals.get('lc_laius',self.lc_laius):
                 if project.summary_ids:
@@ -197,10 +196,9 @@ class Invoice(models.Model):
             # get sow if non exists
             if not vals.get('scope_of_work',self.scope_of_work):
                 if project.scope_of_work:
-                    sow += "{}\n".format(self.html_to_string(project.scope_of_work))
+                    vals['scope_of_work'] = self.html_to_string(project.scope_of_work)
             else:
                 sow = vals.get('scope_of_work', self.scope_of_work)
-
         return vals
 
     @api.multi
@@ -212,41 +210,72 @@ class Invoice(models.Model):
         product_obj = self.env['product.product']
         rate_product_ids = product_obj
         projects_row_data = OrderedDict()
+        list_timesheet_to_compute = {}
+
+        # Creating a dict of the task we want to use, key=parent_task, value=list of task (can include the parent task id if there is time coded on it)
         for timesheet_id in self.timesheet_ids:
-            # check if so line is invoiced
             if not timesheet_id.so_line.qty_invoiced:
                 continue
             project_id = timesheet_id.project_id
 
-            if self.merge_subtask and timesheet_id.task_id.parent_id: #if the task has a parent and we merge
-                parent_task_id = timesheet_id.task_id.parent_id
-            else:
-                parent_task_id = timesheet_id.task_id
+            if timesheet_id.task_id.parent_id:
+                if timesheet_id.task_id.parent_id in list_timesheet_to_compute:
+                    if timesheet_id.task_id[0] not in list_timesheet_to_compute[timesheet_id.task_id.parent_id[0]]:
+                        list_timesheet_to_compute[timesheet_id.task_id.parent_id[0]] += [timesheet_id.task_id[0]]
+                else:
+                    list_timesheet_to_compute[timesheet_id.task_id.parent_id[0]] = [timesheet_id.task_id[0]]
+            else: 
+                if timesheet_id.task_id[0] in list_timesheet_to_compute:
+                    if timesheet_id.task_id[0] not in list_timesheet_to_compute[timesheet_id.task_id[0]]:  # if the task is already in the list but is its own parent, put it a the begining of the list
+                        list_timesheet_to_compute[timesheet_id.task_id[0]] = [timesheet_id.task_id[0]] + list_timesheet_to_compute[timesheet_id.task_id[0]]
+                else:
+                    list_timesheet_to_compute[timesheet_id.task_id[0]] = [timesheet_id.task_id[0]]
 
-            """task_id = timesheet_id.task_id
-            parent_task_id = task_id.parent_id or task_id"""
+        # using the dict of task to create matrix to use in the view
+        for parent_task, list_tasks in list_timesheet_to_compute.items():
+            number_tasks = len(list_tasks)
+            for task_individual in list_tasks:
+                for timesheet_id in task_individual.timesheet_ids.filtered(lambda t: t.timesheet_invoice_id.id == self.id):
+                    if self.merge_subtask and timesheet_id.task_id.parent_id:  # if the task has a parent and we want to merge
+                        current_task_id = timesheet_id.task_id.parent_id
+                    else:
+                        current_task_id = timesheet_id.task_id
 
-            rate_product_id = timesheet_id.so_line.product_id
-            rate_product_ids |= rate_product_id
-            time_category_id = timesheet_id.time_category_id
-            unit_amount = timesheet_id.unit_amount
-            # project matrix data
-            project_rate_matrix_key = (project_id, rate_product_id)
-            project_rate_matrix_data.setdefault(project_rate_matrix_key, 0.)
-            project_rate_matrix_data[project_rate_matrix_key] += unit_amount
-            tasks_row_data = projects_row_data.setdefault(project_id, OrderedDict())
-            # task matrix data
-            task_rate_matrix_key = (project_id, parent_task_id, rate_product_id)
-            task_rate_matrix_data.setdefault(task_rate_matrix_key, 0.)
-            task_rate_matrix_data[task_rate_matrix_key] += unit_amount
-            time_category_row_data = tasks_row_data.setdefault(parent_task_id, OrderedDict())
-            # time category matrix data
-            if detailed:
-                time_category_matrix_key = (project_id, parent_task_id, time_category_id, rate_product_id)
-                time_category_rate_matrix_data.setdefault(time_category_matrix_key, 0.)
-                time_category_rate_matrix_data[time_category_matrix_key] += unit_amount
-                time_category_row_data.setdefault(time_category_id, None)
-        # reorder rate_product_ids according to the richer one
+                    rate_product_id = timesheet_id.so_line.product_id
+                    rate_product_ids |= rate_product_id
+                    time_category_id = timesheet_id.time_category_id
+                    unit_amount = timesheet_id.unit_amount_rounded
+
+                    # project matrix data
+                    project_rate_matrix_key = (project_id, rate_product_id)
+                    project_rate_matrix_data.setdefault(project_rate_matrix_key, 0.)
+                    project_rate_matrix_data[project_rate_matrix_key] += unit_amount
+                    tasks_row_data = projects_row_data.setdefault(project_id, OrderedDict())
+
+                    # task matrix data, the first value is the total of hours per rate per task
+                    task_rate_matrix_key = (project_id, current_task_id, rate_product_id)
+                    task_rate_matrix_data.setdefault(task_rate_matrix_key, [0., 0.])
+                    task_rate_matrix_data[task_rate_matrix_key][0] += unit_amount
+                    task_rate_matrix_data[task_rate_matrix_key][1] += unit_amount
+                    # adding a second value in the list, the total for a parent_task
+                    if timesheet_id.task_id.parent_id or current_task_id == parent_task:
+                        task_to_use = timesheet_id.task_id.parent_id
+                        task_rate_matrix_key = (project_id, task_to_use, rate_product_id)
+                        task_rate_matrix_data.setdefault(task_rate_matrix_key, [0., 0.])
+                        task_rate_matrix_data[task_rate_matrix_key][1] += unit_amount
+
+                    time_category_row_data = tasks_row_data.setdefault(current_task_id, [OrderedDict(), parent_task, number_tasks, self.merge_subtask])
+                    time_category_row_data = time_category_row_data[0]
+
+                    # time category matrix data
+                    if detailed:
+                        time_category_matrix_key = (project_id, current_task_id, time_category_id, rate_product_id)
+                        time_category_rate_matrix_data.setdefault(time_category_matrix_key, 0.)
+                        time_category_rate_matrix_data[time_category_matrix_key] += unit_amount
+                        time_category_row_data.setdefault(time_category_id, None)
+
+        # reorder rate_product_ids columns according to the most expensive one
+        rate_product_ids = rate_product_ids
         rate_product_ids = product_obj.browse(OrderedSet([
             couple[1].id for couple in
             sorted(
@@ -320,6 +349,11 @@ class Invoice(models.Model):
 
             service_sale_line_id = task_id.sale_line_id
             service_section_line_id = service_sale_line_id.section_line_id
+            
+            if rate_sale_line_id.product_uom == self.env.ref('uom.product_uom_day'):
+                unit_of_measure = 'Day(s)'
+            else:
+                unit_of_measure = 'Hour(s)'
             rates_dict = data.setdefault(service_section_line_id, OrderedDict())
             values = rates_dict.setdefault(
                 rate_sale_line_id, {
@@ -327,6 +361,7 @@ class Invoice(models.Model):
                     'price': rate_sale_line_id.price_unit,
                     'currency_id': rate_sale_line_id.currency_id,
                     'uom_id': rate_sale_line_id.product_uom,
+                    'unit_of_measure': unit_of_measure,
                 })
             timesheet_uom_id = timesheet_id.product_uom_id
             qty = timesheet_uom_id._compute_quantity(
@@ -364,6 +399,10 @@ class Invoice(models.Model):
                 task_id = timesheet_id.task_id.parent_id
             else:
                 task_id = timesheet_id.task_id
+            if rate_sale_line_id.product_uom == self.env.ref('uom.product_uom_day'):
+                unit_of_measure = 'Day(s)'
+            else:
+                unit_of_measure = 'Hour(s)'
 
             rates_dict = data.setdefault(task_id, OrderedDict())
             values = rates_dict.setdefault(
@@ -372,6 +411,7 @@ class Invoice(models.Model):
                     'price': rate_sale_line_id.price_unit,
                     'currency_id': rate_sale_line_id.currency_id,
                     'uom_id': rate_sale_line_id.product_uom,
+                    'unit_of_measure': unit_of_measure,
                 })
             timesheet_uom_id = timesheet_id.product_uom_id
             qty = timesheet_uom_id._compute_quantity(
@@ -616,17 +656,33 @@ class Invoice(models.Model):
                                                                                           date_ref=date.today())[0]
                 rec.vcls_due_date = max(line[0] for line in pterm_list)
 
+    """@api.multi
+    @api.returns('self')
+    def refund(self, date_invoice=None, date=None, description=None, journal_id=None):
+        ret = super(Invoice,self).refund(date_invoice,date,description,journal_id)
+        for inv in self:
+            inv.release_timesheets()
+        return ret"""
+
     @api.multi
     def unlink(self):
+        self.release_timesheets()
+        return super(Invoice,self).unlink()
+    
+    @api.multi
+    def release_timesheets(self):
         orders = self.env['sale.order']
         for invoice in self:
             if invoice.timesheet_ids:
-                invoice.timesheet_ids.write({'stage_id':'invoiceable'})
-                orders |= invoice.timesheet_ids.mapped('so_line.order_id')       
-            ret = super(Invoice, invoice).unlink()
-            
-        orders.mapped('order_line')._compute_qty_delivered()
-        return ret
+                _logger.info("{} timesheets released from invoice {}".format(len(invoice.timesheet_ids),invoice.id))
+                invoice.timesheet_ids.write({
+                    'stage_id':'invoiceable',
+                    'timesheet_invoice_id': False,
+                    })
+                orders |= invoice.timesheet_ids.mapped('so_line.order_id')
+        #orders.mapped('order_line')._compute_qty_delivered()
+        orders.mapped('order_line')._get_invoice_qty()
+
 
     @api.multi
     def html_to_string(self, html_format):

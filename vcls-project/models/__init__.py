@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 from . import program
+from . import helpdesk_ticket
 from . import project
 from . import project_task_type
 from . import project_task

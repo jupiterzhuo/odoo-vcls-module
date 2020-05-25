@@ -33,8 +33,23 @@
                     <attribute name="invisible">1</attribute>
                 </xpath>
 
+                <!-- We remove some existing file to re-add them below-->
+                <field name="user_id" position="replace">
+                </field>
+                <field name="company_id" position="replace">
+                </field>
+                <field name="opportunity_id" position="replace">
+                </field>
+
                 <field name="name" position="attributes">
                     <attribute name="readonly">0</attribute>
+                </field>
+
+                <field name="team_id" position="attributes">
+                    <attribute name="options">{'no_open': True,'no_quick_create': True, 'no_create_edit' : True}</attribute>
+                </field>
+                <field name="analytic_account_id" position="attributes">
+                    <attribute name="options">{'no_open': True,'no_quick_create': True, 'no_create_edit' : True}</attribute>
                 </field>
 
                 <xpath expr="//header" position="attributes">    
@@ -53,16 +68,32 @@
                 <xpath expr="//button[@name='create_revision']" position="attributes">    
                     <attribute name="invisible">1</attribute>
                 </xpath>
-                
+
+                <xpath expr="//button[@name='create_revision']" position="before">    
+                    <button string="New Extension"
+                        name="%(vcls-crm.lead_quotation_wizard_form_action)d"
+                        type="action" class="oe_highlight"
+                        attrs="{'invisible': [('parent_id', '!=', False)]}"
+                        context="{'search_default_partner_id': partner_id,
+                                  'default_partner_id': partner_id,
+                                  'default_team_id': team_id,
+                                  'default_existing_quotation_id': id,
+                                  'default_link_rates': True,
+                                  'default_origin': origin,
+                                  'default_quotation_type':'scope_extension',
+                                  }"
+                        groups="vcls_security.vcls_account_manager,sales_team.group_sale_manager"/>
+                </xpath>
+
                 <xpath expr="//group" position="replace">
                     <group>
                         <field name="scope_of_work"/>
                     </group>
                     <group>
                         <group string="Client">
-                            <field name="partner_id" string="Client" widget="res_partner_many2one" domain="[('customer','=',True),('is_company','=',True)]" context="{'search_default_customer':1, 'show_address': 1, 'show_vat': True}" options="{&quot;always_reload&quot;: True}"/>
-                            <field name="partner_invoice_id" domain="['|',('parent_id','=',partner_id),('id','=',partner_id)]" groups="sale.group_delivery_invoice_address" context="{'default_type':'invoice'}" options="{&quot;always_reload&quot;: True}"/>
-                            <field name="partner_shipping_id" string="Deliverable Address" invisible="0" domain="['|',('parent_id','=',partner_id),('id','=',partner_id)]" groups="sale.group_delivery_invoice_address" context="{'default_type':'delivery'}" options="{&quot;always_reload&quot;: True}"/>
+                            <field name="partner_id" string="Client" widget="res_partner_many2one" domain="[('customer','=',True),('is_company','=',True)]" context="{'search_default_customer':1, 'show_address': 1, 'show_vat': True}" options="{'always_reload': True,'no_create':True,'no_create_edit':True}"/>
+                            <field name="partner_invoice_id" domain="['|',('parent_id','=',partner_id),('id','=',partner_id)]" groups="sale.group_delivery_invoice_address" context="{'default_type':'invoice'}" options="{'always_reload': True,'no_create':True,'no_create_edit':True,'no_open':True}"/>
+                            <field name="partner_shipping_id" string="Deliverable Address" invisible="0" domain="['|',('parent_id','=',partner_id),('id','=',partner_id)]" groups="sale.group_delivery_invoice_address" context="{'default_type':'delivery'}" options="{'always_reload': True,'no_create':True,'no_create_edit':True,'no_open':True}"/>
                             <field name="validity_date" attrs="{'invisible': [('state', 'in', ['sale', 'done'])]}" invisible="1"/>
                             <field name="validity_duration" string="Validity duration"/>
                             <field name="confirmation_date" attrs="{'invisible': [('state', 'in', ['draft', 'sent', 'cancel'])]}"/>
@@ -71,13 +102,14 @@
                         </group>
 
                         <group string="Internal">
-                            <field name="user_id" options="{'no_create': True}"/>
-                            <field name="company_id" options="{'no_create': True}" required="True"/>
-                            <field name="pricelist_id" groups="vcls_security.group_finance_invoice_administrator,vcls_security.vcls_account_manager"/>
+                            <field name="user_id" options="{'no_create': True,'no_create_edit':True,'no_open':True}"/>
+                            <field name="company_id" options="{'no_create': True,'no_create_edit':True,'no_open':True}" required="True"/>
+                            <field name="pricelist_id" groups="vcls_security.group_finance_invoice_administrator,vcls_security.vcls_account_manager" options="{'no_create': True,'no_create_edit':True,'no_open':True}"/>
                             <field name="currency_id" invisible="1"/>
                             <field name="parent_id" options="{'no_create': True}" readonly="1"/>
-                            <!--<field name="opportunity_id" options="{'no_create': True}" required="1" attrs="{'readonly': [('id', '&gt;', 0)]}" domain="[('partner_id','=',partner_id)]"/>-->
-                            <field name="opportunity_id" readonly="1"/>
+                            <field name="link_rates" attrs="{'invisible': [('parent_id', '=', False)]}" readonly="1"/>
+                            <field name="opportunity_id" options="{'no_create': True,'no_create_edit': True}" attrs="{'readonly': [('id', '&gt;', 0)]}" domain="[('partner_id','=',partner_id)]"/>
+                            <!--<field name="opportunity_id" readonly="1"/>-->
                             <field name="internal_ref" options="{'no_create': True}" attrs="{'readonly': [('id', '&gt;', 0)]}"/>
                             <field name="parent_sale_order_id" invisible="1"/>
                             <field name="project_id" options="{'no_create': True}" string="Linked Project" invisible="1"/>
@@ -86,15 +118,19 @@
 
                     <group string="Product Catalog (Edit to retrieve products from various catalog)">
                         <group string="Main Filters">
-                            <field name="catalog_mode" invisible="0"/>
-                            <field name="product_category_id" string="1. Select Catalog" attrs="{'required': [('catalog_mode', 'in', ['template','generic']),('state','not in',['sale','done','cancel'])],}"/>
-                            <field name="sale_order_template_id"  domain="[('product_category_id','=',product_category_id)]" string="2. Select Template" attrs="{'required': [('catalog_mode', '=', 'template'),('state','not in',['sale','done','cancel'])],}"/>
-                            <field name="catalog_details" string="Show Detailed Catalog"/>
+                            <field name="catalog_mode" invisible="1"/>
+                            <field name="product_category_id" string="1. Select Catalog" attrs="{'required': [('catalog_mode', 'in', ['template','generic']),('state','not in',['sale','done','cancel'])],}" options="{'no_create': True,'no_create_edit':True,'no_open':True}"/>
+                            <field name="sale_order_template_id"  domain="[('product_category_id','=',product_category_id)]" string="2. Select Template" attrs="{'required': [('catalog_mode', '=', 'template'),('state','not in',['sale','done','cancel'])],}" options="{'no_create': True,'no_create_edit':True,'no_open':True}"/>
+                            <field name="catalog_details" string="Show Detailed Catalog" invisible="1"/>
                         </group>
-                        <group string="Fine Filters (for specific line search)" attrs="{'invisible': [('catalog_details', '=', False)]}">
+                        <group string="Fine Filters (for specific line search)" invisible="1">
+                            <field name="business_mode" widget="radio" string="3. Modify to focus on specific types"/>
+                            <field name="deliverable_id" domain="[('product_category_id','=',product_category_id)]"/>
+                        </group>
+                        <!--<group string="Fine Filters (for specific line search)" attrs="{'invisible': [('catalog_details', '=', False)]}">
                             <field name="business_mode" widget="radio" string="3. Modify to focus on specific types"/>
                             <field name="deliverable_id" domain="[('product_category_id','=',product_category_id)]" attrs="{'required': [('catalog_details', '=', True),('catalog_mode', '=', 'template')]}"/>
-                        </group>
+                        </group>-->
                     </group>
                     <group string="Reporting" invisible="1">
                         <field name="report_details"/>
@@ -104,8 +140,12 @@
                 </xpath>
                 
                 <xpath expr="//field[@name='order_line']//tree/field[@name='product_id']" position="replace">
-                    <field name="product_id" options="{'no_create_edit':True}" attrs="{'readonly': [('product_updatable', '=', False)],'required': [('display_type', '=', False)],}" force_save="1"
+                    <field name="product_id" options="{'no_create':True,'no_create_edit':True}" attrs="{'readonly': [('product_updatable', '=', False)],'required': [('display_type', '=', False)],}" force_save="1"
                     context="{'search_default_group_category':1,'search_default_group_info':1,'tree_view_ref':'vcls-crm.product_tree_view','partner_id': parent.partner_id,'quantity': product_uom_qty,'pricelist': parent.pricelist_id,'uom':product_uom,'company_id': parent.company_id,'default_lst_price': price_unit,'default_description_sale': name,'business_mode':parent.business_mode,'business_line':parent.product_category_id,'deliverable_id':parent.deliverable_id }"/>
+                </xpath>
+
+                <xpath expr="//tree//field[@name='price_unit']" position="attributes">
+                    <attribute name="attrs">{}</attribute>
                 </xpath>
 
                 <xpath expr="//page/field[@name='sale_order_option_ids']/.." position="attributes">
@@ -121,8 +161,8 @@
                             <group name="inv_left">
                                 <field string="Please edit the parent quotation:" readonly="1" name="parent_id" attrs="{'invisible': [('parent_id', '=', False)]}"/>
                                 <field name="invoicing_mode" widget="radio"/>
-                                <field name="fiscal_position_id" options="{'no_create': True}" domain="[('company_id','=',company_id)]"/>
-                                <field name="payment_term_id" options="{'no_create': True}"/>
+                                <field name="fiscal_position_id" options="{'no_create': True,'no_open':True}" domain="[('company_id','=',company_id)]"/>
+                                <field name="payment_term_id" options="{'no_create': True,'no_open':True}"/>
                                 <field name="ts_invoicing_mode" invisible="1"/>
                             </group>
                             <group name="inv_right">

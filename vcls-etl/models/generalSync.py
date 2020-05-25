@@ -57,8 +57,8 @@ class ETLMap(models.Model):
         _logger.info("ETL | UPDATE KEYS {}".format(params))
         rec_ext = params['sfInstance'].getConnection().query_all(params['sql'])['records']
         keys_exist = self.search([('externalObjName','=',params['externalObjName']),('odooModelName','=',params['odooModelName'])])
-        #we default the state of all keys
-        keys_exist.write({'state':'upToDate','priority':0})
+        #we default the state of all keys not already to be updated
+        keys_exist.filtered(lambda k: k.state != 'needUpdateOdoo').write({'state':'upToDate','priority':0})
         keys_exist_sfid = keys_exist.mapped('externalId')
         keys_create = keys_exist.filtered(lambda k: k.externalId and not k.odooId)
 

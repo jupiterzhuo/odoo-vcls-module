@@ -34,6 +34,33 @@ class ProjectForecast(models.Model):
 
     comment = fields.Html()
 
+    rate_id = fields.Many2one(
+        comodel_name='product.template',
+        default = False,
+        readonly = True,
+    )
+
+    @api.multi
+    def get_rate(self,project,employee):
+        self.ensure_one()
+        map_line = project.sale_line_employee_ids.filtered(lambda l: l.employee_id == employee)
+        if map_line:
+            return map_line[0].sale_line_id.product_id.product_tmpl_id
+        else:
+            return False
+
+    @api.onchange('employee_id')
+    def _onchange_employee_id(self):
+        self.ensure_one()
+        self.rate_id = self.get_rate(self.project_id,self.employee_id)
+    
+    @api.model
+    def update_rate_id(self):
+        to_update = self.search([('rate_id','=',False)])
+        for forecast in to_update:
+            forecast._onchange_employee_id()
+            _logger.info("Forecast update Rate_id {} for employee {}".format(forecast.rate_id.name,forecast.employee_id.name))
+
     @api.depends('task_id.date_start', 'task_id.date_end')
     def _get_start_end_date(self):
         for forecast in self:
@@ -77,13 +104,24 @@ class ProjectForecast(models.Model):
         return result
 
     @api.model
-    def create(self, values):
-        #employee_id = values.get('employee_id')
-        #project_id = values.get('project_id')
-        #h_r = self._get_hourly_rate(employee_id, project_id)
-        #if h_r:
-            #values['hourly_rate'] = h_r
-        forecast = super(ProjectForecast, self).create(values)
+    def create(self, vals):
+        
+        if vals.get('project_id',False) and vals.get('employee_id',False):
+            """#if we create a forecast, we update the project mapping accordingly
+            self.env['account.analytic.line']._update_project_soline_mapping({
+                        'employee_id':vals['employee_id'],
+                        'project_id':vals['project_id'],
+                    })"""
+            
+            if not vals.get('rate_id',False):
+                #if the rate_id is not provided we look for the related employee in the mapping table
+                project = self.env['project.project'].browse(vals['project_id'])
+                employee = self.env['rh.employee'].browse(vals['employee_id'])
+                rate = self.get_rate(project,employee)
+                if rate:
+                    vals['rate_id']=rate.id
+               
+        forecast = super(ProjectForecast, self).create(vals)
         
         forecast.sudo()._force_forecast_hours()
         forecast.sudo()._project_forecasted_amount()
@@ -110,7 +148,10 @@ class ProjectForecast(models.Model):
                 limit=1
             )
             if rate_map:
-                return rate_map.price_unit
+                if rate_map.sale_line_id.product_uom == self.env.ref('uom.product_uom_day'): #if we are in daily
+                    return round(rate_map.price_unit/8,2)
+                else:
+                    return rate_map.price_unit
         return 0.0
 
     # Tis server action is meant to return a window action with proper model and active id

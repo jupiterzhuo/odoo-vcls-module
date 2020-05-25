@@ -56,15 +56,36 @@
                             
                             
                         </group>
-                        <field name="description" class="field_description" attrs="{'invisible': [('dynamic_description', '!=', '&lt;p&gt;&lt;br&gt;&lt;/p&gt;')]}" placeholder="Description of the ticket..."/>
+                        <!--<field name="description" class="field_description" attrs="{'invisible': [('dynamic_description', '!=', '&lt;p&gt;&lt;br&gt;&lt;/p&gt;')]}" placeholder="Description of the ticket..."/>-->
                         <field name="dynamic_description" attrs="{'invisible': [('dynamic_description', '==', '&lt;p&gt;&lt;br&gt;&lt;/p&gt;')]}"/>
-                        <group string='Documented by support'>
-                                <field name="ticket_type_id" attrs="{'readonly': [('access_level', 'not in', ['support'])]}"/>
-                                <field name="user_id" class="field_user_id" attrs="{'invisible': [('access_level', 'not in', ['support'])]}"/>
-                                <field name="behalf"/>
-                                <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" attrs="{'readonly': [('access_level', 'not in', ['support'])]}"/>
-                                <field name="resolution" attrs="{'invisible': [('access_level', 'not in', ['support'])]}"/>
-                        </group>
+                        <notebook colspan="4" groups="helpdesk.group_helpdesk_user">
+                            <page string='Documented by support' name='support_info'>
+                                <group>
+                                    <field name="ticket_type_id" attrs="{'readonly': [('access_level', 'not in', ['support'])]}"/>
+                                    <field name="user_id" class="field_user_id" attrs="{'invisible': [('access_level', 'not in', ['support'])]}"/>
+                                    <field name="behalf"/>
+                                    <field name="tag_ids" widget="many2many_tags" options="{'color_field': 'color'}" attrs="{'readonly': [('access_level', 'not in', ['support'])]}"/>
+                                    <field name="resolution" attrs="{'invisible': [('access_level', 'not in', ['support'])]}"/>
+                                </group>
+                            </page>
+                            <page string='Change Qualification' name='change_info' attrs="{'invisible':[('ticket_type_id','!=',10)]}">
+                                <group>
+                                    <group>
+                                        <field name="description" string="Change Name"/>
+                                        <field name="business_value"/>
+                                        <field name="business_value_description"/>
+                                        <field name="related_effort"/>
+                                        <field name="related_effort_description"/>
+                                        <field name="related_risk"/>
+                                        <field name="related_risk_description"/>
+                                    </group>
+                                    <group>
+                                        <field name="change_score"/>
+                                        <field name="approval_type"/>
+                                    </group>
+                                </group>
+                            </page>
+                        </notebook>
                     </sheet>
                     <group>
                         <div class="oe_chatter">
