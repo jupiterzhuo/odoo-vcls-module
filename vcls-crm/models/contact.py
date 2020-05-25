@@ -44,7 +44,7 @@ class ContactExt(models.Model):
         default = 0,
         )
 
-    contact_us_message = fields.Html(
+    contact_us_message = fields.Char(
         readonly = True,
     )
 
