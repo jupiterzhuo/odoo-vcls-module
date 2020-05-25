@@ -44,20 +44,6 @@ class Invoice(models.Model):
         compute='compute_temp_name',
     )
 
-    program_id = fields.Many2one(
-        comodel_name='project.program',
-    )
-
-    program_name = fields.Char(
-        related='program_id.name',
-    )
-    program_description = fields.Char(
-        related='program_id.product_description',
-    )
-    
-    invoice_is_program = fields.Boolean()
-
-
     period_start = fields.Date()
     lc_laius = fields.Text(help="If this will appear on the invoice")
     scope_of_work = fields.Text(help="This field will NOT appear on the invoice. Changing the field here will not change the project Scope of Word")

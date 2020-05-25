@@ -15,3 +15,16 @@ class AccountInvoice(models.Model):
         column2="project_id",
         copy=False, readonly=True
     )
+
+    program_id = fields.Many2one(
+        comodel_name='project.program',
+    )
+
+    program_name = fields.Char(
+        related='program_id.name',
+    )
+    program_description = fields.Char(
+        related='program_id.product_description',
+    )
+    
+    invoice_is_program = fields.Boolean()
