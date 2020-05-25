@@ -6,6 +6,7 @@ class TimesheetForecastReport(models.Model):
 
     _name = "timesheet.report"
     _description = "Timesheet Reports"
+    _order = 'department_id,employee_id'
     _auto=False
 
     # NEEDED FIELDS
@@ -46,7 +47,6 @@ class TimesheetForecastReport(models.Model):
                         E.department_id AS department_id
                     FROM account_analytic_line A
                         LEFT JOIN hr_employee E ON A.employee_id = E.id
-                        WHERE A.is_timesheet=True
                 )
             )
         """ % (self._table,))
