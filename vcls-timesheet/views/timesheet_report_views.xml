@@ -7,15 +7,17 @@
             <field name="arch" type="xml">
                 <search string="Timesheet Report">
                     <field name="employee_id"/>
+                    <field name="department_id"/>
                     <field name="billability" string="Billability Status"/>
                     <field name="project_id"/>
                     <field name="task_id"/>
                     <field name="date"/>
-                    <filter name="mine" string="My Timesheets" domain="[('user_id', '=', uid)]"/>
+                    <!--<filter name="mine" string="My Timesheets" domain="[('user_id', '=', uid)]"/>-->
                     <separator/>
                     <filter name="month" string="Date" date="date"/>
                     <group expand="0" string="Group By">
                         <filter string="Employee" name="groupby_employee" domain="[]" context="{'group_by':'employee_id'}"/>
+                        <filter string="Department" name="groupby_department" domain="[]" context="{'group_by':'department_id'}"/>
                         <filter string="Billability Status" name="groupby_billability" domain="[]" context="{'group_by':'billability'}"/>
                         <filter string="Project" name="groupby_project" domain="[]" context="{'group_by':'project_id'}"/>
                         <filter string="Task" name="groupby_task" domain="[]" context="{'group_by':'task_id'}"/>
@@ -53,11 +55,12 @@
             <field name="name">timesheet.lm.report.pivot</field>
             <field name="model">timesheet.report</field>
             <field name="arch" type="xml">
-                <pivot string="PC Timesheet Report">
+                <pivot string="Timesheet Analysis">
                     <field name="employee_email" type="row"/>
+                    <field name="employee" type="row"/>
+                    <field name="department_id" type="row"/>
                     <field name="billability" type="row"/>
-                    <field name = "project_id" type="row" />
-                    <!--<field name = "deliverable_id" type="row" />-->
+                    <field name="project_id" type="row" />
                     <field name = "task_id" type="row" />
                     <field name = "date" type = "col" interval="week" />
                     <field name="unit_amount" type="measure"/>
@@ -72,9 +75,10 @@
             <field name='view_id' ref='timesheet_pc_report_pivot'/>
             <field name = 'domain'>[('date','&gt;=',(context_today()-relativedelta(days=context_today().weekday(),weeks=4)).strftime('%Y-%m-%d'))]</field>
             <field name = "context">{
-                "search_default_groupby_employee":1,
-                "search_default_groupby_billability":1,
-                "search_default_groupby_project":1,
+                "search_default_groupby_department":1,
+                "search_default_groupby_employee":0,
+                "search_default_groupby_billability":0,
+                "search_default_groupby_project":0,
                 }</field>
         </record>
 

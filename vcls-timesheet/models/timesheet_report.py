@@ -22,6 +22,7 @@ class TimesheetForecastReport(models.Model):
         ('non_billable', 'NON BILLABLE'),],
         )
     employee_email = fields.Char(string="Email",store=True)
+    department_id = fields.Many2one('hr.department', readonly = True)
 
     # END OF NEEDED FIELDS
 
@@ -41,7 +42,8 @@ class TimesheetForecastReport(models.Model):
                         A.employee_id AS employee_id,
                         A.id AS id,
                         A.billability AS billability,
-                        E.work_email AS employee_email
+                        E.work_email AS employee_email,
+                        E.department_id AS department_id,
                     FROM account_analytic_line A
                         LEFT JOIN hr_employee E ON A.employee_id = E.id
                 )
