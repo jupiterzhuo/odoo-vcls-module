@@ -179,13 +179,14 @@ class ExpenseSheet(models.Model):
     """ We override this to ensure a default journal to be properly updated """
     @api.onchange('employee_id')
     def _onchange_employee_id(self):
+        #self.write(self._get_info_from_employee(self.employee_id))
         if self.employee_id:
             new_vals = self._get_info_from_employee(self.employee_id)
             self.address_id = new_vals['address_id']
             self.department_id = new_vals['department_id']
             self.journal_id = new_vals['journal_id']
             self.bank_journal_id = new_vals['bank_journal_id']
-    
+
     def _get_info_from_employee(self,employee_id,vals={}):
         ''' this function is separated from _onchange_employee so it can be called before you create a sheet to avoid conflicts '''
         new_vals = {
