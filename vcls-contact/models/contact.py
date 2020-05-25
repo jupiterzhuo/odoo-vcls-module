@@ -361,7 +361,7 @@ class ResPartner(models.Model):
     def _set_stage_archived(self):
         context = self.env.context
         contact_ids = context.get('active_ids',[])
-        self.env['res.partner'].browse(contact_ids).write({'stage': 5,'active':False})  
+        self.env['res.partner'].browse(contact_ids).write({'stage': 5,'active':False})
     
     @api.onchange('category_id', 'company_type')
     def update_individual_tags(self):
