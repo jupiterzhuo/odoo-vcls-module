@@ -57,7 +57,7 @@
             <field name="arch" type="xml">
                 <pivot string="Timesheet Analysis">
                     <field name="employee_email" type="row"/>
-                    <field name="employee" type="row"/>
+                    <field name="employee_id" type="row"/>
                     <field name="department_id" type="row"/>
                     <field name="billability" type="row"/>
                     <field name="project_id" type="row" />
