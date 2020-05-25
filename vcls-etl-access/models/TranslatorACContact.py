@@ -16,6 +16,7 @@ class TranslatorACContact(TranslatorACGeneral.TranslatorACGeneral):
         result['is_company'] = False
         result['company_type'] = 'person'
         result['type'] = 'contact'
+        result['category_id'] = [(6, 0, [odoo.env.ref('vcls-contact.category_account').id])]
 
         ### IDENTIFICATION
         ### Individual
@@ -36,7 +37,8 @@ class TranslatorACContact(TranslatorACGeneral.TranslatorACGeneral):
         #Inactive
         #CustomerCopy
         #OtherProjectRatesID 
-
+        if AC_Contact[22] :
+            result['active'] = False
         _logger.info(result)
 
         if result['name']:

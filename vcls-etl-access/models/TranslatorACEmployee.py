@@ -21,9 +21,6 @@ class TranslatorACEmployee(TranslatorACGeneral.TranslatorACGeneral):
         #result['contract_id'] = 
         result['employee_type'] = "internal"
 
-        
-
-
         result['name'] = ""
         if AC_Employee[1]:
             result['first_name'] = AC_Employee[1] #FName
@@ -55,6 +52,14 @@ class TranslatorACEmployee(TranslatorACGeneral.TranslatorACGeneral):
         #result['middle_name'] = AC_Employee["PMRate"] #PMRate
         #result['middle_name'] = AC_Employee["CLRate"] #CLRate
         #result['middle_name'] = AC_Employee["InRate"] #InRate
+
+        """ if AC_Employee[15]: #PMRate
+            result['seniority_level_id'] = odoo.env.ref('vcls-etl-access.project_manager_level').id
+        elif AC_Employee[20]: #InRate
+            result['seniority_level_id'] = odoo.env.ref('vcls-etl-access.regulatory_associate_level').id
+        elif AC_Employee[16]: #CLRate
+            result['seniority_level_id'] = odoo.env.ref('vcls-etl-access.clerical_level').id
+ """
         _logger.info(result)
 
         if result['name']:

@@ -11,3 +11,9 @@ from . import TranslatorACContact
 from . import ACContactSync
 from . import TranslatorACEmployee
 from . import ACEmployeeSync
+from . import TranslatorACProject
+from . import ACProjectSync
+from . import TranslatorACTimesheet
+from . import ACTimesheetSync
+from . import TranslatorACExpenses
+from . import ACExpensesSync

@@ -12,9 +12,12 @@
             <field name="state">code</field>
             <field name="code">full_update = True
 obj_dict = {
-    'do_client':True,
-    'do_contact':True,
-    'do_employee':True,
+    'do_client':False,
+    'do_contact':False,
+    'do_employee':False,
+    'do_project':True,
+    'do_timesheet':False,
+    'do_expenses':False,
     }
 model.access_update_keys(obj_dict,full_update)
             </field>

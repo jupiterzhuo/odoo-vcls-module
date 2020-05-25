@@ -14,6 +14,8 @@ class TranslatorACClient(TranslatorACGeneral.TranslatorACGeneral):
         ### DEFAULT VALUES
         result['company_type'] = 'company'
         result['is_company'] = 'True'
+        result['category_id'] = [(6, 0, [odoo.env.ref('vcls-contact.category_account').id])]
+        result['property_product_pricelist'] = odoo.env.ref('vcls-crm.pricelist_std_USD').id
 
         ### IDENTIFICATION
         result['name'] = AC_Client[1] #ClientName
@@ -35,11 +37,23 @@ class TranslatorACClient(TranslatorACGeneral.TranslatorACGeneral):
             if country:
                 result['country_id'] = mapOdoo.convertRef(country,odoo,'res.country',False)
 
+        ccinfo = TranslatorACClient.getCCInfo(AC_Client[0], access)
+        if ccinfo:
+            description = ''
+            result["email"] = False
+            for cc in ccinfo:
+                if cc[0]:
+                    if '@' in cc[0] and not result["email"]:
+                        result["email"] = str(cc[0])
+                    else:
+                        description += str(cc[0]) +'\n'
+            result['description'] = description
+        if AC_Client[22] :
+            result['active'] = False
         _logger.info(result)
         if result['name']:
-            return result
-        else:
-            return False
+            return result 
+        return False
     @staticmethod
     def translateToAccess(Odoo_Account):
         pass
@@ -58,6 +72,15 @@ class TranslatorACClient(TranslatorACGeneral.TranslatorACGeneral):
     @staticmethod
     def translatranslateToAccess(Odoo_Contact, odoo):
         pass
+
+    @staticmethod
+    def getCCInfo(clientID, access):
+        sql = "SELECT CCName FROM tblCC WHERE ClientID = " + str(clientID)
+        row = access.execute(sql).fetchall()
+        if row:
+            return row
+        return False
+        
     
     
     

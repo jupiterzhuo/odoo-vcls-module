@@ -22,5 +22,26 @@
                 FROM tblEmployee
             </field>
         </record>
+        <record id="etl_access_project_query" model="ir.config_parameter">
+            <field name="key">etl_access_project_query</field>
+            <field name="value">
+                SELECT *
+                FROM tblProject
+            </field>
+        </record>
+        <record id="etl_access_timesheet_query" model="ir.config_parameter">
+            <field name="key">etl_access_timesheet_query</field>
+            <field name="value">
+                SELECT *
+                FROM tblClient
+            </field>
+        </record>
+        <record id="etl_access_expenses_query" model="ir.config_parameter">
+            <field name="key">etl_access_expenses_query</field>
+            <field name="value">
+                SELECT *
+                FROM tblAdditionalExpenses
+            </field>
+        </record>
     </data>
 </odoo>

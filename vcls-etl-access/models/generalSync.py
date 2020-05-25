@@ -161,6 +161,48 @@ class ETLMap(models.Model):
                 'is_full_update':True,
             }
             self.update_keys(params)
+            
+        if obj_dict.get('do_project',False):
+            sql = """
+                SELECT ProjID FROM tblProject
+                """
+            params = {
+                'accessInstance':accessInstance,
+                'priority':30,
+                'externalObjName':'project',
+                'sql': sql,
+                'odooModelName':'sale.order',
+                'is_full_update':True,
+            }
+            self.update_keys(params)
+
+        if obj_dict.get('do_timesheet',False):
+            sql = """
+                SELECT ClientID FROM tblClient
+                """
+            params = {
+                'accessInstance':accessInstance,
+                'priority':20,
+                'externalObjName':'timesheet',
+                'sql': sql,
+                'odooModelName':'account.analytic.line',
+                'is_full_update':True,
+            }
+            self.update_keys(params)
+
+        if obj_dict.get('do_expenses',False):
+            sql = """
+                SELECT AddExpID FROM tblAdditionalExpenses
+                """
+            params = {
+                'accessInstance':accessInstance,
+                'priority':10,
+                'externalObjName':'expenses',
+                'sql': sql,
+                'odooModelName':'hr.expense',
+                'is_full_update':True,
+            }
+            self.update_keys(params)
 
         ###CLOSING
         #we trigger the processing job

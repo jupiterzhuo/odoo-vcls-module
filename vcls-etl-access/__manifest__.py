@@ -27,6 +27,7 @@
 
     # always loaded
     'data': [
+        'data/product.category.csv',
         'security/ir.model.access.csv',
         'views/etl_views.xml',
         'views/etl_menu.xml',

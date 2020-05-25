@@ -31,3 +31,21 @@ class TranslatorACGeneral(ITranslator.ITranslator):
         if row:
             return row[0][0]
         return False
+
+    @staticmethod
+    def getEmployeeID(EmployeeID, access, odoo):
+        sql = "SELECT LName,FName FROM tblEmployee WHERE EmployeeID = " + str(EmployeeID)
+        row = access.execute(sql).fetchall()
+        if row:
+            LName = row[0][0]
+            FName = row[0][1]
+            employee_id = odoo.env['hr.employee'].search([('first_name','=',FName),('family_name','=',LName)],limit=1)
+            if employee_id:
+                return employee_id
+            employee_id = odoo.env['hr.employee'].search([('first_name','=',FName)],limit=1)
+            if employee_id:
+                return employee_id
+            employee_id = odoo.env['hr.employee'].search([('family_name','=',LName)],limit=1)
+            if employee_id:
+                return employee_id
+        return False

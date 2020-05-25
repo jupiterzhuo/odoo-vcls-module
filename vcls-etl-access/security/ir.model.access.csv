@@ -4,3 +4,6 @@ access_etl_sync_access_admin,access_etl_sync_access_admin,vcls-etl-access.model_
 access_etl_access_client_admin,access_etl_access_client_admin,vcls-etl-access.model_etl_access_client,vcls-etl.vcls_migrators,1,1,1,1
 access_etl_access_contact_admin,access_etl_access_contact_admin,vcls-etl-access.model_etl_access_contact,vcls-etl.vcls_migrators,1,1,1,1
 access_etl_access_employee_admin,access_etl_access_employee_admin,vcls-etl-access.model_etl_access_employee,vcls-etl.vcls_migrators,1,1,1,1
+access_etl_access_project_admin,access_etl_access_project_admin,vcls-etl-access.model_etl_access_project,vcls-etl.vcls_migrators,1,1,1,1
+access_etl_access_timesheet_admin,access_etl_access_timesheet_admin,vcls-etl-access.model_etl_access_timesheet,vcls-etl.vcls_migrators,1,1,1,1
+access_etl_access_expenses_admin,access_etl_access_expenses_admin,vcls-etl-access.model_etl_access_expenses,vcls-etl.vcls_migrators,1,1,1,1
