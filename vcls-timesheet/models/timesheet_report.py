@@ -44,8 +44,9 @@ class TimesheetForecastReport(models.Model):
                         A.billability AS billability,
                         E.work_email AS employee_email,
                         E.department_id AS department_id
-                    FROM account_analytic_line A WHERE A.is_timesheet=True
+                    FROM account_analytic_line A
                         LEFT JOIN hr_employee E ON A.employee_id = E.id
+                        WHERE A.is_timesheet=True
                 )
             )
         """ % (self._table,))
