@@ -222,6 +222,13 @@ class ResPartner(models.Model):
     ###################
     # COMPUTE METHODS #
     ###################
+
+    @api.onchange('stage')
+    def _update_stage(self):
+        for rec in self:
+            rec.active = False if rec.stage == 5 else True
+
+
     @api.multi
     @api.depends('legacy_account','customer','supplier','employee')
     def _compute_external_account(self):
@@ -336,19 +343,19 @@ class ResPartner(models.Model):
     def _set_stage_new(self):
         context = self.env.context
         contact_ids = context.get('active_ids',[])
-        self.env['res.partner'].browse(contact_ids).write({'stage': 2})
+        self.env['res.partner'].browse(contact_ids).write({'stage': 2,'active':True})
     
     @api.multi
     def _set_stage_verified(self):
         context = self.env.context
         contact_ids = context.get('active_ids',[])
-        self.env['res.partner'].browse(contact_ids).write({'stage': 3})
+        self.env['res.partner'].browse(contact_ids).write({'stage': 3,'active':True})
     
     @api.multi
     def _set_stage_outdated(self):
         context = self.env.context
         contact_ids = context.get('active_ids',[])
-        self.env['res.partner'].browse(contact_ids).write({'stage': 4})
+        self.env['res.partner'].browse(contact_ids).write({'stage': 4,'active':True})
     
     @api.multi
     def _set_stage_archived(self):

@@ -467,7 +467,7 @@
         <!-- used to visualize all externals -->
         <record model="ir.actions.act_window" id="action_contact_all_externals">
             <field name="name">All External Contacts</field>
-            <field name="domain" eval="[('is_internal','=',False),('stage','in',[2,3,4])]"/>
+            <field name="domain" eval="[('is_internal','=',False),('stage','in',[2,3,4,5])]"/>
             <field name="res_model">res.partner</field>
             <field name="view_mode">kanban,tree,form,activity</field>
         </record>

@@ -5,4 +5,10 @@
             <link rel="stylesheet" type="text/scss" href="/vcls-theme/static/src/scss/vcls-variables.scss"/>
         </xpath>
     </template>
+
+    <template id="_assets_backend_helpers" inherit_id="web._assets_backend_helpers">
+        <xpath expr="link[1]" position="after">
+            <link rel="stylesheet" type="text/scss" href="/vcls-theme/static/src/scss/bootstrap_overridden.scss"/>
+        </xpath>
+    </template>
 </odoo>

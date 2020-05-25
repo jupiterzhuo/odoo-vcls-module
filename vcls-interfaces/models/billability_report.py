@@ -20,6 +20,7 @@ class BillabilityReport(models.Model):
     employee_end_date = fields.Date(related='employee_id.employee_end_date', string="Employee End Date", readonly=True)
     line_manager = fields.Many2one(related='employee_id.parent_id', string="Line Manager", readonly=True)
     line_manager_id = fields.Char(related='employee_id.parent_id.employee_external_id', string="Line Manager ID", readonly=True)
+    consultancy_percentage = fields.Integer(related='employee_id.consultancy_percentage', string="Consult %", readonly=True)
 
     # contract related fields
     contract_name = fields.Char(string="Contract Name", readonly=True)
@@ -69,17 +70,17 @@ class BillabilityReport(models.Model):
         with the current week included
         :return:
         """
-        time_start_recalc = datetime.datetime.now() - datetime.timedelta(weeks=last_weeks_count)
-        self.search([('start_date', '>', time_start_recalc)]).unlink()
-
+        
         assert last_weeks_count > 0
         billability = self.env['export.billability']
         time_sheet = self.env['account.analytic.line']
         today = fields.Date.today()
         last_monday = today - datetime.timedelta(days=today.weekday())
+        time_start_recalc = last_monday - datetime.timedelta(weeks=last_weeks_count)
+        self.search([('start_date', '>=', time_start_recalc)]).unlink()
         monday_dates = [last_monday]
         data = []
-        for x in range(last_weeks_count-1):
+        for x in range(last_weeks_count):
             last_monday = last_monday + datetime.timedelta(weeks=-1)
             monday_dates += [last_monday]
         for monday_date in monday_dates:
@@ -104,20 +105,23 @@ class BillabilityReport(models.Model):
                 week_data_line['valued_non_billable_hours'] = sum(time_sheet.search([('employee_id', '=', emp_id),('date', '>=', monday_date), ('date', '<=', sunday_date), ('billability', '=', 'non_billable')]).mapped('unit_amount_rounded'))
                 week_data_line['valued_billable_hours'] = sum(time_sheet.search([('employee_id', '=', emp_id),('date', '>=', monday_date), ('date', '<=', sunday_date), ('billability', '=', 'billable')]).mapped('unit_amount_rounded'))
                 week_data_line['total_time_coded'] = week_data_line['billable_hours'] + week_data_line['non_billable_hours']
+                consult_decimal = self.env['hr.employee'].search([('id','=', emp_id)],limit=1).consultancy_percentage / 100
+                week_data_line['Bank Holiday [d]'] *= 8
+                week_data_line['Leaves [d]'] *= 8
                 #to avoid division by 0 if there is no capacity
                 if week_data_line['Effective Capacity [h]'] == 0:
                     week_data_line['billability_percent'] = None
                     week_data_line['non_billability_percent'] = None
                     week_data_line['total_time_coded_percent'] = None
                     continue
-                #calculate percentages from data
-                week_data_line['billability_percent'] = week_data_line['valued_billable_hours'] / week_data_line['Effective Capacity [h]'] * 100
                 week_data_line['non_billability_percent'] = week_data_line['valued_non_billable_hours'] / week_data_line['Effective Capacity [h]'] * 100
                 week_data_line['total_time_coded_percent'] = week_data_line['total_time_coded'] / week_data_line['Effective Capacity [h]'] * 100
+                if consult_decimal == 0:
+                    week_data_line['billability_percent'] = None
+                    continue
+                #calculate percentages from data
+                week_data_line['billability_percent'] = (week_data_line['valued_billable_hours'] / (week_data_line['Effective Capacity [h]'] * consult_decimal)) * 100
 
-                #convert Days to Hours
-                week_data_line['Bank Holiday [d]'] *= 8
-                week_data_line['Leaves [d]'] *= 8
 
             data += week_data
         field_mapping = self._get_field_mapping()
@@ -125,6 +129,8 @@ class BillabilityReport(models.Model):
         for data_line in data:
             values = dict([(field_name, data_line[data_key]) for field_name, data_key in field_mapping.items()])
             self.create(values)
+
+
 
     @api.model
     def _get_field_mapping(self):
