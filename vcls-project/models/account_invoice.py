@@ -23,7 +23,7 @@ class AccountInvoice(models.Model):
     program_name = fields.Char(
         related='program_id.name',
     )
-    program_description = fields.Char(
+    program_description = fields.Text(
         related='program_id.product_description',
     )
     
