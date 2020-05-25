@@ -43,12 +43,18 @@ class Invoice(models.Model):
     temp_name = fields.Char(
         compute='compute_temp_name',
     )
+
+    program_id = fields.Many2one(
+        comodel_name='project.program',
+    )
+
     program_name = fields.Char(
-        compute='compute_program_name',
+        related='program_id.name',
     )
     program_description = fields.Char(
-        compute='compute_program_description',
+        related='program_id.product_description',
     )
+    
     invoice_is_program = fields.Boolean()
 
 
@@ -138,7 +144,7 @@ class Invoice(models.Model):
                     project_string += project.sale_order_id.internal_ref + ' | ' 
             invoice.temp_name = "{} from {} to {}".format(project_string,invoice.period_start,invoice.timesheet_limit_date)
 
-    @api.multi
+    """@api.multi
     def compute_program_name(self):
         if self.origin:
             list_projects = self.origin.split(', ')
@@ -156,7 +162,7 @@ class Invoice(models.Model):
             program_description = ""
             for project in invoice.project_ids:
                 if project.program_id.product_description:
-                    invoice.program_description = project.program_id.product_description
+                    invoice.program_description = project.program_id.product_description"""
 
     @api.multi
     def _compute_attachment_count(self):

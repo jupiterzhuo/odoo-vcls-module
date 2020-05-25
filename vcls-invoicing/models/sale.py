@@ -190,6 +190,9 @@ class SaleOrder(models.Model):
         We Extend the dictionnary for the invoice creation with VCLS customs.
         """
         invoice_vals = super(SaleOrder, self)._prepare_invoice()
+        group_invoice_method = self._context.get('group_invoice_method','')
+        if group_invoice_method == 'program':
+            invoice_vals['invoice_is_program'] = True
         #project_info
 
         for vcls_type in self.mapped('order_line.product_id.vcls_type'):
@@ -209,6 +212,8 @@ class SaleOrder(models.Model):
             pass
 
         #related models
+        if self.program_id:
+            invoice_vals['program_id'] = self.program_id.id
         if self.po_id:
             invoice_vals['po_id'] = self.po_id.id
         if self.invoice_template:
