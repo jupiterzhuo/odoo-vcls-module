@@ -2,7 +2,8 @@
 
 <odoo>
     <template id="template_external_layout_vcls_modifications" inherit_id="web.external_layout_standard">
-            <xpath expr="//ul[@class='list-inline mb4']" position="replace">
+            <!--<xpath expr="//ul[@class='list-inline mb4']" position="replace">-->
+            <xpath expr="//div[hasclass('footer o_standard_footer')]/div[1]/ul[1]" position="replace">
 
                 <t t-set="o" t-value="res_company.with_context(lang=lang)"/>
                 <t t-set="data" t-value="o._get_vcls_template_report_data()"/>
