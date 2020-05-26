@@ -24,11 +24,7 @@ ACTIVITYREPORT = '_ActivityReport'
 class Invoice(models.Model):
     _inherit = 'account.invoice'
 
-    #def _get_default_po_id(self):
-        #return self.env['sale.order'].search([('invoice_ids', 'in', [self.id])], limit=1).po_id
-
     po_id = fields.Many2one('invoicing.po',
-                            #default = _get_default_po_id,
                             help="This field will appear on the invoice",
                             string ='Client PO ref.')
 
@@ -48,7 +44,6 @@ class Invoice(models.Model):
     lc_laius = fields.Text(help="If this will appear on the invoice")
     scope_of_work = fields.Text(help="This field will NOT appear on the invoice. Changing the field here will not change the project Scope of Word")
     vcls_due_date = fields.Date(string='Custom Due Date', compute='_compute_vcls_due_date')
-    #origin_sale_orders = fields.Char(compute='compute_origin_sale_orders',string='Origin')
 
     ready_for_approval = fields.Boolean(default=False)
 
@@ -130,25 +125,6 @@ class Invoice(models.Model):
                     project_string += project.sale_order_id.internal_ref + ' | ' 
             invoice.temp_name = "{} from {} to {}".format(project_string,invoice.period_start,invoice.timesheet_limit_date)
 
-    """@api.multi
-    def compute_program_name(self):
-        if self.origin:
-            list_projects = self.origin.split(', ')
-            for invoice in self:
-                if len(list_projects) > 1:
-                    self.invoice_is_program = True
-                program_name = ""
-                for project in invoice.project_ids:
-                    if project.program_id.name:
-                        invoice.program_name = project.program_id.name
-
-    @api.multi
-    def compute_program_description(self):
-        for invoice in self:
-            program_description = ""
-            for project in invoice.project_ids:
-                if project.program_id.product_description:
-                    invoice.program_description = project.program_id.product_description"""
 
     @api.multi
     def _compute_attachment_count(self):

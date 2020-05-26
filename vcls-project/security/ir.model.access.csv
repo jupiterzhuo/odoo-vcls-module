@@ -16,7 +16,7 @@ access_project_summary_lc,project.summary,model_project_summary,vcls_security.vc
 access_project_summary_account_manager,project.summary,model_project_summary,vcls_security.vcls_account_manager,1,0,0,0
 access_project_summary_invoice_administrator,access_project_summary_invoice_administrator,model_project_summary,vcls_security.group_finance_invoice_administrator,1,0,0,0
 
-access_account_invoice_lc,account.invoice.lc,account.model_account_invoice,vcls_security.vcls_lc,1,0,0,0
+access_account_invoice_lc,account.invoice.lc,account.model_account_invoice,vcls_security.vcls_lc,1,1,0,0
 access_account_invoice_line_lc,account.invoice.line.lc,account.model_account_invoice_line,vcls_security.vcls_lc,1,0,0,0
 access_account_invoice_tax_lc,account.invoice.tax.lc,account.model_account_invoice_tax,vcls_security.vcls_lc,1,0,0,0
 
