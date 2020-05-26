@@ -50,6 +50,7 @@
                     <th>Grand Total</th>
                 </thead>
                 <tbody>
+                    <!-- iteration of each project  + the rates + the total of hour for each rate -->
                     <t t-foreach="list(projects_row_data)" t-as="project_id">
                         <t t-set="tasks_row_data" t-value="projects_row_data[project_id]"/>
                         <tr style="font-weight: bold;">
@@ -61,6 +62,7 @@
                                 <t t-esc="sum([project_rate_matrix_data.get((project_id, rate_product_id), 0) for rate_product_id in rate_product_ids])"/>
                             </td>
                         </tr>
+                        <!-- iteration on the task/subtask -->
                         <t t-set="prev_ancestor_id" t-value=""/>
                         <t t-foreach="list(tasks_row_data)" t-as="task_id">
                             <t t-set="time_category_row_data" t-value="tasks_row_data[task_id][0]"/>
@@ -70,6 +72,7 @@
                                 <t t-set="nb_tasks" t-value="tasks_row_data[task_id][2]"/>
                                 <t t-set="merge_subtask" t-value="tasks_row_data[task_id][3]"/>
 
+                                <!-- condition to make the parent task appear or not every loop -->
                                 <t t-if="prev_ancestor_id != ancestor_id and nb_tasks > 1 and not merge_subtask">
                                 <tr>
                                     <td class="pl-3" style="font-weight: bold;"><t t-esc="ancestor_id.name"/></td>
@@ -90,9 +93,11 @@
                                 </t>
                                 <t t-set="prev_ancestor_id" t-value="ancestor_id"/>
 
+                                <!-- iteration for the rate of each time category -->
                                 <td t-foreach="rate_product_ids" t-as="rate_product_id" class="text-right">
                                     <t t-esc="task_rate_matrix_data.get((project_id, task_id, rate_product_id), ['-', '-'])[0]"/>
                                 </td>
+                                <!-- total of the line under "Grand Total" -->
                                 <td class="text-right">
                                     <t t-esc="sum([task_rate_matrix_data.get((project_id, task_id, rate_product_id), [0, 0])[0] for rate_product_id in rate_product_ids])"/>
                                 </td>
