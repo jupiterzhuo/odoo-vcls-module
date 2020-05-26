@@ -24,11 +24,7 @@ ACTIVITYREPORT = '_ActivityReport'
 class Invoice(models.Model):
     _inherit = 'account.invoice'
 
-    #def _get_default_po_id(self):
-        #return self.env['sale.order'].search([('invoice_ids', 'in', [self.id])], limit=1).po_id
-
     po_id = fields.Many2one('invoicing.po',
-                            #default = _get_default_po_id,
                             help="This field will appear on the invoice",
                             string ='Client PO ref.')
 
@@ -48,7 +44,6 @@ class Invoice(models.Model):
     lc_laius = fields.Text(help="If this will appear on the invoice")
     scope_of_work = fields.Text(help="This field will NOT appear on the invoice. Changing the field here will not change the project Scope of Word")
     vcls_due_date = fields.Date(string='Custom Due Date', compute='_compute_vcls_due_date')
-    #origin_sale_orders = fields.Char(compute='compute_origin_sale_orders',string='Origin')
 
     ready_for_approval = fields.Boolean(default=False)
 
@@ -130,25 +125,6 @@ class Invoice(models.Model):
                     project_string += project.sale_order_id.internal_ref + ' | ' 
             invoice.temp_name = "{} from {} to {}".format(project_string,invoice.period_start,invoice.timesheet_limit_date)
 
-    """@api.multi
-    def compute_program_name(self):
-        if self.origin:
-            list_projects = self.origin.split(', ')
-            for invoice in self:
-                if len(list_projects) > 1:
-                    self.invoice_is_program = True
-                program_name = ""
-                for project in invoice.project_ids:
-                    if project.program_id.name:
-                        invoice.program_name = project.program_id.name
-
-    @api.multi
-    def compute_program_description(self):
-        for invoice in self:
-            program_description = ""
-            for project in invoice.project_ids:
-                if project.program_id.product_description:
-                    invoice.program_description = project.program_id.product_description"""
 
     @api.multi
     def _compute_attachment_count(self):
@@ -267,8 +243,12 @@ class Invoice(models.Model):
                         time_category_rate_matrix_data[time_category_matrix_key] += unit_amount
                         time_category_row_data.setdefault(time_category_id, None)
 
-        # reorder rate_product_ids columns according to the most expensive one
-        rate_product_ids = rate_product_ids
+        # reorder projects_row_data columns according to the sale.order.line sequence to  mimic the sale order
+        # structure looks like: OrderedDict([(project.project(146,), OrderedDict([(project.task(945,), [...]), (project.task(946,), [...]), (project.task(943,), [...])]))])
+        if projects_row_data and projects_row_data[project_id]:
+            projects_row_data[project_id] = OrderedDict(sorted(list(list(projects_row_data.items())[0][1].items()), key= lambda x : x[0][0].sale_line_id.sequence))
+
+        # reorder rate_product_ids columns according to the most hours coded one
         rate_product_ids = product_obj.browse(OrderedSet([
             couple[1].id for couple in
             sorted(

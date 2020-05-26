@@ -373,12 +373,12 @@
                 <!--
                 <xpath expr="//field[@name='sequence']" position="replace">
                 </xpath>-->
-                <xpath expr="//div[@class='o_primary']" position="inside">
+                <xpath expr="//div[hasclass('o_primary')]" position="inside">
                      <span class="badge badge-pill badge-danger" style="border: none;" t-if="record.risk_score.value > 0">
                         Risk Score : <t t-esc="record.risk_score.value" />
                     </span>
                 </xpath>
-                <xpath expr="//div[@class='o_primary']" position="inside">
+                <xpath expr="//div[hasclass('o_primary')]" position="inside">
                     <t t-if="record.show_folder_path.raw_value">
                     <br/>
                         <field name="sharepoint_folder" widget="url" text="Sharepoint Folder" />
