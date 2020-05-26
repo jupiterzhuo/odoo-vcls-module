@@ -16,7 +16,7 @@ class VclsEntity(models.Model):
     """ We override the field to allow a translation of the string"""
     phone = fields.Char(related='partner_id.phone', string=_("Phone"), store=True, readonly=False)
     vat = fields.Char(related='partner_id.vat', string=_("VAT"), readonly=False)
-    siret = fields.Char(related='partner_id.siret', string=_("ID"), readonly=False)
+    siret = fields.Char(related='partner_id.siret', string=_("Siret"), readonly=False)
     capital = fields.Text(string=_("Capital"), readonly=False, translate=True)
 
     @api.multi
