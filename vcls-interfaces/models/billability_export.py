@@ -187,6 +187,7 @@ class BillabilityExport(models.Model):
             'Working Percentage': contract.resource_calendar_id.effective_percentage,
             'Raw Weekly Capacity [h]': contract.resource_calendar_id.effective_hours,
             'Employee Internal ID': contract.employee_id.id,
+            'consultancy_percentage' : contract.employee_id.consultancy_percentage
         }
         line = {**line, **distribution}
  
