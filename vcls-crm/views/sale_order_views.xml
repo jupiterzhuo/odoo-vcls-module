@@ -277,9 +277,26 @@
                 <xpath expr="//button[@name='action_view_invoice']" position="attributes">
                     <attribute name="invisible">0</attribute>
                 </xpath>
+                <xpath expr="//div[@class='oe_title']" position="replace">
+                    <h1>
+                        <field name="name" attrs="{'readonly':[('state', '!=', 'draft')]}" />
+                    </h1>
+                </xpath>
             </field>
         </record>
 
-
+        <record id="view_order_form_editable_quotation_name_group" model="ir.ui.view">
+            <field name="name">sale.order.form</field>
+            <field name="model">sale.order</field>
+            <field name="inherit_id" ref="sale.view_order_form"/>
+            <field name="groups_id" eval="[(4,ref('vcls-hr.vcls_group_superuser_lvl1')),(4,ref('vcls_security.group_bd_admin')), (4,ref('vcls_security.vcls_account_manager')), (4,ref('vcls-hr.vcls_group_superuser_lvl2'))]"/>
+            <field name="arch" type="xml">
+                <field name="name" position="replace">
+                    <h1>
+                        <field name="name" readonly="False"/>
+                    </h1>
+                </field>
+            </field>
+        </record>
     </data>
 </odoo>

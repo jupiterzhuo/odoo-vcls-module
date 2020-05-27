@@ -103,8 +103,7 @@ class SaleOrder(models.Model):
     name = fields.Char(
         string='Order Reference',
         required=True, copy=False,
-        readonly=True,
-        states={'draft': [('readonly', False)]},
+        readonly=False,
         index=True, default=lambda self: 'New'
     )
     family_order_count = fields.Integer(
