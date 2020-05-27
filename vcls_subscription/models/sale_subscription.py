@@ -90,6 +90,6 @@ class SaleSubscription(models.Model):
     @api.model
     def clean_subs_delivery_method(self):
         #we look for lines beeing subscription but with a timesheet delivery method
-        to_update = self.env['sale.order.line'].search([('vcls_type','=','subscription'),('qty_delivered_method','=','subscription')])
+        to_update = self.env['sale.order.line'].search([('vcls_type','=','subscription'),('qty_delivered_method','=','timesheet')])
         for line in to_update:
             _logger.info("BAD SUBS {} with {} {}".format(line.order_id.name,line.product_id.name,line.name))
