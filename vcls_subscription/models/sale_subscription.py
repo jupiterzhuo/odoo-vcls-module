@@ -78,7 +78,7 @@ class SaleSubscription(models.Model):
                         _logger.info("SUB | Manual vs  Delivered Before {} {}".format(so_line.qty_delivered_manual,so_line.qty_delivered))
                         so_line.qty_delivered += line.quantity
                         #so_line.qty_delivered = so_line.qty_delivered_manual
-                        so_line._inverse_qty_delivered() #we mimic the manual change of the delivered qty by calling the onchange method
+                        #so_line._inverse_qty_delivered() #we mimic the manual change of the delivered qty by calling the onchange method
                         _logger.info("SUB | Manual vs  Delivered After {} {}".format(so_line.qty_delivered_manual,so_line.qty_delivered))
 
                 next_date = sub.recurring_next_date or current_date

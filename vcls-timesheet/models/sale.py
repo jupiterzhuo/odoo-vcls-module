@@ -184,7 +184,7 @@ class SaleOrderLine(models.Model):
                     pass
             
             elif line.order_id.invoicing_mode == 'fixed_price':
-                _logger.info("DELIVERED QTY {} for {} {} MANUAL {}".format(line.qty_delivered,line.name,line.product_id.vcls_type,line.qty_delivered_manual))
+                #_logger.info("DELIVERED QTY {} for {} {} MANUAL {}".format(line.qty_delivered,line.name,line.product_id.vcls_type,line.qty_delivered_manual))
                 if line.product_id.vcls_type in ['vcls_service'] and line.order_id.fp_delivery_mode == 'task':
                     line.qty_delivered = line.task_id.completion_ratio/100
                     if line.historical_invoiced_amount > line.qty_delivered*line.price_unit:
