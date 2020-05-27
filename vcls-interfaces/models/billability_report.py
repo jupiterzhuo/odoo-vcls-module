@@ -15,12 +15,12 @@ class BillabilityReport(models.Model):
     company = fields.Char(readonly=True)
     employee_name = fields.Char(related='employee_id.name', string="Employee Name", readonly=True, store=True)
     email = fields.Char(related='employee_id.work_email', string="Email", readonly=True)
-    Office = fields.Many2one(related='employee_id.office_id', string="Office", readonly=True)
+    office = fields.Char(string="Office", readonly=True)
     employee_start_date = fields.Date(related='employee_id.employee_start_date', string="Employee Start Date", readonly=True)
     employee_end_date = fields.Date(related='employee_id.employee_end_date', string="Employee End Date", readonly=True)
     line_manager = fields.Many2one(related='employee_id.parent_id', string="Line Manager", readonly=True)
     line_manager_id = fields.Char(related='employee_id.parent_id.employee_external_id', string="Line Manager ID", readonly=True)
-    consultancy_percentage = fields.Integer(related='employee_id.consultancy_percentage', string="Consult %", readonly=True)
+    consultancy_percentage = fields.Integer(string="Consult %", readonly=True)
 
     # contract related fields
     contract_name = fields.Char(string="Contract Name", readonly=True)
@@ -40,7 +40,7 @@ class BillabilityReport(models.Model):
     offs = fields.Integer(string='Offs [d]')
     leaves = fields.Integer(string='Leaves [h]')
     worked = fields.Integer(string='Worked [d]')
-    effective_capacity = fields.Integer(string='Effective Capacity [d]')
+    effective_capacity = fields.Integer(string='Effective Capacity [h]')
     control = fields.Integer(string='Control [d]')
 
     year = fields.Integer(string='Year', readonly=True)
@@ -139,7 +139,7 @@ class BillabilityReport(models.Model):
             'company': 'Company',
             'employee_name': 'Employee Name',
             'email': 'Email',
-            'Office': 'Office',
+            'office': 'Office',
             'employee_start_date': 'Employee Start Date',
             'employee_end_date': 'Employee End Date',
             'line_manager': 'Line Manager',
