@@ -11,7 +11,7 @@
     'author': "VCLS",
     'website': "http://www.voisinconsulting.com",
     'category': 'Uncategorized',
-    'version': '0.0.4',
+    'version': '0.0.5',
     'depends': [
         'base',
         'sale_subscription',

@@ -78,7 +78,7 @@ class SaleSubscription(models.Model):
                         _logger.info("SUB | Manual vs  Delivered Before {} {} Method {}".format(so_line.qty_delivered_manual,so_line.qty_delivered,so_line.qty_delivered_method))
                         so_line.qty_delivered += line.quantity
                         #so_line.qty_delivered = so_line.qty_delivered_manual
-                        #so_line._inverse_qty_delivered() #we mimic the manual change of the delivered qty by calling the onchange method
+                        so_line._inverse_qty_delivered() #we mimic the manual change of the delivered qty by calling the onchange method
                         _logger.info("SUB | Manual vs  Delivered After {} {}".format(so_line.qty_delivered_manual,so_line.qty_delivered))
 
                 next_date = sub.recurring_next_date or current_date
@@ -86,3 +86,10 @@ class SaleSubscription(models.Model):
                 invoicing_period = relativedelta(**{periods[sub.recurring_rule_type]: sub.recurring_interval})
                 new_date = next_date + invoicing_period
                 sub.write({'recurring_next_date': new_date.strftime('%Y-%m-%d')})
+    
+    @api.model
+    def clean_subs_delivery_method(self):
+        #we look for lines beeing subscription but with a timesheet delivery method
+        to_update = self.env['sale.order.line'].search([('vcls_type','=','subscription'),('qty_delivered_method','=','subscription')])
+        for line in to_update:
+            _logger.info("BAD SUBS {} with {} {}".format(line.order_id.name,line.product_id.name,line.name))
