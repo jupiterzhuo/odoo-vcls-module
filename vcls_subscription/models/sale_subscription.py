@@ -78,7 +78,7 @@ class SaleSubscription(models.Model):
                         _logger.info("SUB | Manual vs  Delivered Before {} {} Method {}".format(so_line.qty_delivered_manual,so_line.qty_delivered,so_line.qty_delivered_method))
                         so_line.qty_delivered += line.quantity
                         #so_line.qty_delivered = so_line.qty_delivered_manual
-                        so_line._inverse_qty_delivered() #we mimic the manual change of the delivered qty by calling the onchange method
+                        #so_line._inverse_qty_delivered() #we mimic the manual change of the delivered qty by calling the onchange method
                         _logger.info("SUB | Manual vs  Delivered After {} {}".format(so_line.qty_delivered_manual,so_line.qty_delivered))
 
                 next_date = sub.recurring_next_date or current_date
@@ -93,3 +93,7 @@ class SaleSubscription(models.Model):
         to_update = self.env['sale.order.line'].search([('vcls_type','=','subscription'),('qty_delivered_method','=','timesheet')])
         for line in to_update:
             _logger.info("BAD SUBS {} with {} {}".format(line.order_id.name,line.product_id.name,line.name))
+        if to_update:
+            to_update.write({
+                'qty_delivered_method':'manual',
+            })
