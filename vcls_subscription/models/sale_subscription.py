@@ -75,7 +75,7 @@ class SaleSubscription(models.Model):
                         else:
                             so_line = found
                         _logger.info("SUB | Adding {} on {} for {} in {}".format(line.quantity,so_line.qty_delivered,so_line.name,so_line.order_id.name))
-                        _logger.info("SUB | Manual vs  Delivered Before {} {}".format(so_line.qty_delivered_manual,so_line.qty_delivered))
+                        _logger.info("SUB | Manual vs  Delivered Before {} {} Method {}".format(so_line.qty_delivered_manual,so_line.qty_delivered,so_line.qty_delivered_method))
                         so_line.qty_delivered += line.quantity
                         #so_line.qty_delivered = so_line.qty_delivered_manual
                         #so_line._inverse_qty_delivered() #we mimic the manual change of the delivered qty by calling the onchange method
