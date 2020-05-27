@@ -285,18 +285,16 @@ class SaleOrderLine(models.Model):
             line.untaxed_amount_invoiced += line.historical_invoiced_amount
         
 
-        
-        """for line in self:
-            amount_invoiced = 0.0
-            for invoice_line in line.invoice_lines:
-                if invoice_line.invoice_id.state in ['open', 'in_payment', 'paid']:
-                    invoice_date = invoice_line.invoice_id.date_invoice or fields.Date.today()
-                    if invoice_line.invoice_id.type == 'out_invoice':
-                        amount_invoiced += invoice_line.currency_id._convert(invoice_line.price_subtotal, line.currency_id, line.company_id, invoice_date)
-                    elif invoice_line.invoice_id.type == 'out_refund':
-                        amount_invoiced -= invoice_line.currency_id._convert(invoice_line.price_subtotal, line.currency_id, line.company_id, invoice_date)
-            line.untaxed_amount_invoiced = amount_invoiced"""
+    @api.depends('state', 'price_reduce', 'product_id', 'untaxed_amount_invoiced', 'qty_delivered')
+    def _compute_untaxed_amount_to_invoice(self):
+        super()._compute_untaxed_amount_to_invoice()
 
+        for line in self.filtered(lambda l: l.vcls_type=='rate' and l.order_id.invoicing_mode == 'tm'):
+            filter_date = line.order_id.timesheet_limit_date or fields.Date.today()
+            ts = line.order_id.timesheet_ids.filtered(lambda t: t.so_line == line and t.date <= filter_date and t.stage_id == 'invoiceable')
+            #ts = self.env['account.analytic.line'].search([('stage_id','=','historical'),('so_line','=',line.id)])
+            if ts:
+                line.untaxed_amount_to_invoice = sum(ts.mapped(lambda r: r.unit_amount_rounded*r.so_line_unit_price))
 
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
