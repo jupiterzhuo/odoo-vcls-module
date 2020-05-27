@@ -75,7 +75,9 @@ class SaleSubscription(models.Model):
                         else:
                             so_line = found
                         _logger.info("SUB | Adding {} on {} for {} in {}".format(line.quantity,so_line.qty_delivered,so_line.name,so_line.order_id.name))
+                        _logger.info("SUB | Manual vs  Delivered Before {} {}".format(so_line.qty_delivered_manual,so_line.qty_delivered))
                         so_line.qty_delivered += line.quantity
+                        _logger.info("SUB | Manual vs  Delivered After {} {}".format(so_line.qty_delivered_manual,so_line.qty_delivered))
 
                 next_date = sub.recurring_next_date or current_date
                 periods = {'daily': 'days', 'weekly': 'weeks', 'monthly': 'months', 'yearly': 'years'}
