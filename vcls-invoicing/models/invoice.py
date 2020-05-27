@@ -243,8 +243,12 @@ class Invoice(models.Model):
                         time_category_rate_matrix_data[time_category_matrix_key] += unit_amount
                         time_category_row_data.setdefault(time_category_id, None)
 
-        # reorder rate_product_ids columns according to the most expensive one
-        rate_product_ids = rate_product_ids
+        # reorder projects_row_data columns according to the sale.order.line sequence to  mimic the sale order
+        # structure looks like: OrderedDict([(project.project(146,), OrderedDict([(project.task(945,), [...]), (project.task(946,), [...]), (project.task(943,), [...])]))])
+        if projects_row_data and projects_row_data[project_id]:
+            projects_row_data[project_id] = OrderedDict(sorted(list(list(projects_row_data.items())[0][1].items()), key= lambda x : x[0][0].sale_line_id.sequence))
+
+        # reorder rate_product_ids columns according to the most hours coded one
         rate_product_ids = product_obj.browse(OrderedSet([
             couple[1].id for couple in
             sorted(
