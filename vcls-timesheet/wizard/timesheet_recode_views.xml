@@ -11,18 +11,19 @@
                         <field name="mode" widget="radio"/>
                         <field name="include_childs"/>
                         <field name="rate_ids" invisible="1"/>
-                        <field name="run_date" readonly="1"/>
                     </group>
                     <group>
                         <group string="Source">
                             <field name="source_project_id" attrs="{'required':[('mode','in',['replace_rate'])]}"/>
                             <field name="source_rate_id" attrs="{'required':[('mode','in',['replace_rate'])]}" domain="[('id','in',rate_ids)]"/>
+                            <field name="source_employee_id"/>
                         </group>
                         <group string="Target">
                             <field name="target_rate_id" attrs="{'required':[('mode','in',['replace_rate'])]}" domain="[('id','in',rate_ids)]"/>
                         </group>
                     </group>
                     <group>
+                        <field name="run_date" readonly="1"/>
                         <field name="info" readonly="1"/>
                     </group>
                     <footer>
