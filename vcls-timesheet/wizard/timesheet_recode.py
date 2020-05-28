@@ -108,11 +108,11 @@ class LeadQuotation(models.TransientModel):
                 continue
             else:
 
-                if self.employee_id:
-                    maps = project.sale_line_employee_ids.filtered(lambda m: m.employee_id == self.employee_id and m.sale_line_id.product_id.name == ps_name)
-                    ts = project.timesheet_ids.filtered(lambda t: not t.timesheet_invoice_id and t.so_line == source_sol[0] and t.employee_id == self.employee_id)
+                if self.source_employee_id:
+                    maps = project.sale_line_employee_ids.filtered(lambda m: m.employee_id == self.source_employee_id and m.sale_line_id.product_id.name == ps_name)
+                    ts = project.timesheet_ids.filtered(lambda t: not t.timesheet_invoice_id and t.so_line == source_sol[0] and t.employee_id == self.source_employee_id)
                 else:
-                    maps = project.sale_line_employee_ids.filtered(lambda m: m.employee_id == self.employee_id and m.sale_line_id.product_id.name == ps_name)
+                    maps = project.sale_line_employee_ids.filtered(lambda m: m.employee_id == self.source_employee_id and m.sale_line_id.product_id.name == ps_name)
                     ts = project.timesheet_ids.filtered(lambda t: not t.timesheet_invoice_id and t.so_line == source_sol[0])
 
                 if maps:
