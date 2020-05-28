@@ -10,7 +10,7 @@
                     <group>
                         <field name="mode" widget="radio"/>
                         <field name="include_childs"/>
-                        <field name="child_ids" invisible="1"/>
+                        <field name="rate_ids" invisible="1"/>
                         <field name="run_date" readonly="1"/>
                     </group>
                     <group>
