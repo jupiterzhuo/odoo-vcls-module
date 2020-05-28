@@ -112,7 +112,7 @@ class LeadQuotation(models.TransientModel):
                     maps = project.sale_line_employee_ids.filtered(lambda m: m.employee_id == self.source_employee_id and m.sale_line_id.product_id.name == ps_name)
                     ts = project.timesheet_ids.filtered(lambda t: not t.timesheet_invoice_id and t.so_line == source_sol[0] and t.employee_id == self.source_employee_id)
                 else:
-                    maps = project.sale_line_employee_ids.filtered(lambda m: m.employee_id == self.source_employee_id and m.sale_line_id.product_id.name == ps_name)
+                    maps = project.sale_line_employee_ids.filtered(lambda m: m.sale_line_id.product_id.name == ps_name)
                     ts = project.timesheet_ids.filtered(lambda t: not t.timesheet_invoice_id and t.so_line == source_sol[0])
 
                 if maps:
@@ -122,7 +122,11 @@ class LeadQuotation(models.TransientModel):
                     info += "INFO | No map lines updated in project {}.\n".format(project.name)
 
                 if ts:
-                    ts.write({'so_line':target_sol[0].id,'so_line_unit_price':target_sol[0].price_unit})
+                    ts.write({
+                        'so_line':target_sol[0].id,
+                        'so_line_unit_price':target_sol[0].price_unit,
+                        'rate_id':target_sol[0].product_id.product_tmpl_id.id,
+                        })
                     info += "INFO | {} timesheets updated in project {}.\n".format(len(ts),project.name)
                 else: 
                     info += "INFO | No timesheets updated in project {}.\n".format(project.name)
