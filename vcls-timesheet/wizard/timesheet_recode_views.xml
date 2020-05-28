@@ -16,10 +16,10 @@
                     <group>
                         <group string="Source">
                             <field name="source_project_id" attrs="{'required':[('mode','in',['replace_rate'])]}"/>
-                            <field name="source_rate_id" attrs="{'required':[('mode','in',['replace_rate'])]}" domain="[('id','in',child_ids)]"/>
+                            <field name="source_rate_id" attrs="{'required':[('mode','in',['replace_rate'])]}" domain="[('id','in',rate_ids)]"/>
                         </group>
                         <group string="Target">
-                            <field name="target_rate_id" attrs="{'required':[('mode','in',['replace_rate'])]}" domain="[('id','in',child_ids)]"/>
+                            <field name="target_rate_id" attrs="{'required':[('mode','in',['replace_rate'])]}" domain="[('id','in',rate_ids)]"/>
                         </group>
                     </group>
                     <group>
