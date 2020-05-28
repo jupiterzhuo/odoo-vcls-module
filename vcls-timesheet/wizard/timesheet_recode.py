@@ -26,6 +26,8 @@ class LeadQuotation(models.TransientModel):
 
     info = fields.Text()
 
+    run_date = fields.Date()
+
     ### SOURCE FIELDS
 
     source_project_id = fields.Many2one(
