@@ -128,4 +128,4 @@ class LeadQuotation(models.TransientModel):
                     info += "INFO | No timesheets updated in project {}.\n".format(project.name)
             
         self.info=info
-        self.run_date = fields.Datetime.now()
+        self.run_date = fields.Date.now()
