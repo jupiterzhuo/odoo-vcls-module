@@ -8,8 +8,7 @@
             <xpath expr="//button[@name='action_confirm']" position="before">    
                 <button name="action_sync" id="action_sync"
                     string="Synchronize Project" class="btn-primary" type="object"
-                        groups="vcls_security.vcls_account_manager,vcls_security.group_finance_invoice_administrator"
-                    attrs="{'invisible': [('state', 'not in', ['draft'])]}"/>
+                        groups="vcls_security.vcls_account_manager,vcls_security.group_finance_invoice_administrator"/>
             </xpath>
             
             <xpath expr="//tree/field[@name='price_tax']" position="after">
