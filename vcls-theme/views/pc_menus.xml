@@ -11,6 +11,7 @@
                 </field>
                 <xpath expr="//filter[@name='Manager']" position="replace">
                         <filter name="Manager" string="Lead Consultant" context="{'group_by': 'user_id'}"/>
+                        <filter name="account_manager_id" string="Account Manager" context="{'group_by': 'account_manager_id'}"/>
                 </xpath>
                 <xpath expr="//filter[@name='Partner']" position="replace">
                         <filter name="Partner" string="Client" context="{'group_by': 'partner_id'}"/>
