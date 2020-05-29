@@ -155,8 +155,8 @@ class BillabilityExport(models.Model):
                     distribution['Worked [d]'] += max(budget,0)
                     
                     #KPI's
-                    distribution['Effective Capacity [h]'] = distribution['Worked [d]']*distribution['Day Duration [h]']
-                    distribution['Control [d]'] = distribution['Days [d]'] - (distribution['Weekends [d]'] + distribution['Bank Holiday [d]'] + distribution['Out of Contract [d]'] + distribution['Offs [d]'] + distribution['Leaves [d]'] + distribution['Worked [d]'])
+                distribution['Effective Capacity [h]'] = distribution['Worked [d]']*distribution['Day Duration [h]']
+                distribution['Control [d]'] = distribution['Days [d]'] - (distribution['Weekends [d]'] + distribution['Bank Holiday [d]'] + distribution['Out of Contract [d]'] + distribution['Offs [d]'] + distribution['Leaves [d]'] + distribution['Worked [d]'])
                     
                          
                 data.append(self.build_row(contract,distribution))   
@@ -187,7 +187,7 @@ class BillabilityExport(models.Model):
             'Working Percentage': contract.resource_calendar_id.effective_percentage,
             'Raw Weekly Capacity [h]': contract.resource_calendar_id.effective_hours,
             'Employee Internal ID': contract.employee_id.id,
-            'consultancy_percentage' : contract.employee_id.consultancy_percentage
+            'Consult %' : contract.consultancy_percentage
         }
         line = {**line, **distribution}
  

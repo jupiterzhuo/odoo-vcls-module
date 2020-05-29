@@ -89,10 +89,6 @@ class Employee(models.Model):
         string='Family Name',
         track_visibility='always',)
 
-    consultancy_percentage = fields.Integer(
-        default=100,
-        string="Consulting %",)
-    
     # Used in ABsent Today view in order to display leave period
     leave_duration_type = fields.Selection(
         [ ('am', 'Morning'),('pm', 'Afternoon') ],

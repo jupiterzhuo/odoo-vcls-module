@@ -24,7 +24,7 @@
         <field name="model">billability.report</field>
         <field name="arch" type="xml">
             <graph string="Billability by employee">
-                <field name="employee_name"/>
+                <field name="company"/>
                 <field name="billability_percent" type="measure"/>
             </graph>
         </field>
@@ -36,10 +36,37 @@
         <field name="model">billability.report</field>
         <field name="arch" type="xml">
             <pivot string="Billability Report">
-                <field name="employee_name" type="row"/>
-                <field name="week_number" string="Week number" type="col"/>
+                <field name="company" type="row"/>
+                <field name="start_date" string="Start date" type="col" interval='day'/>
                 <field name="billability_percent" type="measure"/>
             </pivot>
+        </field>
+    </record>
+
+     <record model="ir.ui.view" id="view_billability_overview_pivot_search">
+        <field name="name">view_billability_overview_pivot_search</field>
+        <field name="model">billability.report</field>
+        <field name="arch" type="xml">
+            <search string="Billability Report">
+                <field name='employee_name' string='Name'/>
+                <field name='office'/>
+                <field name='company'/>
+                <field name='department'/>
+                <filter string="Billable" name='billable' domain="[('consultancy_percentage', '&gt;', 0)]"/>
+                <separator/>
+                <filter string="Last 30 Days" name="last_month" domain="[('start_date','&gt;', (context_today() - datetime.timedelta(weeks=4)).strftime('%Y-%m-%d'))]"/>
+                <separator/>
+                <filter string="New Comer" name='new_comer' domain="[('employee_start_date','&gt;', (context_today() - datetime.timedelta(weeks=8)).strftime('%Y-%m-%d'))]"/>
+                <group expand="0" string="Group By">
+                <filter string="Office" name="groupby_office" domain="[]" context="{'group_by':'office'}"/>
+                <filter string="Company" name="groupby_company" domain="[]" context="{'group_by':'company'}"/>
+                <filter string="Department" name="groupby_department" domain="[]" context="{'group_by':'department'}"/>
+                <filter string="Employee" name="groupby_employee" domain="[]" context="{'group_by':'employee_name'}"/>
+                <separator/>
+                <filter string="Week" name="groupby_week" domain="[]" context="{'group_by':'start_date'}"/>
+                
+                </group>
+            </search>
         </field>
     </record>
 
