@@ -36,7 +36,7 @@
                             name="run_test" type="object" class="btn-primary"/>
                         
                         <button string="Run"
-                            name="run" type="object" class="btn-secondary o_mail_send" attrs="{'invisible':[('run_date','!=',False)]}"/>
+                            name="run_real" type="object" class="btn-secondary o_mail_send" attrs="{'invisible':[('run_date','!=',False)]}"/>
                         
                     </footer>
                 </form>

@@ -138,6 +138,12 @@ class LeadQuotation(models.TransientModel):
     def run_test(self):
         self.ensure_one()
         self.run(True)
+    
+    @api.multi
+    def run_real(self):
+        self.ensure_one()
+        self.run(False)
+        self.run_date = fields.Datetime.now()
 
     @api.multi
     def run(self,test=False):
@@ -209,5 +215,4 @@ class LeadQuotation(models.TransientModel):
                         info += "INFO | No timesheets updated in project {}.\n".format(project.name)
             
         self.info=info
-        if not test:
-            self.run_date = fields.Datetime.now()
+        
