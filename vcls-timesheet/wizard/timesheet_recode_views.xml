@@ -16,10 +16,15 @@
                         <group string="Source">
                             <field name="source_project_id" attrs="{'required':[('mode','in',['replace_rate'])]}"/>
                             <field name="source_rate_id" attrs="{'required':[('mode','in',['replace_rate'])]}" domain="[('id','in',rate_ids)]"/>
+                            <field name="source_task_id"/>
                             <field name="source_employee_id"/>
+                            <field name="date_range_start"/>
+                            <field name="date_range_end"/>
+                            <field name="source_status" attrs="{'invisible':[('mode','in',['replace_rate'])],'required':[('mode','in',['update_status'])]}"/>
                         </group>
                         <group string="Target">
-                            <field name="target_rate_id" attrs="{'required':[('mode','in',['replace_rate'])]}" domain="[('id','in',rate_ids)]"/>
+                            <field name="target_rate_id" attrs="{'invisible':[('mode','in',['update_status'])],'required':[('mode','in',['replace_rate'])]}" domain="[('id','in',rate_ids)]"/>
+                            <field name="target_status" attrs="{'invisible':[('mode','in',['replace_rate'])],'required':[('mode','in',['update_status'])]}"/>
                         </group>
                     </group>
                     <group>
@@ -27,9 +32,12 @@
                         <field name="info" readonly="1"/>
                     </group>
                     <footer>
+                        <button string="Test"
+                            name="run_test" type="object" class="btn-primary o_mail_send"/>
+                        
                         <button string="Run"
                             name="run" type="object" class="btn-primary o_mail_send" attrs="{'invisible':[('run_date','!=',False)]}"/>
-                        <button string="Cancel" class="btn-secondary" special="cancel" />
+                        
                     </footer>
                 </form>
             </field>
