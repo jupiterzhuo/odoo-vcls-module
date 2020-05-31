@@ -137,16 +137,16 @@ class LeadQuotation(models.TransientModel):
     @api.multi
     def run_test(self):
         self.ensure_one()
-        self.run(True)
+        self.run('test')
     
     @api.multi
     def run_real(self):
         self.ensure_one()
-        self.run(False)
+        self.run('real')
         self.run_date = fields.Datetime.now()
 
     @api.multi
-    def run(self,test=False):
+    def run(self,mode='test'):
         self.ensure_one()
 
         if self.include_childs:
@@ -155,7 +155,7 @@ class LeadQuotation(models.TransientModel):
             projects = self.source_project_id
        
         info = ""
-        if test:
+        if mode=='test':
             info += "TEST:\n"
 
         domain = self.get_ts_source_domain(projects)
@@ -163,7 +163,7 @@ class LeadQuotation(models.TransientModel):
 
         if self.mode == 'update_status':
             if timesheets:
-                if not test:
+                if mode=='real':
                     timesheets.write({
                         'stage_id':self.target_status.id,
                         })
@@ -197,14 +197,14 @@ class LeadQuotation(models.TransientModel):
                         #ts = project.timesheet_ids.filtered(lambda t: not t.timesheet_invoice_id and t.so_line == source_sol[0])
 
                     if maps:
-                        if not test:
+                        if mode=='real':
                             maps.write({'sale_line_id':target_sol[0].id})
                         info += "INFO | {} map lines updated in project {}.\n".format(len(maps),project.name)
                     else: 
                         info += "INFO | No map lines updated in project {}.\n".format(project.name)
 
                     if ts:
-                        if not test:
+                        if mode=='real':
                             ts.write({
                                 'so_line':target_sol[0].id,
                                 'so_line_unit_price':target_sol[0].price_unit,
