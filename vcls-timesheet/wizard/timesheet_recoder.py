@@ -165,7 +165,7 @@ class LeadQuotation(models.TransientModel):
             if timesheets:
                 if mode=='real':
                     timesheets.write({
-                        'stage_id':self.target_status.id,
+                        'stage_id':self.target_status,
                         })
                 info += "INFO | {} timesheets updated with domain {}.\n".format(len(timesheets),domain)
             else: 
