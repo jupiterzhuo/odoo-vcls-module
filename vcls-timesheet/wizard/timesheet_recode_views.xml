@@ -33,10 +33,10 @@
                     </group>
                     <footer>
                         <button string="Test"
-                            name="run_test" type="object" class="btn-secondary"/>
+                            name="run_test" type="object" class="btn-primary"/>
                         
                         <button string="Run"
-                            name="run" type="object" class="btn-primary o_mail_send" attrs="{'invisible':[('run_date','!=',False)]}"/>
+                            name="run" type="object" class="btn-secondary o_mail_send" attrs="{'invisible':[('run_date','!=',False)]}"/>
                         
                     </footer>
                 </form>

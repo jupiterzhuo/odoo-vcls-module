@@ -149,6 +149,8 @@ class LeadQuotation(models.TransientModel):
             projects = self.source_project_id
        
         info = ""
+        if test:
+            info += "TEST:\n"
 
         domain = self.get_ts_source_domain(projects)
         timesheets = self.env['account.analytic.line'].search(domain)
