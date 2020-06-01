@@ -3,7 +3,7 @@
 {
     'name': 'Sale quote project forcast',
     'description': "create a quote from a project forcast",
-    'version': '12.0.5.0.4',
+    'version': '12.0.5.0.5',
     'author': 'Camptocamp',
     'license': 'AGPL-3',
     'category': 'Others',
