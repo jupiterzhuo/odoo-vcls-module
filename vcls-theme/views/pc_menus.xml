@@ -95,6 +95,22 @@
                 sequence="5"
                 action="vcls-timesheet.action_pc_all_timesheet_tree"
         />
+
+        <menuitem
+                id="menu_pc_timesheets_tools"
+                name="HELPERS"
+                parent="menu_pc_timesheets"
+                sequence="6"
+        />
+
+        <menuitem
+                id="menu_pc_timesheets_tools_recoder"
+                name="Recoder"
+                parent="menu_pc_timesheets_tools"
+                sequence="1"
+                action="vcls-timesheet.action_timesheet_recode"
+        />
+
         <menuitem
                 id="menu_pc_project_follow_up"
                 name="Project Follow-Up"
