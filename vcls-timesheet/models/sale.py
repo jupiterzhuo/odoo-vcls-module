@@ -120,8 +120,10 @@ class SaleOrder(models.Model):
     def recompute_lines(self):
         context = self.env.context
         active_ids = context.get('active_ids',[])
+        _logger.info("{}".format(active_ids))
         for so_id in active_ids:
-            so = self.browse(so_id)
+            so = self.env.browse(so_id)
+            _logger.info("{}".format(so.name))
             for line in so.order_line:
                 line._compute_qty_delivered()
                 line._get_invoice_qty()
