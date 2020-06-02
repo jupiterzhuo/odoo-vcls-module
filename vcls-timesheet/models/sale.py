@@ -116,6 +116,20 @@ class SaleOrder(models.Model):
             #we get the default timecategories from the product_template
             line.task_id.time_category_ids = line.product_id.product_tmpl_id.time_category_ids
 
+    @api.multi
+    def recompute_lines(self):
+        context = self.env.context
+        active_ids = context.get('active_ids',[])
+        for so_id in active_ids:
+            so = self.browse(so_id)
+            for line in so.order_line:
+                line._compute_qty_delivered()
+                line._get_invoice_qty()
+                line._compute_amount_delivered_from_task()
+                line._compute_amount_invoiced_from_task()
+                line._compute_untaxed_amount_invoiced()
+                line._compute_untaxed_amount_to_invoice()
+
 
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
