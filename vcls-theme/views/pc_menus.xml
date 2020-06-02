@@ -99,7 +99,7 @@
 
         <menuitem
                 id="menu_pc_timesheets_tools"
-                name="TOOLS"
+                name="HELPERS"
                 parent="menu_pc_timesheets"
                 sequence="6"
         />

@@ -14,12 +14,17 @@
                     </group>
                     <group>
                         <group string="Source">
-                            <field name="source_project_id" attrs="{'required':[('mode','in',['replace_rate'])]}"/>
-                            <field name="source_rate_id" attrs="{'required':[('mode','in',['replace_rate'])]}" domain="[('id','in',rate_ids)]"/>
-                            <field name="source_employee_id"/>
+                            <field name="source_project_id" attrs="{'required':[('mode','in',['replace_rate','update_status'])]}" options="{'no_create': True, 'no_create_edit' : True}"/>
+                            <field name="source_rate_id" attrs="{'required':[('mode','in',['replace_rate'])],'invisible':[('mode','in',['update_status'])]}" domain="[('id','in',rate_ids)]" options="{'no_create': True, 'no_create_edit' : True}"/>
+                            <field name="source_task_id" options="{'no_create': True, 'no_create_edit' : True}"/>
+                            <field name="source_employee_id" options="{'no_create': True, 'no_create_edit' : True}"/>
+                            <field name="date_range_start"/>
+                            <field name="date_range_end"/> 
+                            <field name="source_status" attrs="{'invisible':[('mode','in',['replace_rate'])],'required':[('mode','in',['update_status'])]}"/>
                         </group>
                         <group string="Target">
-                            <field name="target_rate_id" attrs="{'required':[('mode','in',['replace_rate'])]}" domain="[('id','in',rate_ids)]"/>
+                            <field name="target_rate_id" attrs="{'invisible':[('mode','in',['update_status'])],'required':[('mode','in',['replace_rate'])]}" domain="[('id','in',rate_ids)]" options="{'no_create': True, 'no_create_edit' : True}"/>
+                            <field name="target_status" attrs="{'invisible':[('mode','in',['replace_rate'])],'required':[('mode','in',['update_status'])]}"/>
                         </group>
                     </group>
                     <group>
@@ -27,9 +32,12 @@
                         <field name="info" readonly="1"/>
                     </group>
                     <footer>
+                        <button string="Test"
+                            name="run_test" type="object" class="btn-primary"/>
+                        
                         <button string="Run"
-                            name="run" type="object" class="btn-primary o_mail_send" attrs="{'invisible':[('run_date','!=',False)]}"/>
-                        <button string="Cancel" class="btn-secondary" special="cancel" />
+                            name="run_real" type="object" class="btn-secondary o_mail_send" attrs="{'invisible':[('run_date','!=',False)]}"/>
+                        
                     </footer>
                 </form>
             </field>
@@ -39,7 +47,7 @@
             <field name="name">timesheet.recode.wizard.tree</field>
             <field name="model">tool.timesheet.recode</field>
             <field name="arch" type="xml">
-                <tree string="Tool Timesheet Recode">
+                <tree string="Timesheet Recoder">
                     
                     <field name="mode"/>
                     <field name="create_date"/>
@@ -51,7 +59,7 @@
         </record>
 
         <record id="action_timesheet_recode" model="ir.actions.act_window">
-            <field name="name">Tool Timesheet Recode</field>
+            <field name="name">Timesheet Recoder</field>
             <field name="res_model">tool.timesheet.recode</field>
             <field name="view_mode">tree,form</field>
         </record>

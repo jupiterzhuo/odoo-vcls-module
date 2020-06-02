@@ -13,6 +13,7 @@ class LeadQuotation(models.TransientModel):
 
     mode = fields.Selection([
         ('replace_rate', 'Replace Rate'),
+        ('update_status', 'Update Status')
     ], string='Recompute Mode', required=True, default='replace_rate',
     help="""
     Replace Rate:
@@ -36,10 +37,10 @@ class LeadQuotation(models.TransientModel):
         string= 'Source Project',
     )
 
-    """source_task_id = fields.Many2one(
+    source_task_id = fields.Many2one(
         comodel_name='project.task',
         string= 'Source Task',
-    )"""
+    )
 
     source_rate_id = fields.Many2one(
         comodel_name='sale.order.line',
@@ -49,13 +50,43 @@ class LeadQuotation(models.TransientModel):
     source_employee_id = fields.Many2one(
         comodel_name='hr.employee',
         string= 'Source Employee',
-    ) 
+    )
+
+    source_status = fields.Selection([
+        # ('forecast', 'Stock'),
+        ('draft', '0. Draft'), 
+        ('lc_review', '1. LC review'), 
+        ('pc_review', '2. PC review'), 
+        ('carry_forward', 'Carry Forward'),
+        #('adjustment_validation', '4. Adjustment Validation'),
+        ('invoiceable', '5. Invoiceable'),
+        #('invoiced', '6. Invoiced'),
+        ('historical','7. Historical'),
+        #('outofscope', 'Out Of Scope'),
+        ], default='draft')
+
+    date_range_start = fields.Date()
+    date_range_end = fields.Date()
+
 
     ### TARGET FIELDS
     target_rate_id = fields.Many2one(
         comodel_name='sale.order.line',
         string= 'Target Rate',
     )
+
+    target_status = fields.Selection([
+        # ('forecast', 'Stock'),
+        ('draft', '0. Draft'), 
+        ('lc_review', '1. LC review'), 
+        ('pc_review', '2. PC review'), 
+        ('carry_forward', 'Carry Forward'),
+        #('adjustment_validation', '4. Adjustment Validation'),
+        ('invoiceable', '5. Invoiceable'),
+        #('invoiced', '6. Invoiced'),
+        ('historical','7. Historical'),
+        #('outofscope', 'Out Of Scope'),
+        ], default='draft')
 
     ### TOOL FIELDS
     rate_ids = fields.Many2many(
@@ -80,10 +111,12 @@ class LeadQuotation(models.TransientModel):
                 item.rate_ids = rates
 
 
-
+    @api.multi
+    def run_test(self):
+        self.run(True)
 
     @api.multi
-    def run(self):
+    def run(self,test=False):
         self.ensure_one()
        
         info = ""
@@ -116,20 +149,23 @@ class LeadQuotation(models.TransientModel):
                     ts = project.timesheet_ids.filtered(lambda t: not t.timesheet_invoice_id and t.so_line == source_sol[0])
 
                 if maps:
-                    maps.write({'sale_line_id':target_sol[0].id})
+                    if not test:
+                        maps.write({'sale_line_id':target_sol[0].id})
                     info += "INFO | {} map lines updated in project {}.\n".format(len(maps),project.name)
                 else: 
                     info += "INFO | No map lines updated in project {}.\n".format(project.name)
 
                 if ts:
-                    ts.write({
-                        'so_line':target_sol[0].id,
-                        'so_line_unit_price':target_sol[0].price_unit,
-                        'rate_id':target_sol[0].product_id.product_tmpl_id.id,
-                        })
+                    if not test:
+                        ts.write({
+                            'so_line':target_sol[0].id,
+                            'so_line_unit_price':target_sol[0].price_unit,
+                            'rate_id':target_sol[0].product_id.product_tmpl_id.id,
+                            })
                     info += "INFO | {} timesheets updated in project {}.\n".format(len(ts),project.name)
                 else: 
                     info += "INFO | No timesheets updated in project {}.\n".format(project.name)
             
         self.info=info
-        self.run_date = fields.Datetime.now()
+        if not test:
+            self.run_date = fields.Datetime.now()
