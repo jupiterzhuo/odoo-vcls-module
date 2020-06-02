@@ -55,7 +55,7 @@ class BillabilityReport(models.Model):
     non_billability_percent = fields.Float(readonly=True, digits = (12,2), store=True, group_operator="avg")
     total_time_coded = fields.Float(string='Time coded [h]', readonly=True)
     total_time_coded_percent = fields.Float(string='coding ratio [%]', readonly=True, group_operator="avg")
-    full_time_amount = fields.Float(string='Full time amount', help='effective capacity / 40', readonly=True)
+    amount_fte_billable = fields.Float(string='FTE with consult %', help='effective capacity / 40 * consult %', readonly=True)
 
     @api.multi
     @api.depends('employee_id.name', 'week_number', 'year')
@@ -113,14 +113,14 @@ class BillabilityReport(models.Model):
                 
                 #to avoid division by 0 if there is no capacity
                 if week_data_line['Effective Capacity [h]'] == 0:
-                    week_data_line['full_time_amount'] = None
+                    week_data_line['amount_fte_billable'] = None
                     week_data_line['billability_percent'] = None
                     week_data_line['non_billability_percent'] = None
                     week_data_line['total_time_coded_percent'] = None
                     continue
                 week_data_line['non_billability_percent'] = week_data_line['valued_non_billable_hours'] / week_data_line['Effective Capacity [h]'] * 100
                 week_data_line['total_time_coded_percent'] = week_data_line['total_time_coded'] / week_data_line['Effective Capacity [h]'] * 100
-                week_data_line['full_time_amount'] = week_data_line['Effective Capacity [h]'] / 40
+                week_data_line['amount_fte_billable'] = (week_data_line['Effective Capacity [h]'] / 40) * consult_decimal
                 if consult_decimal == 0:
                     week_data_line['billability_percent'] = None
                     continue
@@ -180,5 +180,5 @@ class BillabilityReport(models.Model):
             'non_billability_percent' : 'non_billability_percent',
             'total_time_coded' : 'total_time_coded',
             'total_time_coded_percent' : 'total_time_coded_percent',
-            'full_time_amount' : 'full_time_amount'
+            'amount_fte_billable' : 'amount_fte_billable'
         }

@@ -54,9 +54,9 @@
                 <field name='department'/>
                 <filter string="Billable" name='billable' domain="[('consultancy_percentage', '&gt;', 0)]"/>
                 <separator/>
-                <filter string="Last 30 Days" name="last_month" domain="[('start_date','&gt;', (context_today() - datetime.timedelta(weeks=4)).strftime('%Y-%m-%d'))]"/>
+                <filter string="Last 4 Weeks" name="last_month" domain="[('start_date','&gt;', (context_today() - datetime.timedelta(weeks=4)).strftime('%Y-%m-%d'))]"/>
                 <separator/>
-                <filter string="New Comer" name='new_comer' domain="[('employee_start_date','&gt;', (context_today() - datetime.timedelta(weeks=8)).strftime('%Y-%m-%d'))]"/>
+                <filter string="New Comers" name='new_comer' domain="[('employee_start_date','&gt;', (context_today() - datetime.timedelta(weeks=8)).strftime('%Y-%m-%d'))]"/>
                 <group expand="0" string="Group By">
                 <filter string="Office" name="groupby_office" domain="[]" context="{'group_by':'office'}"/>
                 <filter string="Company" name="groupby_company" domain="[]" context="{'group_by':'company'}"/>
@@ -64,7 +64,6 @@
                 <filter string="Employee" name="groupby_employee" domain="[]" context="{'group_by':'employee_name'}"/>
                 <separator/>
                 <filter string="Week" name="groupby_week" domain="[]" context="{'group_by':'start_date'}"/>
-                
                 </group>
             </search>
         </field>
