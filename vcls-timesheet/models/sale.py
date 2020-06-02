@@ -136,7 +136,7 @@ class SaleOrder(models.Model):
                 line._compute_untaxed_amount_invoiced()
                 _logger.info("Invoiced amount{}".format(line.untaxed_amount_invoiced))
                 line._compute_untaxed_amount_to_invoice()
-                _logger.info("Invoiced amount{}".format(line.untaxed_amount_to_invoice))
+                _logger.info("To Invoice amount{}".format(line.untaxed_amount_to_invoice))
 
 
 class SaleOrderLine(models.Model):
@@ -302,8 +302,11 @@ class SaleOrderLine(models.Model):
     def _compute_untaxed_amount_invoiced(self):
         super()._compute_untaxed_amount_invoiced()
 
+        for line in self:
+            _logger.info("{}".format(vcls_type))
+
         for line in self.filtered(lambda l: l.historical_invoiced_amount>0):
-            _logger.info("Historical amount invoiced {} {}".format(line.historical_invoiced_amount, line.vcls_type))
+            _logger.info("Historical amount invoiced {}".format(line.historical_invoiced_amount))
             line.untaxed_amount_invoiced += line.historical_invoiced_amount
 
         for line in self.filtered(lambda l: l.vcls_type=='rate' and l.order_id.invoicing_mode == 'tm'):
