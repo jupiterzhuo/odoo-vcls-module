@@ -120,9 +120,9 @@ class LeadQuotation(models.TransientModel):
         domain = [('project_id','in',projects.ids),('timesheet_invoice_id', '=', False),('is_timesheet','=',True)] #we don't change invoiced timesheets, too risky
         
         if self.source_employee_id:
-            domain.append(('employee_id','=',self.source_employee_id))
+            domain.append(('employee_id','=',self.source_employee_id.id))
         if self.source_task_id:
-            domain.append(('task_id','=',self.source_task_id))
+            domain.append(('task_id','=',self.source_task_id.id))
         if self.date_range_start:
             domain.append(('date','>=',self.date_range_start))
         if self.date_range_end:
