@@ -229,9 +229,10 @@ class SaleOrderLine(models.Model):
                 timesheets = line.order_id.timesheet_ids.filtered(lambda ts: ts.stage_id=='historical' and ts.so_line == line)
                 
                 if timesheets:
-                    #_logger.info("Historical QTY for {} : {}".format(line.name,len(timesheets)))
+                    _logger.info("Historical QTY for {} : {}".format(line.name,len(timesheets)))
                     if line.product_uom == self.env.ref('uom.product_uom_day'): #if we are in daily
                         line.qty_invoiced += sum(timesheets.mapped('unit_amount_rounded'))/8
+                        _logger.info("Historical QTY for {} ".format(line.qty_invoiced)
                     else:
                         line.qty_invoiced += sum(timesheets.mapped('unit_amount_rounded'))
                     
