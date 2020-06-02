@@ -303,7 +303,7 @@ class SaleOrderLine(models.Model):
         super()._compute_untaxed_amount_invoiced()
 
         for line in self:
-            _logger.info("{}".format(vcls_type))
+            _logger.info("{}".format(line.vcls_type))
 
         for line in self.filtered(lambda l: l.historical_invoiced_amount>0):
             _logger.info("Historical amount invoiced {}".format(line.historical_invoiced_amount))
