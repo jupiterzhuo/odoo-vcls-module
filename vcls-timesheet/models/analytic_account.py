@@ -557,7 +557,7 @@ class AnalyticLine(models.Model):
 
             task_ts = timesheets.filtered(lambda t: t.task_id.id == task.id and t.task_id.stage_allow_ts)
             for employee in task_ts.mapped('employee_id'):
-                #_logger.info("SMART TIMESHEETING: {} on {}".format(task.name,employee.name))
+                _logger.info("SMART TIMESHEETING: {} on {}".format(task.name,employee.name))
                 #we finally create the ts
                 self.create({
                     'date': now + timedelta(days=1),
