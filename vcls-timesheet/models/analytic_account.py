@@ -552,7 +552,8 @@ class AnalyticLine(models.Model):
         ])
 
         tasks |= timesheets.mapped('task_id')
-        _logger.info("SMART TIMESHEETING: {} unique tasks in {}".format(len(tasks),len(timesheets.mapped('task_id'))))
+        _logger.info("SMART TIMESHEETING: {} unique tasks in {} for {} timesheets".format(len(tasks),len(timesheets.mapped('task_id')),len(timesheets)))
+        _logger.info("SMART TIMESHEETING: {} ".format(timesheets.mapped('task_id')))
 
         for task in tasks:
             if task.project_id.parent_id:
