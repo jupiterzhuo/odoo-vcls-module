@@ -551,10 +551,9 @@ class AnalyticLine(models.Model):
             ('date', '<', now - timedelta(days=days,hours=remainder)),
         ])
 
-        tasks |= timesheets.mapped('task_id')
+        tasks |= timesheets.mapped('reporting_task_id')
         _logger.info("SMART TIMESHEETING: {} unique tasks in {} for {} timesheets".format(len(tasks),len(timesheets.mapped('task_id')),len(timesheets)))
         tasks=tasks.sorted(key=lambda r: r.id)
-        tasks= tasks.filtered(lambda p: not p.parent_id)
         _logger.info("SMART TIMESHEETING: {} ".format(tasks.mapped('id')))
 
         for task in tasks:
