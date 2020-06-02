@@ -126,15 +126,15 @@ class SaleOrder(models.Model):
             _logger.info("{}".format(so.name))
             for line in so.order_line:
                 line._compute_qty_delivered()
-                _logger.info("Delivered {}".format(so.qty_delivered))
+                _logger.info("Delivered {}".format(line.qty_delivered))
                 line._get_invoice_qty()
-                _logger.info("Invoiced {}".format(so.qty_delivered))
+                _logger.info("Invoiced {}".format(line.qty_delivered))
                 line._compute_amount_delivered_from_task()
                 line._compute_amount_invoiced_from_task()
                 line._compute_untaxed_amount_invoiced()
-                _logger.info("Invoiced amount{}".format(so.untaxed_amount_invoiced))
+                _logger.info("Invoiced amount{}".format(line.untaxed_amount_invoiced))
                 line._compute_untaxed_amount_to_invoice()
-                _logger.info("Invoiced amount{}".format(so.untaxed_amount_to_invoice))
+                _logger.info("Invoiced amount{}".format(line.untaxed_amount_to_invoice))
 
 
 class SaleOrderLine(models.Model):
