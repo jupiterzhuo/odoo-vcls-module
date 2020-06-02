@@ -542,6 +542,8 @@ class AnalyticLine(models.Model):
         remainder = hourly_offset%24
         now = fields.Datetime.now()
 
+        tasks = self.env['project.task']
+
         timesheets = self.search([
             ('project_id', '!=', False),
             ('unit_amount', '>', 0),
@@ -549,7 +551,10 @@ class AnalyticLine(models.Model):
             ('date', '<', now - timedelta(days=days,hours=remainder)),
         ])
 
-        for task in timesheets.mapped('task_id'):
+        tasks |= timesheets.mapped('task_id')
+        _logger.info("SMART TIMESHEETING: {} unique tasks in {}".format(len(tasks),len(timesheets.mapped('task_id'))))
+
+        for task in tasks:
             if task.project_id.parent_id:
                 parent_project_id = task.project_id.parent_id
             else:
