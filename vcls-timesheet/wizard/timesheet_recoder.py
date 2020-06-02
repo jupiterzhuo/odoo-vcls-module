@@ -205,9 +205,14 @@ class LeadQuotation(models.TransientModel):
 
                     if ts:
                         if mode=='real':
+                            if target_sol[0].product_uom == self.env.ref('uom.product_uom_day'): #if we are in daily
+                                so_line_unit_price = round((target_sol[0].price_unit/8.0),2)
+                            else:
+                                so_line_unit_price = target_sol[0].price_unit
+
                             ts.write({
                                 'so_line':target_sol[0].id,
-                                'so_line_unit_price':target_sol[0].price_unit,
+                                'so_line_unit_price':so_line_unit_price,
                                 'rate_id':target_sol[0].product_id.product_tmpl_id.id,
                                 })
                         info += "INFO | {} timesheets updated in project {}.\n".format(len(ts),project.name)
