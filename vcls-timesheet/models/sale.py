@@ -122,15 +122,19 @@ class SaleOrder(models.Model):
         active_ids = context.get('active_ids',[])
         _logger.info("{}".format(active_ids))
         for so_id in active_ids:
-            so = self.env.browse(so_id)
+            so = self.browse(so_id)
             _logger.info("{}".format(so.name))
             for line in so.order_line:
                 line._compute_qty_delivered()
+                _logger.info("Delivered {}".format(so.qty_delivered))
                 line._get_invoice_qty()
+                _logger.info("Invoiced {}".format(so.qty_delivered))
                 line._compute_amount_delivered_from_task()
                 line._compute_amount_invoiced_from_task()
                 line._compute_untaxed_amount_invoiced()
+                _logger.info("Invoiced amount{}".format(so.untaxed_amount_invoiced))
                 line._compute_untaxed_amount_to_invoice()
+                _logger.info("Invoiced amount{}".format(so.untaxed_amount_to_invoice))
 
 
 class SaleOrderLine(models.Model):
