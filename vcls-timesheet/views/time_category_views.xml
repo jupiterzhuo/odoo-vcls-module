@@ -69,7 +69,7 @@
                     <attribute name="options">{'no_create':True,'no_create_edit':True}</attribute>
                 </field>
                 <field name="task_id" position="before">
-                    <field name="main_project_id" required="1" options="{'no_create':True,'no_create_edit':True}" domain="[('allow_timesheets','=',True)]"/>
+                    <field name="main_project_id" required="1" options="{'no_create':True,'no_create_edit':True}" domain="[('allow_timesheets','=',True),('parent_id','=',False)]"/>
                     <!--<field name="main_project_id" context="{'related_core_team_projects':True}" required="1"/>-->
                 </field>
             </field>

@@ -120,9 +120,9 @@ class LeadQuotation(models.TransientModel):
         domain = [('project_id','in',projects.ids),('timesheet_invoice_id', '=', False),('is_timesheet','=',True)] #we don't change invoiced timesheets, too risky
         
         if self.source_employee_id:
-            domain.append(('employee_id','=',self.source_employee_id))
+            domain.append(('employee_id','=',self.source_employee_id.id))
         if self.source_task_id:
-            domain.append(('task_id','=',self.source_task_id))
+            domain.append(('task_id','=',self.source_task_id.id))
         if self.date_range_start:
             domain.append(('date','>=',self.date_range_start))
         if self.date_range_end:
@@ -205,9 +205,14 @@ class LeadQuotation(models.TransientModel):
 
                     if ts:
                         if mode=='real':
+                            if target_sol[0].product_uom == self.env.ref('uom.product_uom_day'): #if we are in daily
+                                so_line_unit_price = round((target_sol[0].price_unit/8.0),2)
+                            else:
+                                so_line_unit_price = target_sol[0].price_unit
+
                             ts.write({
                                 'so_line':target_sol[0].id,
-                                'so_line_unit_price':target_sol[0].price_unit,
+                                'so_line_unit_price':so_line_unit_price,
                                 'rate_id':target_sol[0].product_id.product_tmpl_id.id,
                                 })
                         info += "INFO | {} timesheets updated in project {}.\n".format(len(ts),project.name)
