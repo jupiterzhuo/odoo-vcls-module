@@ -78,7 +78,7 @@ class Project(models.Model):
                               string='Ta')
     controller_id = fields.Many2one('res.users', related='partner_id.controller_id', string='Project Controller')
     invoice_admin_id = fields.Many2one('res.users', related='partner_id.invoice_admin_id', string='Invoice Administrator')
-    account_manager_id = fields.Many2one('res.users', related='sale_order_id.user_id', string='Account Manager')
+    account_manager_id = fields.Many2one('res.users', related='sale_order_id.user_id', string='Account Manager', store=True)
 
     invoices_count = fields.Integer(
         compute='_get_out_invoice_ids',

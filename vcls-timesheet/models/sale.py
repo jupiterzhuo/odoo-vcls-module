@@ -116,6 +116,28 @@ class SaleOrder(models.Model):
             #we get the default timecategories from the product_template
             line.task_id.time_category_ids = line.product_id.product_tmpl_id.time_category_ids
 
+    @api.multi
+    def recompute_lines(self):
+        context = self.env.context
+        active_ids = context.get('active_ids',[])
+        _logger.info("{}".format(active_ids))
+        for so_id in active_ids:
+            so = self.browse(so_id)
+            _logger.info("{}".format(so.name))
+            for line in so.order_line:
+                line._compute_qty_delivered()
+                _logger.info("Delivered {}".format(line.qty_delivered))
+                line._get_invoice_qty()
+                _logger.info("Invoiced {}".format(line.qty_delivered))
+                line._compute_amount_delivered_from_task()
+                _logger.info("Delivered amount from task{}".format(line.amount_delivered_from_task))
+                line._compute_amount_invoiced_from_task()
+                _logger.info("Invoiced amount from task{}".format(line.amount_invoiced_from_task))
+                line._compute_untaxed_amount_invoiced()
+                _logger.info("Invoiced amount{}".format(line.untaxed_amount_invoiced))
+                line._compute_untaxed_amount_to_invoice()
+                _logger.info("To Invoice amount{}".format(line.untaxed_amount_to_invoice))
+
 
 class SaleOrderLine(models.Model):
     _inherit = 'sale.order.line'
@@ -229,8 +251,12 @@ class SaleOrderLine(models.Model):
                 timesheets = line.order_id.timesheet_ids.filtered(lambda ts: ts.stage_id=='historical' and ts.so_line == line)
                 
                 if timesheets:
-                    #_logger.info("Historical QTY for {} : {}".format(line.name,len(timesheets)))
-                    line.qty_invoiced += sum(timesheets.mapped('unit_amount_rounded'))
+                    _logger.info("Historical QTY for {} : {}".format(line.name,len(timesheets)))
+                    if line.product_uom == self.env.ref('uom.product_uom_day'): #if we are in daily
+                        line.qty_invoiced += sum(timesheets.mapped('unit_amount_rounded'))/8
+                        _logger.info("Historical QTY for {} ".format(line.qty_invoiced))
+                    else:
+                        line.qty_invoiced += sum(timesheets.mapped('unit_amount_rounded'))
                     
 
     # We need to override the OCA to take the rounded_unit_amount in account rather than the standard unit_amount
@@ -276,13 +302,19 @@ class SaleOrderLine(models.Model):
     def _compute_untaxed_amount_invoiced(self):
         super()._compute_untaxed_amount_invoiced()
 
+        for line in self:
+            _logger.info("{}".format(line.vcls_type))
+
+        for line in self.filtered(lambda l: l.historical_invoiced_amount>0):
+            _logger.info("Historical amount invoiced {}".format(line.historical_invoiced_amount))
+            line.untaxed_amount_invoiced += line.historical_invoiced_amount
+
         for line in self.filtered(lambda l: l.vcls_type=='rate' and l.order_id.invoicing_mode == 'tm'):
             ts = self.env['account.analytic.line'].search([('stage_id','=','historical'),('so_line','=',line.id)])
             if ts:
                 line.untaxed_amount_invoiced += sum(ts.mapped(lambda r: r.unit_amount_rounded*r.so_line_unit_price))
 
-        for line in self.filtered(lambda l: l.historical_invoiced_amount>0):
-            line.untaxed_amount_invoiced += line.historical_invoiced_amount
+        
         
 
     @api.depends('state', 'price_reduce', 'product_id', 'untaxed_amount_invoiced', 'qty_delivered')
