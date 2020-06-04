@@ -243,6 +243,17 @@ class Invoice(models.Model):
                         time_category_rate_matrix_data[time_category_matrix_key] += unit_amount
                         time_category_row_data.setdefault(time_category_id, None)
 
+            for key, value in task_rate_matrix_data.items():
+                for index, nb in enumerate(value):
+                    value[index] = round(nb, 2)
+                task_rate_matrix_data[key] = value
+      
+            for key, value in project_rate_matrix_data.items():
+                project_rate_matrix_data[key] = round(value, 2)
+
+            for key, value in time_category_rate_matrix_data.items():
+                time_category_rate_matrix_data[key] = round(value, 2)
+
         # reorder projects_row_data columns according to the sale.order.line sequence to  mimic the sale order
         # structure looks like: OrderedDict([(project.project(146,), OrderedDict([(project.task(945,), [...]), (project.task(946,), [...]), (project.task(943,), [...])]))])
         if projects_row_data and projects_row_data[project_id]:
@@ -342,6 +353,7 @@ class Invoice(models.Model):
                 rate_sale_line_id.product_uom
             )
             values['qty'] += qty
+            values['qty'] = round(values['qty'], 2)
             total_not_taxed += qty * values['price']
         # assert abs(total_not_taxed - self.amount_untaxed) < 0.001, _('Something went wrong')
         return data, total_not_taxed
@@ -392,6 +404,7 @@ class Invoice(models.Model):
                 rate_sale_line_id.product_uom
             )
             values['qty'] += qty
+            values['qty'] = round(values['qty'], 2)
             total_not_taxed += qty * values['price']
         # assert abs(total_not_taxed - self.amount_untaxed) < 0.001, _('Something went wrong')
         return data, total_not_taxed
