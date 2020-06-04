@@ -203,9 +203,9 @@ class SaleOrder(models.Model):
         if self.timesheet_limit_date:
             invoice_vals['timesheet_limit_date'] = self.timesheet_limit_date
             if self.invoicing_frequency == 'month':
-                invoice_vals['period_start'] = self.timesheet_limit_date + relativedelta(months=-1,days=1)
+                invoice_vals['period_start'] = self.timesheet_limit_date.replace(day=1) #self.timesheet_limit_date + relativedelta(months=-1,days=1)
             elif self.invoicing_frequency == 'trimester':
-                invoice_vals['period_start'] = self.timesheet_limit_date + relativedelta(months=-3,days=1)
+                invoice_vals['period_start'] = self.timesheet_limit_date.replace(day=1) + relativedelta(months=-2) #self.timesheet_limit_date + relativedelta(months=-3,days=1)
             else:
                 pass
         else:

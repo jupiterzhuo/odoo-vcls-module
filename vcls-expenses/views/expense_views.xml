@@ -35,7 +35,7 @@
                                 <field name="total_amount" widget='monetary' options="{'currency_field': 'currency_id'}" />
                                 <label for="payment_mode" />
                                 <div>
-                                    <field name="payment_mode" widget="radio" groups="hr_expense.group_hr_expense_manager"/>
+                                    <field name="payment_mode" widget="radio"/>
                                 </div>
                             </group>
 

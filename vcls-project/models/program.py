@@ -127,7 +127,7 @@ class ProjectProgram(models.Model):
         for program in self:
             projects = self.env['project.project'].search([('program_id','=',program.id),('parent_id','=',False)])
             if projects:
-                program.opportunity_count = len(projects)
+                program.project_count = len(projects)
     
     def _compute_invoice_count(self):
         for program in self:
@@ -191,4 +191,5 @@ class Project(models.Model):
     program_id = fields.Many2one(
         comodel_name = 'project.program',
         string = 'Related Program',
+        related="sale_order_id.program_id",
     )
