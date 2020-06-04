@@ -65,6 +65,7 @@
                         <field name="sharepoint_folder" widget="url" readonly="1" text="   Open Project Folder" string='' attrs="{'invisible': [('show_folder_path', '=', False)]}"/>
                         <group>
                             <field name="partner_id" string="Client"/>
+                            <field name="program_id" string="Client Program"/>
                             <field name="scope_of_work"/>
                         </group>
                         <group string="Project KPIs">
