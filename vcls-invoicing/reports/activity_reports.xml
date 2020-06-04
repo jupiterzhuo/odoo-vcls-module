@@ -59,7 +59,7 @@
                                 <t t-esc="project_rate_matrix_data.get((project_id, rate_product_id), '-')"/>
                             </td>
                             <td class="text-right">
-                                <t t-esc="sum([project_rate_matrix_data.get((project_id, rate_product_id), 0) for rate_product_id in rate_product_ids])"/>
+                                <t t-esc="round(sum([project_rate_matrix_data.get((project_id, rate_product_id), 0) for rate_product_id in rate_product_ids]), 2)"/>
                             </td>
                         </tr>
                         <!-- iteration on the task/subtask -->
@@ -80,7 +80,7 @@
                                         <t t-esc="task_rate_matrix_data.get((project_id, ancestor_id, rate_product_id), ['-', '-'])[1]"/>
                                     </td>
                                     <td class="text-right">
-                                        <t t-esc="sum([task_rate_matrix_data.get((project_id, ancestor_id, rate_product_id), [0, 0])[1] for rate_product_id in rate_product_ids])"/>
+                                        <t t-esc="round(sum([task_rate_matrix_data.get((project_id, ancestor_id, rate_product_id), [0, 0])[1] for rate_product_id in rate_product_ids]), 2)"/>
                                     </td>
                                 </tr>
                                     <td class="pl-4"><t t-esc="task_id.name"/></td>
@@ -99,7 +99,7 @@
                                 </td>
                                 <!-- total of the line under "Grand Total" -->
                                 <td class="text-right">
-                                    <t t-esc="sum([task_rate_matrix_data.get((project_id, task_id, rate_product_id), [0, 0])[0] for rate_product_id in rate_product_ids])"/>
+                                    <t t-esc="round(sum([task_rate_matrix_data.get((project_id, task_id, rate_product_id), [0, 0])[0] for rate_product_id in rate_product_ids]), 2)"/>
                                 </td>
                             </tr>
                         </t>
@@ -151,7 +151,7 @@
                     <t t-esc="time_category_rate_matrix_data.get((project_id, task_id, time_category_id, rate_product_id), '-')"/>
                 </td>
                 <td class="text-right">
-                    <t t-esc="sum([time_category_rate_matrix_data.get((project_id, task_id, time_category_id, rate_product_id), 0) for rate_product_id in rate_product_ids])"/>
+                    <t t-esc="round(sum([time_category_rate_matrix_data.get((project_id, task_id, time_category_id, rate_product_id), 0) for rate_product_id in rate_product_ids]), 2)"/>
                 </td>
             </tr>
         </t>
