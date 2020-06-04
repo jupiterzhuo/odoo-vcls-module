@@ -55,6 +55,7 @@
         'views/time_category_views.xml',
         'views/timesheet_report_views.xml',
         'views/contact_view.xml',
+        'views/project_summary_views.xml',
         'wizard/timesheet_recode_views.xml',
 
 

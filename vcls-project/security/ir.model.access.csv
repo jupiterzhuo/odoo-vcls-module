@@ -9,13 +9,6 @@ access_program_program_account_manager,access_program_program_account_manager,vc
 
 access_project_forecast_account_manager,project.forecast.account.manager,model_project_forecast,vcls_security.vcls_account_manager,1,1,1,1
 
-access_project_summary_manager,project.summary,model_project_summary,sales_team.group_sale_manager,1,1,1,1
-access_project_summary_user,project.summary,model_project_summary,project.group_project_user,1,0,0,0
-access_project_summary_consultant,project.summary consultant,model_project_summary,vcls_security.group_vcls_consultant,1,0,0,0
-access_project_summary_lc,project.summary,model_project_summary,vcls_security.vcls_lc,1,1,1,1
-access_project_summary_account_manager,project.summary,model_project_summary,vcls_security.vcls_account_manager,1,0,0,0
-access_project_summary_invoice_administrator,access_project_summary_invoice_administrator,model_project_summary,vcls_security.group_finance_invoice_administrator,1,0,0,0
-
 access_account_invoice_lc,account.invoice.lc,account.model_account_invoice,vcls_security.vcls_lc,1,1,0,0
 access_account_invoice_line_lc,account.invoice.line.lc,account.model_account_invoice_line,vcls_security.vcls_lc,1,0,0,0
 access_account_invoice_tax_lc,account.invoice.tax.lc,account.model_account_invoice_tax,vcls_security.vcls_lc,1,0,0,0
@@ -23,3 +16,6 @@ access_account_invoice_tax_lc,account.invoice.tax.lc,account.model_account_invoi
 access_project_timesheet_forecast_report_analysis_consultant,project.timesheet.forecast.report.analysis,project_timesheet_forecast.model_project_timesheet_forecast_report_analysis,vcls_security.group_vcls_consultant,1,0,0,0
 access_project_timesheet_forecast_report_analysis_lc,project.timesheet.forecast.report.analysis,project_timesheet_forecast.model_project_timesheet_forecast_report_analysis,vcls_security.vcls_lc,1,0,0,0
 access_project_timesheet_forecast_report_analysis_account_manager,project.timesheet.forecast.report.analysis,project_timesheet_forecast.model_project_timesheet_forecast_report_analysis,vcls_security.vcls_account_manager,1,0,0,0
+
+
+access_project_summary_manager,project.summary,model_project_summary,base.group_user,1,1,1,1

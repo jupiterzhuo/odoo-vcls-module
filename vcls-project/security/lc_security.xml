@@ -3,14 +3,14 @@
     <data>
 
 
-    <record model="ir.rule" id="project_summary_lc_rule">
+    <!-- <record model="ir.rule" id="project_summary_lc_rule">
         <field name="name">Project summary: lc is project manager</field>
         <field name="model_id" ref="vcls-project.model_project_summary"/>
         <field name="domain_force">[
             ('project_id.user_id', '=', user.id),
         ]</field>
         <field name="groups" eval="[(4, ref('vcls_security.vcls_lc'))]"/>
-    </record>
+    </record> -->
 
     <record model="ir.rule" id="account_invoice_lc_rule">
         <field name="name">Out invoice: lc is project manager of linked invoices</field>
