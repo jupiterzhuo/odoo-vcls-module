@@ -64,7 +64,8 @@
                         </group>
                         <field name="sharepoint_folder" widget="url" readonly="1" text="   Open Project Folder" string='' attrs="{'invisible': [('show_folder_path', '=', False)]}"/>
                         <group>
-                            <field name="partner_id" string="Client"/>
+                            <field name="partner_id" string="Client" options='{"no_open": True,"no_create": True, "no_create_edit": True}'/>
+                            <field name="program_id" string="Client Program" domain="[('client_id','=',partner_id)]" options='{"no_open": True,"no_create": True, "no_create_edit": True}'/>
                             <field name="scope_of_work"/>
                         </group>
                         <group string="Project KPIs">
@@ -193,7 +194,7 @@
                                 </kanban>
                             </field>
                         </page>
-                        <page name="billing_employee_rate" string="Invoicing" attrs="{'invisible': [('billable_type', '=', 'no')]}" groups="vcls-hr.vcls_group_superuser_lvl2,vcls-suppliers.vcls_group_rm,vcls_security.group_project_controller">
+                        <page name="billing_employee_rate" string="Invoicing" attrs="{'invisible': [('billable_type', '=', 'no')]}" groups="vcls-hr.vcls_group_superuser_lvl2,vcls-suppliers.vcls_group_rm,vcls_security.group_project_controller,vcls_security.vcls_lc,vcls_security.vcls_account_manager">
                             <group>
                                 <field name="billable_type" invisible="1"/>
                                 <field name="sale_order_id" attrs="{'invisible': [('billable_type', '=', 'no')]}"/>
