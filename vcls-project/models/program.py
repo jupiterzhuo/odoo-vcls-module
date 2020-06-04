@@ -191,4 +191,5 @@ class Project(models.Model):
     program_id = fields.Many2one(
         comodel_name = 'project.program',
         string = 'Related Program',
+        related="sale_order_id.program_id",
     )
