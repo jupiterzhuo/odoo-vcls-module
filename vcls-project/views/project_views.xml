@@ -193,7 +193,7 @@
                                 </kanban>
                             </field>
                         </page>
-                        <page name="billing_employee_rate" string="Invoicing" attrs="{'invisible': [('billable_type', '=', 'no')]}" groups="vcls-hr.vcls_group_superuser_lvl2,vcls-suppliers.vcls_group_rm,vcls_security.group_project_controller">
+                        <page name="billing_employee_rate" string="Invoicing" attrs="{'invisible': [('billable_type', '=', 'no')]}" groups="vcls-hr.vcls_group_superuser_lvl2,vcls-suppliers.vcls_group_rm,vcls_security.group_project_controller,vcls_security.vcls_lc,vcls_security.vcls_account_manager">
                             <group>
                                 <field name="billable_type" invisible="1"/>
                                 <field name="sale_order_id" attrs="{'invisible': [('billable_type', '=', 'no')]}"/>
