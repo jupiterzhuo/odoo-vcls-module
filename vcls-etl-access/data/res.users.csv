@@ -1,0 +1,4 @@
+id,name,login,company_id:id,company_ids:id,tz
+project_manager_user,Project Manager,ratePM@noemail.com,vcls-hr.company_BH,vcls-hr.company_BH,America/New_York
+clerical_user,Clerical,rateCL@noemail.com,vcls-hr.company_BH,vcls-hr.company_BH,America/New_York
+regulatory_associate_user,Regulatory Associate,rateRA@noemail.com,vcls-hr.company_BH,vcls-hr.company_BH,America/New_York

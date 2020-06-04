@@ -1,0 +1,4 @@
+id,active,name,work_email,employee_type,company_id:id,user_id:id,resource_calendar_id:id
+project_manager_employee,False,Project Manager,ratePM@noemail.com,internal,vcls-hr.company_BH,vcls-etl-access.project_manager_user,vcls-etl-access.bh_resource
+clerical_employee,False,Clerical,rateCL@noemail.com,internal,vcls-hr.company_BH,vcls-etl-access.clerical_user,vcls-etl-access.bh_resource
+regulatory_associate_employee,False,Regulatory Associate,rateRA@noemail.com,internal,vcls-hr.company_BH,vcls-etl-access.regulatory_associate_user,vcls-etl-access.bh_resource

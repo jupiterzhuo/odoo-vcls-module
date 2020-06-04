@@ -1,0 +1,79 @@
+<odoo>
+    <data noupdate="0">
+
+        <record id="project_manager_product" model="product.template">
+            <field name="name">Project Manager</field>
+            <field name="sale_ok" eval="True"/>
+            <field name="purchase_ok" eval="False"/>
+            <field name="active" eval="True" />
+            <field name="lst_price" eval="200"/>
+            <field name="taxes_id" eval="False"/>
+            <field name="uom_id" ref="uom.product_uom_hour" />
+            <field name="uom_po_id" ref="uom.product_uom_hour" />
+            <field name="type">service</field>
+            <field name="vcls_type">rate</field>
+            <field name="service_tracking">no</field>
+            <field name="service_policy">delivered_timesheet</field>
+            <field name="categ_id" ref="vcls-etl-access.bh_rate" />
+            <field name="company_id" ref="vcls-hr.company_BH" />
+            <field name="seniority_level_id" ref="vcls-etl-access.pm_seniority_level" />
+            <field name="forecast_employee_id" ref="vcls-etl-access.project_manager_employee" />
+            <field name="item_ids" eval="[(6,0,[ref('vcls-etl-access.usd_pm_pricelist_item'),
+                                                ref('vcls-etl-access.gbp_pm_pricelist_item'),
+                                                ref('vcls-etl-access.eur_pm_pricelist_item'),
+                                                ref('vcls-etl-access.chf_pm_pricelist_item')
+                                        ])]"/>
+        </record>
+
+        <record id="regulatory_associate_product" model="product.template">
+            <field name="name">Regulatory Associate</field>
+            <field name="sale_ok" eval="True"/>
+            <field name="purchase_ok" eval="False"/>
+            <field name="active" eval="True" />
+            <field name="lst_price" eval="200"/>
+            <field name="taxes_id" eval="False"/>
+            <field name="uom_id" ref="uom.product_uom_hour" />
+            <field name="uom_po_id" ref="uom.product_uom_hour" />
+            <field name="type">service</field>
+            <field name="vcls_type">rate</field>
+            <field name="service_tracking">no</field>
+            <field name="service_policy">delivered_timesheet</field>
+            <field name="categ_id" ref="vcls-etl-access.bh_rate" />
+            <field name="company_id" ref="vcls-hr.company_BH" />
+            <field name="seniority_level_id" ref="vcls-etl-access.ra_seniority_level" />
+            <field name="forecast_employee_id" ref="vcls-etl-access.regulatory_associate_employee" />
+            <field name="item_ids" eval="[(6,0,[ref('vcls-etl-access.usd_ra_pricelist_item'),
+                                                ref('vcls-etl-access.gbp_ra_pricelist_item'),
+                                                ref('vcls-etl-access.eur_ra_pricelist_item'),
+                                                ref('vcls-etl-access.chf_ra_pricelist_item')
+                                        ])]"/>
+        </record>
+
+        <record id="clerical_product" model="product.template">
+            <field name="name">Clerical</field>
+            <field name="sale_ok" eval="True"/>
+            <field name="purchase_ok" eval="False"/>
+            <field name="active" eval="True" />
+            <field name="lst_price" eval="100"/>
+            <field name="taxes_id" eval="False"/>
+            <field name="communication_elligible" eval="True"/>
+            <field name="uom_id" ref="uom.product_uom_hour" />
+            <field name="uom_po_id" ref="uom.product_uom_hour" />
+            <field name="type">service</field>
+            <field name="vcls_type">rate</field>
+            <field name="service_tracking">no</field>
+            <field name="service_policy">delivered_timesheet</field>
+            <field name="categ_id" ref="vcls-etl-access.bh_rate" />
+            <field name="company_id" ref="vcls-hr.company_BH" />
+            <field name="seniority_level_id" ref="vcls-etl-access.cl_seniority_level" />
+            <field name="forecast_employee_id" ref="vcls-etl-access.clerical_employee" />
+            <field name="item_ids" eval="[(6,0,[ref('vcls-etl-access.usd_cl_pricelist_item'),
+                                                ref('vcls-etl-access.gbp_cl_pricelist_item'),
+                                                ref('vcls-etl-access.eur_cl_pricelist_item'),
+                                                ref('vcls-etl-access.chf_cl_pricelist_item')
+                                        ])]"/>
+        </record>
+
+    </data>
+
+</odoo>

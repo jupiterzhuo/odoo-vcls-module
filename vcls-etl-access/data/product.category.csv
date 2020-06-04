@@ -1,2 +1,3 @@
 id,name,is_business_line
 bh_category,B&H Category,True
+bh_rate, B&H / Rates,False

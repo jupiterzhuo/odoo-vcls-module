@@ -29,6 +29,12 @@
     # always loaded
     'data': [
         'data/product.category.csv',
+        'data/hr.employee.seniority.level.csv',
+        'data/product.pricelist.item.csv',
+        'data/resource.calendar.csv',
+        'data/res.users.csv',
+        'data/employee.xml',
+        'data/products.xml',
         'security/ir.model.access.csv',
         'views/etl_views.xml',
         'views/etl_menu.xml',

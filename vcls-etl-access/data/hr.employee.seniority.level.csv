@@ -1,0 +1,4 @@
+id,name,sequence,code
+pm_seniority_level,Project Manager,10,PM
+ra_seniority_level,Regulatory Associate,10,RA
+cl_seniority_level,Clerical,10,CL

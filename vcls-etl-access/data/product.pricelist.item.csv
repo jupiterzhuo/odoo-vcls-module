@@ -1,0 +1,15 @@
+id,pricelist_id:id,fixed_price,min_quantity
+usd_pm_pricelist_item,vcls-crm.pricelist_std_USD,230,0
+gbp_pm_pricelist_item,vcls-crm.pricelist_std_GBP,180,0
+eur_pm_pricelist_item,vcls-crm.pricelist_std_EUR,200,0
+chf_pm_pricelist_item,vcls-crm.pricelist_std_CHF,230,0
+
+usd_ra_pricelist_item,vcls-crm.pricelist_std_USD,230,0
+gbp_ra_pricelist_item,vcls-crm.pricelist_std_GBP,180,0
+eur_ra_pricelist_item,vcls-crm.pricelist_std_EUR,200,0
+chf_ra_pricelist_item,vcls-crm.pricelist_std_CHF,230,0
+
+usd_cl_pricelist_item,vcls-crm.pricelist_std_USD,110,0
+gbp_cl_pricelist_item,vcls-crm.pricelist_std_GBP,90,0
+eur_cl_pricelist_item,vcls-crm.pricelist_std_EUR,100,0
+chf_cl_pricelist_item,vcls-crm.pricelist_std_CHF,110,0

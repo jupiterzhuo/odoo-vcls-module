@@ -238,7 +238,29 @@ class ETLMap(models.Model):
                 })
                 _logger.info("ETL | CRON relaunched")
 
+class GeneralSync(models.AbstractModel):
+    _name = 'etl.sync.mixin'
+    _description = 'This model represents an abstract parent class used to manage ETL'
+    
+    lastRun = fields.Datetime(readonly = True)
 
+    def setNextRun(self):
+        self.lastRun = fields.Datetime.from_string(datetime.now(pytz.timezone("GMT")).strftime("%Y-%m-%d %H:%M:%S.00+0000"))
+        print(self.lastRun)
+    
+    def getStrLastRun(self):
+        if not self.lastRun:
+            return fields.Datetime.from_string('2000-01-01 00:00:00.000000+00:0')
+        return self.lastRun
+    
+    @api.model
+    def getLastUpdate(self, OD_id):
+        partner = self.env['res.partner']
+        odid = int(OD_id[0])
+        record = partner.browse([odid])
+        return str(record.write_date)
 
-
+    @staticmethod
+    def isDateOdooAfterExternal(dateOdoo,dateExternal):
+        return dateOdoo >= dateExternal
 

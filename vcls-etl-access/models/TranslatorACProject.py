@@ -124,11 +124,9 @@ class TranslatorACProject(TranslatorACGeneral.TranslatorACGeneral):
             ra_rate = TranslatorACProject.getRaRate(AC_Project[2], access)
 
             service_product = odoo.env['product.product'].search([('name','=','Migration Default')],limit=1)
-
-            pm_product = odoo.env['product.product'].search([('name','=','Clinical Project Manager')],limit=1)
-            cl_product = odoo.env['product.product'].search([('name','=','Clinical Project Assistant')],limit=1)
-            ra_product = odoo.env['product.product'].search([('name','=','Senior Regulatory Scientist, Clinical Operations')],limit=1)
-            
+            pm_product = odoo.env.ref('vcls-etl-access.project_manager_product').product_variant_ids
+            cl_product = odoo.env.ref('vcls-etl-access.clerical_product').product_variant_ids
+            ra_product = odoo.env.ref('vcls-etl-access.regulatory_associate_product').product_variant_ids
             #we create a section services
             section = odoo.env['sale.order.line'].create({
                                 'order_id':so_id,
@@ -143,7 +141,6 @@ class TranslatorACProject(TranslatorACGeneral.TranslatorACGeneral):
                     'price_unit':0
                 }
             TranslatorACProject.so_line_create_with_changes(odoo,vals)
-
             #we create a section hours
             section = odoo.env['sale.order.line'].create({
                 'order_id':so_id,
@@ -153,7 +150,7 @@ class TranslatorACProject(TranslatorACGeneral.TranslatorACGeneral):
             if pm_rate and pm_product:
                 vals = {
                     'order_id':so_id,
-                    'product_id': pm_product.id,
+                    'product_id': pm_product.ids[0],
                     'product_uom_qty':0,
                     'section_line_id':section.id,
                     }
@@ -163,7 +160,7 @@ class TranslatorACProject(TranslatorACGeneral.TranslatorACGeneral):
             if cl_rate and cl_product:
                 vals = {
                     'order_id':so_id,
-                    'product_id': cl_product.id,
+                    'product_id': cl_product.ids[0],
                     'product_uom_qty':0,
                     'section_line_id':section.id,
                     }
@@ -173,7 +170,7 @@ class TranslatorACProject(TranslatorACGeneral.TranslatorACGeneral):
             if ra_rate and ra_product:
                 vals = {
                     'order_id':so_id,
-                    'product_id': ra_product.id,
+                    'product_id': ra_product.ids[0],
                     'product_uom_qty':0,
                     'section_line_id':section.id,
                     }

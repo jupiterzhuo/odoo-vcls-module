@@ -28,10 +28,10 @@ class TranslatorACTimesheet(TranslatorACGeneral.TranslatorACGeneral):
                 project_id = odoo.env['project.project'].search([('sale_order_id','=',sale_id)],limit=1)
                 task_id = odoo.env['project.task'].search([('sale_order_id','=',sale_id)], limit=1)
                 employeeID = TranslatorACGeneral.TranslatorACGeneral.getEmployeeID(projHour[2], access, odoo)
-                if str(sale_id) == "1051":
+                if str(sale_id) == "465":
                     if project_id and employeeID and sale_id and task_id:
                         if projHour[3]:
-                            timesheet['stage_id'] = "invoiced"
+                            timesheet['stage_id'] = "historical"
                         else:
                             timesheet['stage_id'] = "invoiceable"
                         timesheet['is_timesheet'] = True
@@ -79,22 +79,20 @@ class TranslatorACTimesheet(TranslatorACGeneral.TranslatorACGeneral):
         employee = access.execute(sql).fetchall()
         if employee:
             if employee[0][0]:
-                return odoo.env['product.product'].search([('name','=','Clinical Project Manager')],limit=1).id
+                return odoo.env.ref('vcls-etl-access.project_manager_product').id
             elif employee[0][1]:
-                return odoo.env['product.product'].search([('name','=','Clinical Project Assistant')],limit=1).id
+                return odoo.env.ref('vcls-etl-access.clerical_product').id
             elif employee[0][2]:
-                return odoo.env['product.product'].search([('name','=','Senior Regulatory Scientist, Clinical Operations')],limit=1).id
-            
-            
-
+                return odoo.env.ref('vcls-etl-access.regulatory_associate_product').id
         return False
 
     @staticmethod
     def getSo_Line(employeeID, sale_id, access, odoo):
         rate = TranslatorACTimesheet.getRateId(employeeID, access, odoo)
+        rate_id = odoo.env['product.template'].search([('id','=',rate)],limit=1).product_variant_ids.ids[0]
         sale = odoo.env['sale.order'].search([('id','=',sale_id)],limit=1)
         for line in sale.order_line:
-            if rate == line.product_id.id:
+            if rate_id == line.product_id.id:
                 return line.id
         return False
 

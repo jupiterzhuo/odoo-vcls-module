@@ -1,0 +1,33 @@
+<odoo>
+    <data noupdate="0">
+        <record id="project_manager_employee" model="hr.employee">
+            <field name="active" eval="False"/>
+            <field name="name">Project Manager</field>
+            <field name="work_email">ratePM@noemail.com</field>
+            <field name="employee_type">internal</field>
+            <field name="company_id" ref="vcls-hr.company_BH"/>
+            <field name="user_id" ref="vcls-etl-access.project_manager_user"/>
+            <field name="resource_calendar_id" ref="vcls-etl-access.bh_resource"/>
+        </record>
+
+        <record id="clerical_employee" model="hr.employee">
+            <field name="active" eval="False"/>
+            <field name="name">Clerical</field>
+            <field name="work_email">rateCL@noemail.com</field>
+            <field name="employee_type">internal</field>
+            <field name="company_id" ref="vcls-hr.company_BH"/>
+            <field name="user_id" ref="vcls-etl-access.clerical_user"/>
+            <field name="resource_calendar_id" ref="vcls-etl-access.bh_resource"/>
+        </record>
+
+        <record id="regulatory_associate_employee" model="hr.employee">
+            <field name="active" eval="False"/>
+            <field name="name">Regulatory Associate</field>
+            <field name="work_email">rateRA@noemail.com</field>
+            <field name="employee_type">internal</field>
+            <field name="company_id" ref="vcls-hr.company_BH"/>
+            <field name="user_id" ref="vcls-etl-access.regulatory_associate_user"/>
+            <field name="resource_calendar_id" ref="vcls-etl-access.bh_resource"/>
+        </record>
+    </data>
+</odoo>

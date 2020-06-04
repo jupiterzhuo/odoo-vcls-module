@@ -40,7 +40,6 @@ class accessSync(models.Model):
             else:
                 to_process = self.env['etl.sync.access.keys'].search([('state','not in',['upToDate','postponed']),('priority','=',top_priority)])
 
-            
             if to_process:
                 template = to_process[0]
                 _logger.info("ETL | Found {} {} keys {}".format(len(to_process),template.externalObjName,template.state))
@@ -67,45 +66,47 @@ class accessSync(models.Model):
                                     key[0].write({'state':'upToDate','priority':0})
                                     _logger.info("ETL | Record Created {}/{} | {} |".format(counter,len(to_process),key[0].externalObjName))
                             else:
-                                attributes = translator.translateToOdoo(access_rec, sync, accessInstance)
-                                if not attributes:
-                                    key[0].write({'state':'postponed','priority':0})
-                                    _logger.info("ETL | Missing Mandatory info to process key {} - {}".format(key[0].externalObjName,key[0].externalId))
-                                    continue
-
-                                #UPDATE Case
-                                if key[0].state == 'needUpdateOdoo':
-                                    #we catch the existing record
-                                    o_rec = self.env[key[0].odooModelName].with_context(active_test=False).search([('id','=',key[0].odooId)],limit=1)
-                                    if o_rec:
-                                        o_rec.with_context(tracking_disable=1).write(attributes)
-                                        key[0].write({'state':'upToDate','priority':0})
-                                        _logger.info("ETL | Record Updated {}/{} | {} | {}".format(counter,len(to_process),key[0].externalObjName,attributes.get('log_info')))
-                                    else:
-                                        key[0].write({'state':'upToDate','priority':0})
-                                        _logger.info("ETL | Missed Update - Odoo record not found {}/{} | {} | {}".format(counter,len(to_process),key[0].odooModelName,key[0].odooId))
-                                 
-                                #CREATE Case
-                                elif key[0].state == 'needCreateOdoo':
-                                    odoo_id = self.env[key[0].odooModelName].with_context(tracking_disable=1).create(attributes)
-                                    key[0].write({'state':'upToDate','odooId':odoo_id.id,'priority':0})
-                                    #key[0].write({'state':'upToDate','priority':0})
-                                    _logger.info("ETL | Record Created {}/{} | {} | {}".format(counter,len(to_process),key[0].externalObjName,attributes.get('log_info')))
-                                    if key[0].odooModelName == "sale.order":
-                                        translator.setOrderLine(sync,access_rec, accessInstance, odoo_id.id)
-                                        odoo_id.action_sync()
-                                        odoo_id.action_confirm()
-                                        task_stage = self.env['project.task.type'].search([('name','=','0% Progress')],limit = 1)
-                                        project_id = self.env['project.project'].search([('sale_order_id','=',odoo_id.id)],limit = 1)
-                                        task_id = self.env['project.task'].search([('sale_order_id','=',odoo_id.id)],limit = 1)
-                                        if project_id:
-                                            project_id.write({
-                                                'user_id': odoo_id.user_id.id,
-                                            })                                  
-                                        if task_id:
-                                            task_id.stage_id = task_stage
-                                        
+                                if str(access_rec[2]) == "164":
+                                    attributes = translator.translateToOdoo(access_rec, sync, accessInstance)
+                                    if not attributes:
+                                        key[0].write({'state':'postponed','priority':0})
+                                        _logger.info("ETL | Missing Mandatory info to process key {} - {}".format(key[0].externalObjName,key[0].externalId))
+                                        continue
+                                    
+                                    #UPDATE Case
+                                    if key[0].state == 'needUpdateOdoo':
+                                        #we catch the existing record
+                                        o_rec = self.env[key[0].odooModelName].with_context(active_test=False).search([('id','=',key[0].odooId)],limit=1)
+                                        if o_rec:
+                                            o_rec.with_context(tracking_disable=1).write(attributes)
+                                            key[0].write({'state':'upToDate','priority':0})
+                                            _logger.info("ETL | Record Updated {}/{} | {} | {}".format(counter,len(to_process),key[0].externalObjName,attributes.get('log_info')))
+                                        else:
+                                            key[0].write({'state':'upToDate','priority':0})
+                                            _logger.info("ETL | Missed Update - Odoo record not found {}/{} | {} | {}".format(counter,len(to_process),key[0].odooModelName,key[0].odooId))
+                                    
+                                    #CREATE Case
+                                    elif key[0].state == 'needCreateOdoo':
+                                        odoo_id = self.env[key[0].odooModelName].with_context(tracking_disable=1).create(attributes)
+                                        key[0].write({'state':'upToDate','odooId':odoo_id.id,'priority':0})
+                                        #key[0].write({'state':'upToDate','priority':0})
+                                        _logger.info("ETL | Record Created {}/{} | {} | {}".format(counter,len(to_process),key[0].externalObjName,attributes.get('log_info')))
+                                        if key[0].odooModelName == "sale.order":
+                                            translator.setOrderLine(sync,access_rec, accessInstance, odoo_id.id)
+                                            odoo_id.action_sync()
+                                            odoo_id.action_confirm()
+                                            task_stage = self.env['project.task.type'].search([('name','=','0% Progress')],limit = 1)
+                                            project_id = self.env['project.project'].search([('sale_order_id','=',odoo_id.id)],limit = 1)
+                                            task_id = self.env['project.task'].search([('sale_order_id','=',odoo_id.id)],limit = 1)
+                                            if project_id:
+                                                project_id.write({
+                                                    'user_id': odoo_id.user_id.id,
+                                                })                                  
+                                            if task_id:
+                                                task_id.stage_id = task_stage
+                                                    
                                 else:
+                                    key[0].write({'state':'upToDate','priority':0})
                                     _logger.info("ETL | Non-managed key state {} | {}".format(key[0].id,key[0].state))
                                 
                 if loop_cron:
