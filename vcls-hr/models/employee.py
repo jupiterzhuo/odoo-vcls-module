@@ -260,6 +260,8 @@ class Employee(models.Model):
     notes = fields.Text(
         compute='_compute_notes',
         inverse='_set_notes') # Don't have label
+
+    handbook_link = fields.Char(string="Employee Handbook", compute='_compute_handbook_link',)
     
     #Health Care Management
     ### /!\ Confidential information
@@ -1514,7 +1516,36 @@ class Employee(models.Model):
                 self.env['hr.employee.confidential'].create({'employee_id':rec.id, 'notes': self.notes})
             else:
                 rec.confidential_id[0].write({'notes': self.notes})
-    
+
+    @api.depends('company_id')
+    def _compute_handbook_link(self):
+        for rec in self:
+            if rec.company_id:
+                # Voisin SARL and Voisin WW have the same hadbook
+                if rec.company_id.id == 1:
+                    rec.handbook_link = self.env.ref('vcls-hr.handbook_link_SARL').value
+                elif rec.company_id.id == 3:
+                    rec.handbook_link = self.env.ref('vcls-hr.handbook_link_SARL').value
+                elif rec.company_id.id == 4:
+                    rec.handbook_link = self.env.ref('vcls-hr.handbook_link_INC').value
+                elif rec.company_id.id == 5:
+                    rec.handbook_link = self.env.ref('vcls-hr.handbook_link_CH_sarl').value
+                elif rec.company_id.id == 6:
+                    rec.handbook_link = self.env.ref('vcls-hr.handbook_link_LTD').value
+                elif rec.company_id.id == 7:
+                    rec.handbook_link = self.env.ref('vcls-hr.handbook_link_Canary').value
+                elif rec.company_id.id == 8:
+                    rec.handbook_link = self.env.ref('vcls-hr.handbook_link_RRG').value
+                elif rec.company_id.id == 10:
+                    rec.handbook_link = self.env.ref('vcls-hr.handbook_link_BH').value
+                elif rec.company_id.id == 11:
+                    rec.handbook_link = self.env.ref('vcls-hr.handbook_link_IWAC').value
+                elif rec.company_id.id == 12:
+                    rec.handbook_link = self.env.ref('vcls-hr.handbook_link_Comharsa').value
+                else:
+                    rec.notes = 'False'
+            else:
+                rec.notes = 'False'
     # End of Personal information
     
     # Job information
