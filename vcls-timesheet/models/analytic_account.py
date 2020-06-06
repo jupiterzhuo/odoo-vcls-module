@@ -549,7 +549,7 @@ class AnalyticLine(models.Model):
         employees = self.env['hr.employee'].search([('do_smart_timesheeting','=',True)])
 
         for emp in employees:
-            if datetime.now()>timestamp_end:#to avoid timeout
+            if fields.Datetime.now()>timestamp_end:#to avoid timeout
                 break
             else:
 
