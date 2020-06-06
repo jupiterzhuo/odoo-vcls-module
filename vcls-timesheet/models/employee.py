@@ -14,7 +14,7 @@ class Employee(models.Model):
     _inherit = 'hr.employee'
 
     do_smart_timesheeting = fields.Boolean(
-        default = True
+        default = False
     )
 
     # A CRON to set automatically the timesheet approval date
@@ -30,7 +30,7 @@ class Employee(models.Model):
 
     @api.model
     def smart_timesheeting_init(self):
-        to_update = self.search([('employee_status','=','active'),('employee_type','=','internal')])
+        to_update = self.search([('active','=',True),('employee_status','=','active'),('employee_type','=','internal')])
         to_update.write({'do_smart_timesheeting':True})
 
         cron = self.env.ref('vcls-timesheet.cron_smart_timesheeting')
