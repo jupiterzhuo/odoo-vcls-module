@@ -543,8 +543,6 @@ class AnalyticLine(models.Model):
         now = fields.Datetime.now()
         timestamp_end = now + timedelta(minutes=9)
 
-        tasks = self.env['project.task']
-
         #we look for employees to smart_timesheets
         employees = self.env['hr.employee'].search([('do_smart_timesheeting','=',True)])
 
@@ -552,7 +550,7 @@ class AnalyticLine(models.Model):
             if fields.Datetime.now()>timestamp_end:#to avoid timeout
                 break
             else:
-
+                tasks = self.env['project.task']
                 #we get timesheets
                 timesheets = self.search([
                     ('employee_id','=',emp.id),
@@ -561,7 +559,9 @@ class AnalyticLine(models.Model):
                     ('date', '>', now - timedelta(days=days+7,hours=remainder)),
                     ('date', '<', now - timedelta(days=days,hours=remainder)),
                 ])
+                
                 if timesheets:
+                    _logger.info("SMART TIMESHEETING: Found {} timesheets for {}".format(len(timesheets),emp.name))
                     tasks |= timesheets.mapped('task_id')
                     for task in tasks.filtered(lambda t: t.stage_allow_ts):
                         if task.project_id.parent_id:
