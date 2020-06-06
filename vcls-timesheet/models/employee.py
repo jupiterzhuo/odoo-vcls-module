@@ -36,6 +36,6 @@ class Employee(models.Model):
         cron = self.env.ref('vcls-timesheet.cron_smart_timesheeting')
         cron.write({
             'active': True,
-            'nextcall': datetime.now() + timedelta(seconds=30),
+            'nextcall': fields.Datetime.now() + timedelta(seconds=30),
             'numbercall': 5,
         })
