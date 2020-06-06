@@ -140,7 +140,7 @@
                 </xpath>
                 
                 <xpath expr="//field[@name='order_line']//tree/field[@name='product_id']" position="replace">
-                    <field name="product_id" options="{'no_create':True,'no_create_edit':True}" attrs="{'readonly': [('product_updatable', '=', False)],'required': [('display_type', '=', False)],}" force_save="1"
+                    <field name="product_id" options="{'no_create':True,'no_create_edit':True,'no_open':True}" attrs="{'readonly': [('product_updatable', '=', False)],'required': [('display_type', '=', False)],}" force_save="1"
                     context="{'search_default_group_category':1,'search_default_group_info':1,'tree_view_ref':'vcls-crm.product_tree_view','partner_id': parent.partner_id,'quantity': product_uom_qty,'pricelist': parent.pricelist_id,'uom':product_uom,'company_id': parent.company_id,'default_lst_price': price_unit,'default_description_sale': name,'business_mode':parent.business_mode,'business_line':parent.product_category_id,'deliverable_id':parent.deliverable_id }"/>
                 </xpath>
 
