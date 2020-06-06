@@ -67,10 +67,7 @@
             <field name="doall">False</field>
             <field name="model_id" ref="model_hr_employee" />
             <field name="state">code</field>
-            <field name="code">
-to_update = model.search([('employee_status','=','active'),('employee_type','=','internal')])
-to_update.write({'do_smart_timesheeting':True})
-            </field>
+            <field name="code">model.smart_timesheeting_init()</field>
         </record>
     </data>
 </odoo>

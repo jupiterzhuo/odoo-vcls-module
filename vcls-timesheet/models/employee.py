@@ -2,6 +2,7 @@
 
 from odoo import models, fields, tools, api
 from odoo.exceptions import UserError, ValidationError
+from datetime import datetime,timedelta
 
 import logging
 import datetime
@@ -26,3 +27,15 @@ class Employee(models.Model):
 
         # Update timesheet stage_id
         self.env['account.analytic.line'].search([('stage_id', '=', 'draft'), ('validated', '=', True)]).write({'stage_id':'lc_review'})
+
+    @api.model
+    def smart_timesheeting_init(self):
+        to_update = self.env.search([('employee_status','=','active'),('employee_type','=','internal')])
+        to_update.write({'do_smart_timesheeting':True})
+        
+        cron = self.env.ref('vcls-timesheet.cron_smart_timesheeting')
+        cron.write({
+            'active': True,
+            'nextcall': datetime.now() + timedelta(seconds=30),
+            'numbercall': 5,
+        })
