@@ -12,6 +12,10 @@ class Employee(models.Model):
     
     _inherit = 'hr.employee'
 
+    do_smart_timesheeting = fields.Boolean(
+        default = True
+    )
+
     # A CRON to set automatically the timesheet approval date
     @api.model
     def approve_timesheets(self,hours_offset_from_now=0):
