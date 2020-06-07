@@ -130,13 +130,13 @@ class SaleOrder(models.Model):
                 line._get_invoice_qty()
                 _logger.info("Invoiced {}".format(line.qty_delivered))
                 line._compute_amount_delivered_from_task()
-                _logger.info("Delivered amount from task{}".format(line.amount_delivered_from_task))
+                _logger.info("Delivered amount from task {}".format(line.amount_delivered_from_task))
                 line._compute_amount_invoiced_from_task()
-                _logger.info("Invoiced amount from task{}".format(line.amount_invoiced_from_task))
-                line._compute_untaxed_amount_invoiced()
-                _logger.info("Invoiced amount{}".format(line.untaxed_amount_invoiced))
+                _logger.info("Invoiced amount from task {}".format(line.amount_invoiced_from_task))
                 line._compute_untaxed_amount_to_invoice()
                 _logger.info("To Invoice amount{}".format(line.untaxed_amount_to_invoice))
+                line._compute_untaxed_amount_invoiced()
+                _logger.info("Invoiced amount{}".format(line.untaxed_amount_invoiced))
 
 
 class SaleOrderLine(models.Model):
@@ -219,7 +219,7 @@ class SaleOrderLine(models.Model):
                     line.qty_delivered = 0.
                 else:
                     pass
-                _logger.info("DELIVERED QTY {} for {} {} MANUAL {}".format(line.qty_delivered,line.name,line.product_id.vcls_type,line.qty_delivered_manual))
+                #_logger.info("DELIVERED QTY {} for {} {} MANUAL {}".format(line.qty_delivered,line.name,line.product_id.vcls_type,line.qty_delivered_manual))
             
             else:
                 pass
