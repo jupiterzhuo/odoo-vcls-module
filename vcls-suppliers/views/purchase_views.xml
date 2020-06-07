@@ -1,6 +1,21 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
+        <record model="ir.ui.view" id="inherited_purchase_approval_view">
+            <field name="name">inherited.purchase.approval.view</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_supplier_form"/>
+            <field name="arch" type="xml">
+            <!-- <xpath expr="//field[@name='vendor_bill_purchase_id']" position="after">
+                <xpath expr="//form[1]/sheet[1]/notebook[1]/page[@name='other_info']/group[1]/group[2]/field[@name='company_id']" position="move"/>
+            </xpath> -->
+               <xpath expr="//button[@name='action_invoice_open']" position="before">
+                    <field name='ready_for_approval' invisible="1"/>
+                    <button string="Ready for Approval" type="object" class="btn-primary" name="action_purchase_approval" attrs="{'invisible': [('ready_for_approval', '=', True)]}"/>
+                </xpath>
+            </field>
+        </record>
+
         <record model="ir.ui.view" id="purchase_order_form_inherit">
             <field name="name">purchase.order.form.inherit</field>
             <field name="model">purchase.order</field>
