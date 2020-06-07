@@ -541,10 +541,52 @@ class AnalyticLine(models.Model):
         days = hourly_offset//24
         remainder = hourly_offset%24
         now = fields.Datetime.now()
+        timestamp_end = now + timedelta(minutes=9)
 
-        tasks = self.env['project.task']
+        #we look for employees to smart_timesheets
+        employees = self.env['hr.employee'].search([('do_smart_timesheeting','=',True)])
 
-        timesheets = self.search([
+        for emp in employees:
+            if fields.Datetime.now()>timestamp_end:#to avoid timeout
+                break
+            else:
+                tasks = self.env['project.task']
+                #we get timesheets
+                timesheets = self.search([
+                    ('employee_id','=',emp.id),
+                    ('project_id', '!=', False),
+                    ('unit_amount', '>', 0),
+                    ('date', '>', now - timedelta(days=days+7,hours=remainder)),
+                    ('date', '<', now - timedelta(days=days,hours=remainder)),
+                ])
+                
+                if timesheets:
+                    _logger.info("SMART TIMESHEETING: Found {} timesheets for {}".format(len(timesheets),emp.name))
+                    tasks |= timesheets.mapped('task_id')
+                    for task in tasks.filtered(lambda t: t.stage_allow_ts):
+                        if task.project_id.parent_id:
+                            parent_project_id = task.project_id.parent_id
+                        else:
+                            parent_project_id = task.project_id
+
+                        _logger.info("SMART TIMESHEETING: {} on {}".format(task.name,emp.name))
+                        #we finally create the ts
+                        self.create({
+                            'date': now + timedelta(days=1),
+                            'task_id': task.id,
+                            'unit_amount': 0.0,
+                            'company_id': task.company_id.id,
+                            'project_id': task.project_id.id,
+                            'main_project_id': parent_project_id.id,
+                            'employee_id': emp.id,
+                            'name': "/",
+                        })
+                
+                #employee processed
+                emp.do_smart_timesheeting = False 
+
+
+        """timesheets = self.search([
             ('project_id', '!=', False),
             ('unit_amount', '>', 0),
             ('date', '>', now - timedelta(days=days+7,hours=remainder)),
@@ -575,7 +617,7 @@ class AnalyticLine(models.Model):
                     'main_project_id': parent_project_id.id,
                     'employee_id': employee.id,
                     'name': "/",
-                })
+                })"""
 
 
     def _timesheet_preprocess(self, vals):
