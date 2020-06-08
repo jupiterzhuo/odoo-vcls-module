@@ -15,7 +15,8 @@
     # Check https://github.com/odoo/odoo/blob/master/odoo/addons/base/module/module_data.xml
     # for the full list
     'category': 'Uncategorized',
-    'version': '1.15.8',
+    'version': '1.15.10',
+
 
 
     # any module necessary for this one to work correctly
@@ -35,6 +36,11 @@
     # always loaded
     'data': [
         
+
+        ### CONFIGURATION DATA ###
+        # 'data/ir.config_parameter.csv',
+        'data/parameters.xml',
+
         ############
         # SECURITY #
         ############
@@ -64,6 +70,7 @@
         'views/leave_report.xml',
         'views/leave_type.xml',
         'views/working_times.xml',
+        'views/user_group_history_views.xml',
 
         ########
         # MENU #
