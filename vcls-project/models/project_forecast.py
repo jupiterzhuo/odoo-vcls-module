@@ -171,6 +171,11 @@ class ProjectForecast(models.Model):
     def _action_server_forecast_from_order(self):
         server_action_id = self.env.ref('vcls-project.action_server_project_forecast_from_order').id
         return self._action_server_forecast(server_action_id, 'sale.order')
+    
+    @api.model
+    def _action_server_forecast_from_project(self):
+        server_action_id = self.env.ref('vcls-project.action_server_project_forecast_from_project').id
+        return self._action_server_forecast(server_action_id, 'project.project')
 
     @api.multi
     def button_form_from_list(self):

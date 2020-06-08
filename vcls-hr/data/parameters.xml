@@ -1,0 +1,40 @@
+<odoo>
+    <data noupdate="1">
+        <record id="handbook_link_SARL" model="ir.config_parameter">
+            <field name="key">handbook_link_SARL</field>
+            <field name="value">False</field>
+        </record>
+        <record id="handbook_link_LTD" model="ir.config_parameter">
+            <field name="key">handbook_link_LTD</field>
+            <field name="value">False</field>
+        </record>
+        <record id="handbook_link_INC" model="ir.config_parameter">
+            <field name="key">handbook_link_INC</field>
+            <field name="value">False</field>
+        </record>
+        <record id="handbook_link_CH_sarl" model="ir.config_parameter">
+            <field name="key">handbook_link_CH_sarl</field>
+            <field name="value">False</field>
+        </record>
+        <record id="handbook_link_RRG" model="ir.config_parameter">
+            <field name="key">handbook_link_RRG</field>
+            <field name="value">False</field>
+        </record>
+        <record id="handbook_link_IWAC" model="ir.config_parameter">
+            <field name="key">handbook_link_IWAC</field>
+            <field name="value">False</field>
+        </record>
+        <record id="handbook_link_Comharsa" model="ir.config_parameter">
+            <field name="key">handbook_link_Comharsa</field>
+            <field name="value">False</field>
+        </record>
+        <record id="handbook_link_Canary" model="ir.config_parameter">
+            <field name="key">handbook_link_Canary</field>
+            <field name="value">False</field>
+        </record>
+        <record id="handbook_link_BH" model="ir.config_parameter">
+            <field name="key">handbook_link_BH</field>
+            <field name="value">False</field>
+        </record>
+    </data>
+</odoo>

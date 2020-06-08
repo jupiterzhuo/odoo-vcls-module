@@ -45,6 +45,10 @@ class Contract(models.Model):
         string = 'Effective working percentage',
         related = 'resource_calendar_id.effective_percentage',
         readonly = True)
+    
+    consultancy_percentage = fields.Integer(
+        default=100,
+        string="Consulting %",)
         
     
     #For french employees only
