@@ -213,7 +213,7 @@
                 </xpath>
                 <xpath expr="//a[@name='action_view_project_forecast']" position="after">
                     <a t-if="record.allow_forecast.raw_value" class="o_project_kanban_box"
-                       name="%(vcls-project.action_forecast_from_project)d" type="action">
+                       name="%(vcls-project.action_server_project_forecast_from_project)d" type="action">
                         <div>
                             <span class="o_label">Forecast</span>
                         </div>
