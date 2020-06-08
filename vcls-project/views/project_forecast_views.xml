@@ -71,7 +71,7 @@
                 <sheet string="Project Forecast">
                     <group>
                         <group>
-                            <field name="employee_id" string="Assign Too" attrs="{'readonly':[('id', '>', '0')]}"/>
+                            <field name="employee_id" string="Assign To" attrs="{'readonly':[('id', '>', '0')]}"/>
                             <field name="project_id" readonly="1"/>
                             <field name="deliverable_id" readonly="1"/>
                             <field name="task_id" readonly="1"/>
