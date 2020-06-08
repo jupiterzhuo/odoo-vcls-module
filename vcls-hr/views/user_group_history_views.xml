@@ -26,12 +26,12 @@
     </record>
 
     <menuitem
-            id="menu_user_group_history"
-            name="Tracked Group History"
-            parent="base.menu_security"
-            sequence="5"
-            action="action_user_group_history"
-        />
+        id="menu_user_group_history"
+        name="Tracked Group History"
+        parent="base.menu_security"
+        sequence="5"
+        action="action_user_group_history"
+    />
 
             
   </data>
