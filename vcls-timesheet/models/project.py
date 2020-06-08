@@ -79,6 +79,19 @@ class Project(models.Model):
         action['context'] = {}
         return action
     
+    @api.multi
+    def action_view_forecast(self):
+        self.ensure_one()
+        family_project_ids = self._get_family_project_ids()
+        action = self.env.ref('vcls-project.project_forecast_action').read()[0]
+        action['domain'] = [('project_id', 'in', family_project_ids.ids)]
+        action['context'] = {
+            'active_id': self.id,
+            'search_default_group_by_project_id': 1,
+            'search_default_group_by_task_id': 1,
+        }
+        return action
+    
     @api.model
     def clean_pre_project(self):
         completed = self.env['project.task.type'].search([('name','=','Completed'),('case_default','=',True),('project_type_default','=',False)],limit=1)
