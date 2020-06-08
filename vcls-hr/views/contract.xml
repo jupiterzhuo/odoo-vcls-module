@@ -55,6 +55,7 @@
                                         <!--<span class="text-muted">(If fixed-term contract)</span>-->
                                     </div>
                                     <field name="resource_calendar_id" domain="[('company_id','=',company_id)]"/>
+                                    <field name="consultancy_percentage" string = "Consulting Percent"/>
                                 </group>
                             </group>
                             <group string="Notes">

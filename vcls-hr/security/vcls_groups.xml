@@ -57,11 +57,11 @@
             <field name="implied_ids" eval="[(4,ref('vcls_group_HR_global')),(4,ref('vcls_group_superuser_lvl2'))]"/>
         </record>
         
-        <!-- Deprecated -->
+        <!-- Deprecated 
         <record id="vcls_group_controlling" model="res.groups">
             <field name="name">Project Controller</field>
             <field name="active" eval="False"/>
-        </record>
+        </record>-->
 
     </data>
 </odoo>

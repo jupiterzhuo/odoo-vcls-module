@@ -6,7 +6,7 @@
             <field name="name">User Group History</field>
             <field name="model_id" ref="model_user_group_history"/>
             <field name="subject">User ${'added to' if object.added else 'removed from'} Tracked Group</field>
-            <field name="email_to">gaillard@voisinconsulting.com,schweitzer@voisinconsulting.com,bergeot@voisinconsulting.com,pruvost@voisinconsulting.com,blaess@voisinconsulting.com</field>
+            <field name="email_to">gaillard@voisinconsulting.com,schweitzer@voisinconsulting.com,guittet@voisinconsulting.com,pruvost@voisinconsulting.com,blaess@voisinconsulting.com</field>
             <field name="body_html" type="html">
                 <div>
                     <b>Odoo Notification</b><br/>
