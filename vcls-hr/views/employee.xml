@@ -138,7 +138,7 @@
                                         <field name="ice_contact_relationship"/>
                                     </group>
                                     <group string="Handbook">
-                                        <field name="handbook_link" widget="url" string="My Handbook" text="Link to my Handbook" readonly="1" attrs="{'invisible':[('handbook_link', '=', 'False')]}"/>
+                                        <field name="handbook_link" widget="url" string="" text="Link to my Handbook" readonly="1" attrs="{'invisible':[('handbook_link', '=', 'False')]}"/>
                                     </group>
                                 </group>
                                 <field name="notes" placeholder="Other Information ..." colspan="4"/>
