@@ -158,6 +158,16 @@
             </field>
         </record>
 
+        <record model="ir.actions.server" id="action_server_project_forecast_from_project">
+            <field name="name">Forecast</field>
+            <field name="model_id" ref="project_forecast.model_project_forecast"/>
+            <field name="type">ir.actions.server</field>
+            <field name="state">code</field>
+            <field name="code">
+                action = env['project.forecast']._action_server_forecast_from_project()
+            </field>
+        </record>
+
         <record id="action_forecast_from_project" model="ir.actions.act_window">
             <field name="name">Forecast</field>
             <field name="res_model">project.forecast</field>
