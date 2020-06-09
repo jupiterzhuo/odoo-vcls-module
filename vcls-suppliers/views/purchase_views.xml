@@ -6,12 +6,22 @@
             <field name="model">account.invoice</field>
             <field name="inherit_id" ref="account.invoice_supplier_form"/>
             <field name="arch" type="xml">
-            <!-- <xpath expr="//field[@name='vendor_bill_purchase_id']" position="after">
-                <xpath expr="//form[1]/sheet[1]/notebook[1]/page[@name='other_info']/group[1]/group[2]/field[@name='company_id']" position="move"/>
-            </xpath> -->
-               <xpath expr="//button[@name='action_invoice_open']" position="before">
+                <xpath expr="//field[@name='company_id']" position="replace">
+                </xpath>
+                <xpath expr="//field[@name='partner_id']" position="before">
+                    <field name='company_id' required="1" options='{"no_open": True, "no_create": True,"no_create_edit": True}'/>
+                </xpath> 
+                <xpath expr="//button[@name='action_invoice_open']" position="before">
                     <field name='ready_for_approval' invisible="1"/>
                     <button string="Ready for Approval" type="object" class="btn-primary" name="action_purchase_approval" attrs="{'invisible': [('ready_for_approval', '=', True)]}"/>
+                </xpath>
+                <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='accound_id']" position="attributes">
+                    <attribute name="required">1</attribute>
+                    <attribute name="options">'{"no_open": True, "no_create": True,"no_create_edit": True}'</attribute>
+                </xpath>
+                <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='account_analytic_id']" position="attributes">
+                    <attribute name="required">1</attribute>
+                    <attribute name="options">'{"no_open": True, "no_create": True,"no_create_edit": True}'</attribute>
                 </xpath>
             </field>
         </record>
@@ -141,5 +151,13 @@
 
             </field>
         </record>
+
+        <record id="purchase.action_invoice_pending" model="ir.actions.act_window">
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('vcls-invoicing.ia_invoices_view_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('vcls-suppliers.inherited_purchase_approval_view')}),
+            ]"/>
+        </record>
+
     </data>
 </odoo>
