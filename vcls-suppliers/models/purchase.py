@@ -30,7 +30,9 @@ class Invoice(models.Model):
 
     @api.onchange('company_id')
     def vcls_onchange(self):
-        if not self.env.context.get('journal_id') and self.partner_id and self.type in ['in_invoice', 'in_refund']:
+        context = self.env.context
+        if not context.get('journal_id') and context.get('type',self.type) in ['in_invoice', 'in_refund']:
+        #if not self.env.context.get('journal_id') and self.partner_id and self.type in ['in_invoice', 'in_refund']:
             _logger.info("SUP INVOICE journal undefined")
             journal_domain = [
                 ('type', '=', 'purchase'),
@@ -40,7 +42,7 @@ class Invoice(models.Model):
             if default_journal_id:
                 self.journal_id = default_journal_id
         else:
-            self.journal_id = self.env.context.get('journal_id')
+            #self.journal_id = context.get('journal_id')
             _logger.info("SUP INVOICE journal defined {}".format(self.journal_id))
 
         for invoice_line in self.invoice_line_ids:
