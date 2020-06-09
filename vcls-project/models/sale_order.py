@@ -129,8 +129,15 @@ class SaleOrder(models.Model):
                 if tasks_values:
                     tasks.write(tasks_values)
             project_id.name = order.name
-            for task_id in project_id.tasks:
+            for task_id in project_id.tasks.filtered(lambda t: not t.parent_id): #we rename parent task according to the related sale_line
                 task_id.name = task_id.sale_line_id.name
+            for task_id in project_id.tasks.filtered(lambda t: t.parent_id): #for the childs, we combine
+                #we look for the subtask specific name
+                parts = task_id.name.split(':')
+                if len(parts)>1: #if there is a specific name
+                    task_id.name = "{}:{}".format(task_id.sale_line_id.name,parts[1])
+                else: #we don't update the name to avoid same naming
+                    pass
 
     def map_match(self):
         self.ensure_one()
