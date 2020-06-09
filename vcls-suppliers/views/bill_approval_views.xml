@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="view_account_analytic_account_form">
+            <field name="name">analytic.analytic.account.form</field>
+            <field name="model">account.analytic.account</field>
+            <field name="inherit_id" ref="analytic.view_account_analytic_account_form"/>
+            <field name="arch" type="xml">
+               
+                <xpath expr="//field[@name='partner_id']" position="after">
+                    <field name='approver_id' options='{"no_open": True, "no_create": True,"no_create_edit": True}'/>
+                </xpath> 
+                
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_company_form">
+            <field name="name">res.company.form</field>
+            <field name="model">res.company</field>
+            <field name="inherit_id" ref="base.view_company_form"/>
+            <field name="arch" type="xml">
+               
+                <xpath expr="//field[@name='bank_ids']" position="after">
+                    <field name='supplier_approver_id' options='{"no_open": True, "no_create": True,"no_create_edit": True}'/>
+                </xpath> 
+                
+            </field>
+        </record>
+
+    </data>
+</odoo>

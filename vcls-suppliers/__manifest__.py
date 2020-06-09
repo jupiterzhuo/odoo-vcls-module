@@ -51,6 +51,7 @@
         'views/skill_views.xml',
         'views/sale_report_rm_views.xml',
         'views/portal_templates.xml',
+        'views/bill_approval_views.xml',
 
         ### MENUS
         'views/supplier_menu.xml', 
