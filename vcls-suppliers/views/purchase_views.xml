@@ -15,7 +15,7 @@
                     <field name='ready_for_approval' invisible="1"/>
                     <button string="Ready for Approval" type="object" class="btn-primary" name="action_purchase_approval" attrs="{'invisible': [('ready_for_approval', '=', True)]}"/>
                 </xpath>
-                <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='accound_id']" position="attributes">
+                <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='account_id']" position="attributes">
                     <attribute name="required">1</attribute>
                     <attribute name="options">'{"no_open": True, "no_create": True,"no_create_edit": True}'</attribute>
                 </xpath>
