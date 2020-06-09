@@ -7,12 +7,20 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-class AccountAccount(models.Model):
-    _inherit = 'account.account'
+class AnalyticAccount(models.Model):
+    _inherit = 'account.analytic.account'
 
     approver_id = fields.Many2one(
         'res.users',
         string='Approver'
+        )
+
+class Company(models.Model):
+    _inherit = 'res.company'
+
+    supplier_approver_id = fields.Many2one(
+        'res.users',
+        string='Supplier Approver'
         )
 
 
@@ -27,6 +35,8 @@ class Invoice(models.Model):
             if self.partner_id:
                 if self.company_id != self.partner_id.company_id:
                     self.company_id = self.partner_id.company_id
+                if self.partner_id.default_currency_id:
+                    self.currency_id = self.partner_id.default_currency_id
 
     @api.onchange('company_id')
     def vcls_onchange(self):
@@ -77,16 +87,23 @@ class Invoice(models.Model):
             activity_type = self.env['mail.activity.type'].search([('name', '=', 'Invoice Review')], limit=1)
             if activity_type:
                 users_to_notify = self.env['res.users']
+                if invoice.company_id.supplier_approver_id:
+                    users_to_notify |= invoice.company_id.supplier_approver_id
+
                 for invoice_line in invoice.invoice_line_ids:
-                    if invoice_line.account_analytic_id:
-                        project = self.env['project.project'].search([('analytic_account_id', '=', invoice_line.account_analytic_id.id)], limit=1)
+                    if invoice_line.account_analytic_id.project_ids:
+                        users_to_notify |= invoice_line.account_analytic_id.project_ids.mapped('user_id')
+                        """project = self.env['project.project'].search([('analytic_account_id', '=', invoice_line.account_analytic_id.id)], limit=1)
                         if project and project.user_id:
                             users_to_notify |= project.user_id
                     if invoice_line.account_id.approver_id:
-                        users_to_notify |= invoice_line.account_id.approver_id
+                        users_to_notify |= invoice_line.account_id.approver_id"""
+
                 if not users_to_notify:
                     raise UserError('No one is eligible to approve this')
-                    return
+
+                else:
+                    _logger.info("Users to notify {}".format(users_to_notify.mapped('name')))
                 invoice.write({'ready_for_approval': True})
                 for user in users_to_notify:
                     self.env['mail.activity'].create({
