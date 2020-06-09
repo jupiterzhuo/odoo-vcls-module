@@ -92,16 +92,16 @@
                     <page string="Related Tickets" attrs="{'invisible':[('total_ticket_effort','=',0)]}">
                         <field name="total_ticket_effort"/>
                         <field name="ticket_ids" mode='tree'>
-                        <tree string="Related Tickets" default_order="date">
-                            <field name="name"/>
-                            <field name="description"/>
-                            <field name="team_id" string="Category"/>
-                            <field name="subcategory_id"/>
-                            <field name="user_id" string="Assigned To"/>
-                            <field name="partner_id" string="Requested By"/>
-                            <field name="stage_id"/>
-                            <field name="planned_effort"/>
-                        </tree>
+                            <tree string="Related Tickets" default_order="date">
+                                <field name="name"/>
+                                <field name="description"/>
+                                <field name="team_id" string="Category"/>
+                                <field name="subcategory_id"/>
+                                <field name="user_id" string="Assigned To"/>
+                                <field name="partner_id" string="Requested By"/>
+                                <field name="stage_id"/>
+                                <field name="planned_effort"/>
+                            </tree>
                         </field>
 
                     </page>
