@@ -3,6 +3,9 @@
 from odoo import models, fields, api
 from odoo.exceptions import UserError
 
+import logging
+_logger = logging.getLogger(__name__)
+
 
 class AccountAccount(models.Model):
     _inherit = 'account.account'
@@ -28,6 +31,7 @@ class Invoice(models.Model):
     @api.onchange('company_id')
     def vcls_onchange(self):
         if not self.env.context.get('journal_id') and self.partner_id and self.type in ['in_invoice', 'in_refund']:
+            _logger.info("SUP INVOICE journal undefined")
             journal_domain = [
                 ('type', '=', 'purchase'),
                 ('company_id', '=', self.company_id.id),
@@ -37,8 +41,10 @@ class Invoice(models.Model):
                 self.journal_id = default_journal_id
         else:
             self.journal_id = self.env.context.get('journal_id')
+            _logger.info("SUP INVOICE journal defined {}".format(self.journal_id))
 
         for invoice_line in self.invoice_line_ids:
+            _logger.info("SUP INVOICE LINE {}".format(invoice_line.name))
             invoice_line = invoice_line.with_context(
                 default_company_id=self.company_id.id,
                 force_company=self.company_id.id
