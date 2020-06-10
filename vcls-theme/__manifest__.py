@@ -15,7 +15,7 @@
     # Check https://github.com/odoo/odoo/blob/12.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
 
-    'version': '0.7.25',
+    'version': '0.7.26',
 
 
     # any module necessary for this one to work correctly
@@ -34,6 +34,7 @@
         'vcls_security',
         'vcls-expenses',
         'vcls_marketing',
+        'vcls_interfaces',
     ],
 
     # always loaded
@@ -49,6 +50,7 @@
         'views/todo_menu.xml',
         'views/vcls_support.xml',
         'views/marketing_menu.xml',
+        'views/timesheets_menus.xml',
         'data/translation.sql',
         'data/email_template.xml',
     ],
