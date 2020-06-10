@@ -34,7 +34,7 @@
         'vcls_security',
         'vcls-expenses',
         'vcls_marketing',
-        'vcls_interfaces',
+        'vcls-interfaces',
     ],
 
     # always loaded
