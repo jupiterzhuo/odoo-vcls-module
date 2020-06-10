@@ -140,5 +140,15 @@
                 parent="menu_pc_root"
                 sequence="5"
                 action="vcls-invoicing.action_po"/>
+
+        <menuitem
+            id="menu_billability_overview"
+            name="Billability Overview"
+            parent="vcls-theme.menu_pc_root"
+            sequence="34"
+            action="vcls-interfaces.action_billability_overview_display"
+            groups="vcls_security.group_project_controller"
+        />
+
     </data>
 </odoo>

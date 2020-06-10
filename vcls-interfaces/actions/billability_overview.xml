@@ -32,15 +32,6 @@
                 (0, 0, {'view_mode': 'cohort', 'view_id': ref('vcls-interfaces.view_billability_overview_cohort')}),
             ]"/>
         </record>
-        
-        <menuitem
-            id="menu_billability_overview"
-            name="Billability Overview"
-            parent="vcls-theme.menu_pc_root"
-            sequence="34"
-            action="action_billability_overview_display"
-            groups="vcls_security.group_project_controller"
-        />
  
     </data>
 </odoo>
