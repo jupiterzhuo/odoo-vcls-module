@@ -77,10 +77,10 @@ class SaleSubscription(models.Model):
                         else:
                             so_line = found
                         
-                        if len(so_line)>1:
+                        if len(so_line)!=1:
                             #there is a problem, we need to bypass this subscription
                             break_sub = True
-                            _logger.info("SUB | Unable to process {} because multiple similar naming".format(found.mapped('order_id.name')))
+                            _logger.info("SUB | Unable to process {} because no matching so line was found.".format(found.mapped('order_id.name')))
                             break
 
                         _logger.info("SUB | Adding {} on {} for {} in {}".format(line.quantity,so_line.qty_delivered,so_line.name,so_line.order_id.name)) 
