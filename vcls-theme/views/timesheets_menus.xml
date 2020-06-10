@@ -56,7 +56,7 @@
             groups="vcls_security.group_project_controller,vcls-hr.vcls_group_superuser_lvl2,vcls-hr.vcls_group_head"
         />
 
-        <menuitem id="menu_pc_analysis"
+        <menuitem id="menu_pc_billability"
             name="Billability Report" 
             sequence="1"
             parent="menu_pc_analysis"
@@ -64,7 +64,7 @@
             action="vcls-interfaces.action_billability_overview_display"
         />
 
-        <menuitem id="menu_pc_analysis"
+        <menuitem id="menu_pc_time"
             name="Time Report" 
             sequence="2"
             parent="menu_pc_analysis"
