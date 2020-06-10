@@ -461,6 +461,7 @@
                 ]"/>
         </record>
 
+        <!--
         <menuitem 
             id="hr_timesheet.timesheet_menu_activity_mine" 
             name="My Timesheets | Grid" 
@@ -487,7 +488,7 @@
             active="False" 
         />
 
-        <!--
+        
         <record id="account_analytic_line_tree_inherit" model="ir.ui.view">
             <field name="name">account.analytic.line.tree.inherit</field>
             <field name="model">account.analytic.line</field>
