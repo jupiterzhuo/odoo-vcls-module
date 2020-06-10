@@ -53,7 +53,8 @@
                     <attribute name="force_save">1</attribute>
                 </xpath>
                 <xpath expr="//field[@name='fiscal_position_id']" position="after">
-                    <field name="invoice_template" attrs="{'readonly': [('financial_config_readonly', '!=', True)]}" force_save="1" options="{'no_create_edit': True,'no_open':True}"/>
+                    <!--<field name="invoice_template" attrs="{'readonly': [('financial_config_readonly', '!=', True)]}" force_save="1" options="{'no_create_edit': True,'no_open':True}"/>-->
+                    <field name="invoice_template" force_save="1" options="{'no_create_edit': True,'no_open':True}"/>
                     <field name="merge_subtask"/>
                     <field name="activity_report_template" attrs="{'readonly': [('financial_config_readonly', '!=', True)]}" force_save="1" options="{'no_create_edit': True,'no_open':True}"/>
                 </xpath>

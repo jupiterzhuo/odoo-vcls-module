@@ -20,7 +20,7 @@ class BillabilityReport(models.Model):
     employee_end_date = fields.Date(related='employee_id.employee_end_date', string="Employee End Date", readonly=True)
     line_manager = fields.Many2one(related='employee_id.parent_id', string="Line Manager", readonly=True)
     line_manager_id = fields.Char(related='employee_id.parent_id.employee_external_id', string="Line Manager ID", readonly=True)
-    consultancy_percentage = fields.Integer(related='employee_id.contract_id.consultancy_percentage', string="Consult %", readonly=True)
+    
 
     # contract related fields
     contract_name = fields.Char(string="Contract Name", readonly=True)
@@ -31,6 +31,7 @@ class BillabilityReport(models.Model):
     job_title = fields.Char(string="Job Title", readonly=True)
     working_percentage = fields.Char(string="Working Percentage", readonly=True)
     raw_weekly_capacity = fields.Integer(string="Raw Weekly Capacity [h]", readonly=True)
+    consultancy_percentage = fields.Integer(string="Consult %", readonly=True)
 
     days = fields.Integer(string='Days [d]')
     weekends = fields.Integer(string='Weekends [d]')
@@ -156,6 +157,7 @@ class BillabilityReport(models.Model):
             'department': 'Department',
             'job_title': 'Job Title',
             'working_percentage': 'Working Percentage',
+            'consultancy_percentage':'Consult %',
             'raw_weekly_capacity': 'Raw Weekly Capacity [h]',
             'days': 'Days [d]',
             'weekends': 'Weekends [d]',

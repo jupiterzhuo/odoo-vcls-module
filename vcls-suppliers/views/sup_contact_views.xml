@@ -22,10 +22,12 @@
             <field name="inherit_id" ref="vcls-contact.view_form_contact_all"/>
 
             <field name="arch" type="xml">
+                
                 <xpath expr="/form/sheet/notebook/page[4]" position="after">
                     <page name="suppliers" string="Supplier Info" attrs="{'invisible': [('see_supplier', '=', False)]}">
                     <field name="see_supplier" invisible="1"/>
                     <group>
+                        <field name="company_id"/>
                         <field name="property_product_pricelist" string="Trading Pricelist"/>
                         <field name="default_currency_id"/>
                         <field name="project_supplier_type_id"/>

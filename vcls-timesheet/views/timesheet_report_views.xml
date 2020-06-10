@@ -82,6 +82,7 @@
                 }</field>
         </record>
 
+        <!--
         <menuitem id="menu_lm_timesheet"
                   name="Managee's Time Analysis" sequence="4"
                   parent="hr_timesheet.timesheet_menu_root"
@@ -96,7 +97,7 @@
                   action="action_pc_all_timesheet_pivot"
         />
 
-        <!--
+        
         <menuitem id="menu_lm_timesheet_tree"
             name="Pivot View"
             sequence="2"
