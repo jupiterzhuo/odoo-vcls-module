@@ -20,6 +20,7 @@
             sequence="30"
             action="action_export_billability"
             groups="vcls_security.group_project_controller"
+            active='False'
         />
 
     </data>
