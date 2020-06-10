@@ -70,11 +70,12 @@ class SaleSubscription(models.Model):
                     #we get the related so_line
                     found = so_lines.filtered(lambda s: s.product_id == line.product_id)
                     if found:
+                        _logger.info("SUB | Found line(s) {} in {}".format(found.mapped('name'),found.mapped('order_id.name')))
                         if len(found)>1: #if several lines related to the same product, we try to match the name
                             so_line = found.filtered(lambda n: n.name == line.name)
                         else:
                             so_line = found
-                        _logger.info("SUB | Adding {} on {} for {} in {}".format(line.quantity,so_line.qty_delivered,so_line.name,so_line.order_id.name))
+                        _logger.info("SUB | Adding {} on {} for {} in {}".format(line.quantity,so_line.qty_delivered,so_line.name,so_line.order_id.name)) 
                         _logger.info("SUB | Manual vs  Delivered Before {} {} Method {}".format(so_line.qty_delivered_manual,so_line.qty_delivered,so_line.qty_delivered_method))
                         so_line.qty_delivered += line.quantity
                         #so_line.qty_delivered = so_line.qty_delivered_manual
