@@ -433,9 +433,9 @@ class Leads(models.Model):
     def build_lead_name(self,vals):
         if vals.get('contact_name', self.contact_name) and vals.get('contact_lastname', self.contact_lastname):
                 if vals.get('contact_middlename', False):
-                    return vals['contact_name'] + " " + vals['contact_middlename'] + " " + vals['contact_lastname']
+                    return vals.get('contact_name', self.contact_name) + " " + vals.get('contact_middlename', self.contact_middlename) + " " + vals.get('contact_lastname', self.contact_lastname)
                 else:
-                    return vals['contact_name'] + " " + vals['contact_lastname']
+                    return vals.get('contact_name', self.contact_name) + " " + vals.get('contact_lastname', self.contact_lastname)
         else:
             return False
 
