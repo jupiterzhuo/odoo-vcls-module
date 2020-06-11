@@ -26,7 +26,7 @@ class SaleOrder(models.Model):
         default = 0.0,
     )
 
-    sp_folder = fields.Char('Sharepoint Folder')
+    sharepoint_folder = fields.Char('Sharepoint Folder')
 
     @api.multi
     def _get_parent_project_id(self):
@@ -190,7 +190,10 @@ class SaleOrder(models.Model):
         """
         if self.internal_ref and self.partner_id.altname:
             client_name = "AAA-TEST-" + self.partner_id.altname
-            project_name = str(self.internal_ref.split('-', 1)[1].split('|', 1)[0])
+            if self.parent_id:
+                project_name = str(self.parent_id.internal_ref.split('-', 1)[1].split('|', 1)[0])
+            else:
+                project_name = str(self.internal_ref.split('-', 1)[1].split('|', 1)[0])
             header_to_send = {
                 "Content-Type": "application/json",
                 "Referrer": "https://vcls.odoo.com/create-sp-folder"
@@ -202,12 +205,12 @@ class SaleOrder(models.Model):
             response = requests.post(URL_POWER_AUTOMATE, data=json.dumps(data_to_send), headers=header_to_send)
 
             if response.status_code in [200, 202]:
-                message = "Sucess"
+                message = "Success"
                 data_back = response.json()
-                self.sp_folder = data_back['clientSiteUrl']
-                message_log = ("The Sharepoint Folder has been created, here is the link: {}".format(self.sp_folder))
+                self.sharepoint_folder = data_back['clientSiteUrl']
+                message_log = ("The Sharepoint Folder has been created, here is the link: {}".format(self.sharepoint_folder))
                 self.message_post(body=message_log)
-                _logger.info("Call API: Power Automate message: {}, whith the client: {} and for the project: {}, and the Sharepoint link is: {}".format(message, client_name, project_name, self.sp_folder))
+                _logger.info("Call API: Power Automate message: {}, whith the client: {} and for the project: {}, and the Sharepoint link is: {}".format(message, client_name, project_name, self.sharepoint_folder))
                 return
 
             if response.status_code in [400, 403]:
@@ -222,4 +225,4 @@ class SaleOrder(models.Model):
             _logger.warning("Call API: Power Automate message: {}, whith the client: {} and for the project: {}".format(message, client_name, project_name))
             raise UserError(_("Sharepoint didn't respond, Please try again"))
         else:
-           raise UserError(_("Please make sure that the project has an internal reference and an Alt name"))
+            raise UserError(_("Please make sure that the quotation has an internal reference(or the parent quotation) and an AltName"))

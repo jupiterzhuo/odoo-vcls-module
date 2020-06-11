@@ -146,7 +146,7 @@ class Project(models.Model):
     external_account = fields.Char(
         default="/",
     )
-    sp_folder = fields.Char('Sharepoint Folder')
+    sharepoint_folder = fields.Char('Sharepoint Folder')
 
     # sharepoint_folder = fields.Char(
     #     string='Sharepoint Folder',
@@ -586,7 +586,6 @@ class Project(models.Model):
             for so in project.sale_order_id.child_ids.filtered(lambda o: o.link_rates): #for linked orders
                 so.map_match()"""
 
-    
     @api.multi
     def create_sp_folder(self):
         self.ensure_one()
@@ -594,9 +593,12 @@ class Project(models.Model):
         As long as the migration in the new Sharepoint Online is not complete, 
         the client Name should start with AAA (to not interfer in the other folders)
         """
-        if self.name:
-            client_name = "AAA-TEST-" + str(self.name.split('-', 1)[0])
-            project_name = str(self.name.split('-', 1)[1].split('|', 1)[0])
+        if self.partner_id.altname and (self.sale_order_id.internal_ref or self.parent_id.sale_order_id.internal_ref):
+            client_name = "AAA-TEST-" + str(self.partner_id.altname.split('-', 1)[0])
+            if self.parent_id:
+                project_name = str(self.parent_id.sale_order_id.internal_ref.split('-', 1)[1].split('|', 1)[0])
+            else:
+                project_name = str(self.sale_order_id.internal_ref.split('-', 1)[1].split('|', 1)[0])
             header_to_send = {
                 "Content-Type": "application/json",
                 "Referrer": "https://vcls.odoo.com/create-sp-folder"
@@ -605,15 +607,17 @@ class Project(models.Model):
                 "client": client_name,
                 "project": project_name,
             }
+            print("client name = ", client_name)
+            print("project_name = ", project_name)
             response = requests.post(URL_POWER_AUTOMATE, data=json.dumps(data_to_send), headers=header_to_send)
 
             if response.status_code in [200, 202]:
-                message = "Sucess"
+                message = "Success"
                 data_back = response.json()
-                self.sp_folder = data_back['clientSiteUrl']
-                message_log = ("The Sharepoint Folder has been created, here is the link: {}".format(self.sp_folder))
+                self.sharepoint_folder = data_back['clientSiteUrl']
+                message_log = ("The Sharepoint Folder has been created, here is the link: {}".format(self.sharepoint_folder))
                 self.message_post(body=message_log)
-                _logger.info("Call API: Power Automate message: {}, whith the client: {}, for the project : {},and the Sharepoint link is: {}".format(message, client_name, project_name, self.sp_folder))
+                _logger.info("Call API: Power Automate message: {}, whith the client: {}, for the project : {},and the Sharepoint link is: {}".format(message, client_name, project_name, self.sharepoint_folder))
                 return
 
             if response.status_code in [400, 403]:
@@ -627,6 +631,6 @@ class Project(models.Model):
 
             _logger.warning("Call API: Power Automate message: {}, whith the client: {}, for the project : {}".format(message, client_name, project_name))
             raise UserError(_("Sharepoint didn't respond, Please try again"))
-        
+
         else:
-           raise UserError(_("Please make sure that the Project has a name"))
+            raise UserError(_("Please make sure that the Project has a quotation ref(or his parent project) and a client altname"))

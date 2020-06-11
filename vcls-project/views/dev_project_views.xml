@@ -161,9 +161,8 @@
                 </xpath>
                 <xpath expr="//field[@name='name']" position="after">
                     <br/>
-                        <field name="sp_folder" widget ="url" style='font-size:medium' text=" Open Sharepoint Folder"/>
-                        <br/>
-                        <button type="object" class = 'btn btn-primary' name="create_sp_folder" string="Create SharePoint Folder" attrs="{'invisible': ['|', ('sp_folder', '!=', False),('parent_id', '!=', False)]}"/>
+                        <field name="sharepoint_folder" widget ="url" style='font-size:medium' text=" Open Sharepoint Folder" attrs="{'invisible': ['|', ('sharepoint_folder', '=', False)]}"/>
+                        <button type="object" class = 'btn btn-primary' name="create_sp_folder" string="Create SharePoint Folder" attrs="{'invisible': ['|', ('sharepoint_folder', '!=', False),('parent_id', '!=', False)]}"/>
                 </xpath>
             </field>
         </record> 

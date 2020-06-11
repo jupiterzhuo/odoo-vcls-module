@@ -316,8 +316,8 @@
                     <group>
                         <field name="CDA" />
                         <field name="MSA" />
-                        <field name="sp_folder" widget = "url" />
-                        <button type="object" class = 'btn btn-primary' name="create_sp_folder" string="Create SharePoint Folders" attrs="{'invisible': [('sp_folder', '!=', False)]}"/>
+                        <!-- <field name="sharepoint_folder" widget = "url" attrs="{'invisible': [('sharepoint_folder', '=', False)]}"/>
+                        <button type="object" class = 'btn btn-primary' name="create_sp_folder" string="Create SharePoint Folders" attrs="{'invisible': [('sharepoint_folder', '!=', False)]}"/> -->
                     </group>
                     <group string="Contracts">
                         <field name="contract_type" widget="radio" nolabel="1"/>

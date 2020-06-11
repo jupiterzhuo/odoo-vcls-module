@@ -45,10 +45,9 @@
                                     </div>
                                 </div>
                                 <field name="category_id" string='' widget="many2many_tags" required="True" options="{'no_create_edit': True}" placeholder="Client, Supplier, etc."/>
-                                <!-- <field name="sharepoint_folder" widget="url" readonly="1" text="|   Open Document Folder" string='' attrs="{'invisible': [('create_folder', '=', False)]}"/> -->
-                                <field name="sp_folder" widget ="url" style='font-size:medium' text="|   Open Sharepoint Folder"/>
+                                <field name="sharepoint_folder" widget="url" readonly="1" text="|   Open Document Folder" string='' attrs="{'invisible': [('create_folder', '=', False)]}"/>
                                 <br/>
-                                <button type="object" class = 'btn btn-primary' name="create_sp_folder" string="Create SharePoint Folder" attrs="{'invisible': ['|','|','|', ('sp_folder', '!=', False),('is_company', '=', False), ('altname', '=', False),('customer', '=', False)]}"/>
+                                <button type="object" class = 'btn btn-primary' name="create_sp_folder" string="Create SharePoint Folder" attrs="{'invisible': ['|','|','|', ('sharepoint_folder', '!=', False),('is_company', '=', False), ('altname', '=', False),('customer', '=', False)]}"/>
                                 <separator string="   "/>
 
                                 <group attrs="{'invisible': [('is_company', '=', True)]}">

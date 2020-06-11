@@ -55,7 +55,7 @@ class ResPartner(models.Model):
         default=2,
     )
 
-    sp_folder = fields.Char('Sharepoint Folder')
+    sharepoint_folder = fields.Char('Sharepoint Folder')
 
     # sharepoint_folder = fields.Char(
     #     string='Sharepoint Folder',
@@ -65,9 +65,9 @@ class ResPartner(models.Model):
     # )
     # manual_sharepoint_folder = fields.Char()
 
-    # create_folder = fields.Boolean(
-    #     string="Create Sharepoint Folder",
-    # )
+    create_folder = fields.Boolean(
+        string="Create Sharepoint Folder",
+    )
 
     ### THe objective of this field is to assist responsible roles in contact completion exercise and maintain a good data quality
     completion_ratio = fields.Float(
@@ -445,12 +445,12 @@ class ResPartner(models.Model):
             response = requests.post(URL_POWER_AUTOMATE, data=json.dumps(data_to_send), headers=header_to_send)
 
             if response.status_code in [200, 202]:
-                message = "Sucess"
+                message = "Success"
                 data_back = response.json()
-                self.sp_folder = data_back['clientSiteUrl']
-                message_log = ("The Sharepoint Folder has been created, here is the link: {}".format(self.sp_folder))
+                self.sharepoint_folder = data_back['clientSiteUrl']
+                message_log = ("The Sharepoint Folder has been created, here is the link: {}".format(self.sharepoint_folder))
                 self.message_post(body=message_log)
-                _logger.info("Call API: Power Automate message: {}, whith the client: {}, and the Sharepoint link is: {}".format(message, client_name, self.sp_folder))
+                _logger.info("Call API: Power Automate message: {}, whith the client: {}, and the Sharepoint link is: {}".format(message, client_name, self.sharepoint_folder))
                 return
 
             if response.status_code in [400, 403]:
