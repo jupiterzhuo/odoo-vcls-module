@@ -367,11 +367,12 @@ class Leads(models.Model):
     
     @api.multi
     def write(self, vals):
-        _logger.info("OPP VALS {} ".format(vals))
+        #_logger.info("OPP VALS {} ".format(vals))
 
         for lead in self:
             lead_vals = {**vals} #we make a copy of the vals to avoid iterative updates
             _logger.info("{}".format(lead_vals))
+            _logger.info("{} or {}".format(lead_vals.get('type'),lead.type))
 
             if self._context.get('clear_ref'):
                 _logger.info("Clearing Opp Ref {}".format(lead.internal_ref))
