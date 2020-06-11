@@ -371,6 +371,7 @@ class Leads(models.Model):
 
         for lead in self:
             lead_vals = {**vals} #we make a copy of the vals to avoid iterative updates
+            _logger.info("{}".format(vals))
 
             if self._context.get('clear_ref'):
                 _logger.info("Clearing Opp Ref {}".format(lead.internal_ref))
@@ -382,6 +383,7 @@ class Leads(models.Model):
                 temp = self.build_lead_name(lead_vals)
                 if temp:
                     lead_vals['name'] = temp
+                    _logger.info(temp)
 
             #we manage the reference of the opportunity, if we change the type or update an opportunity not having a ref defined
             if lead_vals.get('internal_ref',False):
@@ -396,6 +398,7 @@ class Leads(models.Model):
                     lead_vals['internal_ref']=False
             
             lead_vals['name']=lead.build_opp_name(lead_vals.get('internal_ref',lead.internal_ref),lead_vals.get('name',lead.name))
+            _logger.info(lead_vals['name'])
 
             #we manage the case of manual_probability, we re-use the manually set value, except if new one is 0 or 100
             if lead_vals.get('stage_id') and lead.manual_probability:
