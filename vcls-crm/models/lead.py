@@ -750,14 +750,11 @@ class Leads(models.Model):
             'context': {'default_type': 'opportunity'}
         }
     
-# HERE
     @api.onchange('stage_id')
     def _check_won_lost(self):
         if self.stage_id.probability == 100:
             if len(self.won_reasons) == 0:
                 raise ValidationError(_("Please use the \"MARK WON\" button or select at least 1 reason."))
-        # if self.stage_id == 7:
-        #     print("hello")
     
     risk_raised = fields.Boolean(default = False)
 

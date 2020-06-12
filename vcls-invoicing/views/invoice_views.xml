@@ -226,35 +226,6 @@
             </field>
             <field name="domain">[('res_model','=','account.invoice')]</field>
         </record>
-        
-
-
-        <!-- <record model="ir.ui.view" id="view_purchase_form_inherit">
-            <field name="name">view.purchase.form.inherit</field>
-            <field name="model">account.invoice</field>
-            <field name="mode">primary</field>
-            <field name="inherit_id" ref="account.invoice_supplier_form"/>
-            <field name="arch" type="xml">
-                <xpath expr="//button[@name='action_invoice_open']" position="after">
-                    <button string="ready to approve" type="object" class="oe_highlight" name="action_purchase_approval" />
-                </xpath>
-                 
-                <xpath expr="//field[@name='origin']" position="after">
-                    <field name="partner_id" string="testststsstsjkdf!!!!!"/>
-                </xpath>
-            </field>
-        </record>
-
-        <record id="srfdhgfhgbkml" model="ir.ui.view">
-            <field name="name">test.vendor.bill.form</field>
-            <field name="model">account.invoice</field>
-            <field name="inherit_id" ref="account.invoice_supplier_form"/>
-            <field name="arch" type="xml">
-                <xpath expr="//field[@name='invoice_line_ids']" position="before">
-                    <field name="partner_id" string="TEST!!!!!"/>
-                </xpath>
-            </field>
-        </record> -->
 
         <record id="test_form" model="ir.ui.view">
             <field name="name">test.form</field>

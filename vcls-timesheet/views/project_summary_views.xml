@@ -6,171 +6,30 @@
             <field name="inherit_id" ref="vcls-project.view_project_summary_form"/>
             <field name="arch" type="xml">
                 <field name="consumed_completed_ratio" position="after">
-                        <field name="valuation_ratio" widget="percentpie" nolabel="1"/>
-                    <!-- <group string="Dates">
+                    <field name="valuation_ratio" widget="percentpie" nolabel="1"/>
+                </field>
+                <field name="internal_summary" position="after">
+                    <group string="Dates">
                         <field name="create_uid"/>
                         <field name="write_uid"/>
                         <field name="write_date"/>
-                    </group> -->
+                    </group>
                 </field>
             </field>
         </record>
 
-        <!-- <record  id="view_project_summary_kanban_timesheet" model="ir.ui.view">
+        <record id="view_project_summary_kanban_timesheet" model="ir.ui.view">
             <field name="name">view.project.summary.kanban.timesheet</field>
             <field name="model">project.project</field>
             <field name="inherit_id" ref="vcls-project.vcls_specific_project_form"/>
             <field name="arch" type="xml">
-                HERE doesn't show up on the kanban + but show up on the page (not the good record)
-                <xpath expr="//field[@name='summary_ids']" position="replace">
-                        <field name="valuation_ratio"  string="Valuation Ratio TEST"/>
-                        <br/>
-                        <field name="create_uid"/>
-                        <field name="write_uid"/>
-                        <field name="write_date"/>
+                <xpath expr="//div[@class='oe_kanban_details']" position="inside">
+                    <div>
+                        <label>Valuation Ratio: </label>
+                        <field name="valuation_ratio"/><label>%</label>
+                    </div>
                 </xpath>
             </field>
         </record>
-
     </data>
-</odoo> -->
-
-        <record  id="view_project_summary_kanban_timesheet" model="ir.ui.view">
-            <field name="name">view.project.summary.kanban.timesheet</field>
-            <field name="model">project.project</field>
-            <field name="inherit_id" ref="vcls-project.vcls_specific_project_form"/>
-            <field name="arch" type="xml">
-            <!-- <xpath expr="//field[@name='summary_ids']" position="replace"> -->
-            <xpath expr="//kanban" position="after">
-                    <div class="oe_kanban_details">
-                        <strong>
-                            <label>Creation Date: </label>
-                            <field name="create_date"/>
-                        </strong>
-                            <div>
-                                <label>Completion Ratio: </label>
-                                <field name="completion_ratio"/>
-                            </div>
-                            <div>
-                                <label>BC / TC: </label>
-                                <field name="consumed_completed_ratio"/>
-                            </div>
-                            <div>
-                                <label>Valuation Ratio: </label>
-                                <field name="valuation_ratio"/>
-                            </div>
-                        <!-- <group>
-                            <div>
-                                <label>Created by: </label>
-                                <field name="create_uid"/>
-                                <br/>
-                                <label>Last modification by: </label>
-                                <field name="write_uid"/>
-                                <br/>
-                                <label>Last modification date: </label>
-                                <field name="write_date"/>
-                            </div>
-                        </group> -->
-                    </div>
-            </xpath>
-            </field>
-        </record>
-
-                <!-- <xpath expr="//div[@class='oe_kanban_details']" position="replace">
-                    <div class="oe_kanban_details">
-                        <strong>
-                            <label>Creation Date: </label>
-                            <field name="create_date"/>
-                        </strong>
-                        <group>
-                            <div>
-                                <label>Completion Ratio: </label>
-                                <field name="completion_ratio"/>
-                            </div>
-                            <div>
-                                <label>BC / TC: </label>
-                                <field name="consumed_completed_ratio"/>
-                            </div>
-                            <div>
-                                <label>Valuation Ratio: </label>
-                                <field name="valuation_ratio"/>
-                            </div>
-                        </group>
-                        <group>
-                            <div>
-                                <label>Created by: </label>
-                                <field name="create_uid"/>
-                                <br/>
-                                <label>Last modification by: </label>
-                                <field name="write_uid"/>
-                                <br/>
-                                <label>Last modification date: </label>
-                                <field name="write_date"/>
-                            </div>
-                        </group>
-                    </div> -->
-
-                    <!-- <kanban>
-                    <field name="progress_rate"/> 
-                    <field name="maximum_rate"/>  
-                        <templates> 
-                            <t t-name="kanban-box">
-                                <div class="oe_kanban_global_click">  
-                                    <field name="completion_ratio" widget="gauge" style="width:120px;height:90px;cursor:pointer;" 
-                                        options="{'max_field': 'maximum_rate'}"> 
-                                                Progress                                
-                                    </field>                            
-                                </div>     
-                            </t>
-                        </templates>
-                </kanban> -->
-
-                
-                <!-- </xpath> -->
-            <!-- </field>
-        </record> -->
-
-
-
-
-                        <!-- <notebook>
-                        <page string="Summaries" name="summaries">
-                            <field name="is_project_manager" invisible="1"/>
-                            <button name="%(project_summary_action_new)d"
-                                string="Create SUMMARY" class="oe_highlight" type="action"
-                                groups="sales_team.group_sale_manager,vcls_security.vcls_lc"
-                                context="{
-                                    'default_project_id': active_id,
-                                    'default_completion_ratio': completion_ratio,
-                                    'default_consumed_completed_ratio': consummed_completed_ratio,
-                                }"                                
-                            />
-
-                            <field name="summary_ids" mode="kanban">
-                                <kanban create="0">
-                                    <field name="completion_ratio"/>
-                                    <field name="consumed_completed_ratio"/>
-                                    <field name="create_date"/>
-                                    <templates>
-                                        <t t-name="kanban-box">
-                                            <div class="oe_kanban_global_click">
-                                                <div class="oe_kanban_details">
-                                                    <strong>
-                                                        <field name="create_date"/>
-                                                    </strong>
-                                                    <div>
-                                                        <field name="completion_ratio" widget="percentage" nolabel="0"/>
-                                                    </div>
-                                                    <div>
-                                                        <field name="consumed_completed_ratio" string= "BC / TC" widget="percentage"
-                                                            nolabel="0"/>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </t>
-                                    </templates>
-                                </kanban>
-                            </field>
-                        </page>
-                        </notebook> -->
-
+</odoo>
