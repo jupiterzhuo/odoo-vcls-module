@@ -22,7 +22,7 @@ class AnalyticLine(models.Model):
         ('lc_review', '1. LC review'), 
         ('pc_review', '2. PC review'), 
         ('carry_forward', 'Carry Forward'),
-        ('adjustment_validation', '4. Adjustment Validation'),
+        ('fixed_price', '4. Fixed Price'),
         ('invoiceable', '5. Invoiceable'),
         ('invoiced', '6. Invoiced'),
         ('historical','7. Historical'),
@@ -385,13 +385,14 @@ class AnalyticLine(models.Model):
 
         if new_stage=='invoiceable':
             timesheets_in = timesheets.filtered(lambda r: (r.stage_id=='pc_review' or r.stage_id=='carry_forward'))
-
-            #adj_validation_timesheets = timesheets_in.filtered(lambda r: r.required_lc_comment == True)
-            #invoiceable_timesheets = (timesheets_in - adj_validation_timesheets) if adj_validation_timesheets else timesheets_in
-
-            #adj_validation_timesheets.write({'stage_id': 'adjustment_validation'})
-            #invoiceable_timesheets.write({'stage_id': 'invoiceable'})
-            timesheets_in.write({'stage_id': 'invoiceable'})
+            #fixed price usecase
+            fp_ts = timesheets_in.filtered(lambda t: t.so_line.order_id.invoicing_mode == 'fixed_price')
+            if fp_ts:
+                fp_ts.write({'stage_id': 'fixed_price'})
+            #t&m usecase
+            tm_ts = timesheets_in.filtered(lambda t: t.so_line.order_id.invoicing_mode == 'tm')
+            if tm_ts:
+                tm_ts.write({'stage_id': 'invoiceable'})
 
         elif new_stage=='outofscope':
             timesheets_in = timesheets.filtered(lambda r: (r.stage_id=='pc_review' or r.stage_id=='carry_forward'))
@@ -521,8 +522,7 @@ class AnalyticLine(models.Model):
         self.search([('stage_id', '=', 'lc_review')]).write({'stage_id': 'pc_review'})
 
     def pc_review_approve_timesheets(self):
-        self.search([('stage_id', '=', 'pc_review'), ('lc_comment', '=', False)]).\
-            write({'stage_id': 'invoiceable'})
+        self.search([('stage_id', '=', 'pc_review'), ('lc_comment', '=', False)])._pc_change_state('invoiceable')
 
     @api.model
     def _clean_0_ts(self):
@@ -657,3 +657,11 @@ class AnalyticLine(models.Model):
                 if ts:
                     _logger.info("Processing Rate_id for map line for {} as {} with {} timesheets".format(map_line.employee_id.name,rate_id.name,len(ts)))
                     ts.write({'rate_id':rate_id.id})
+
+    @api.model
+    def _set_fixed_price_timesheets(self):
+        timesheets = self.search([('is_timesheet','=',True),('employee_id','!=',False),('project_id','!=',False),('stage_id','=','invoiceable')])
+        fp_ts = timesheets.filtered(lambda t: t.so_line.order_id.invoicing_mode == 'fixed_price')
+        if fp_ts:
+            fp_ts.write({'stage_id': 'fixed_price'})
+            _logger.info("Found {} invoiceable timesheets set as fixed_price status.")

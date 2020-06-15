@@ -547,7 +547,14 @@ class Project(models.Model):
         timesheet_ids = self.env['account.analytic.line'].search([('main_project_id', 'in', all_projects.ids),
                                                                  ('stage_id', '=', 'pc_review')])
         if timesheet_ids:
-            timesheet_ids.write({'stage_id': 'invoiceable'})
+            #fixed price usecase
+            fp_ts = timesheet_ids.filtered(lambda t: t.so_line.order_id.invoicing_mode == 'fixed_price')
+            if fp_ts:
+                fp_ts.write({'stage_id': 'fixed_price'})
+            #t&m usecase
+            tm_ts = timesheet_ids.filtered(lambda t: t.so_line.order_id.invoicing_mode == 'tm')
+            if tm_ts:
+                tm_ts.write({'stage_id': 'invoiceable'}) 
         
         #we update the timesheet limit date to the end of the previous month
         today = fields.Date.today()
