@@ -379,7 +379,7 @@ class Leads(models.Model):
             
             #Lead naming convention
             if (lead_vals.get('type',lead.type) == 'lead'):
-                temp = self.build_lead_name(lead_vals)
+                temp = lead.build_lead_name(lead_vals)
                 if temp:
                     lead_vals['name'] = temp
 
@@ -429,13 +429,13 @@ class Leads(models.Model):
             else:
                 opp.sig_opp = False
 
-    @api.model
     def build_lead_name(self,vals):
-        if vals.get('contact_name', False) and vals.get('contact_lastname', False):
-                if vals.get('contact_middlename', False):
-                    return vals['contact_name'] + " " + vals['contact_middlename'] + " " + vals['contact_lastname']
+        self.ensure_one()
+        if vals.get('contact_name', self.contact_name) and vals.get('contact_lastname', self.contact_lastname):
+                if vals.get('contact_middlename', self.contact_middlename):
+                    return vals.get('contact_name', self.contact_name) + " " + vals.get('contact_middlename', self.contact_middlename) + " " + vals.get('contact_lastname', self.contact_lastname)
                 else:
-                    return vals['contact_name'] + " " + vals['contact_lastname']
+                    return vals.get('contact_name', self.contact_name) + " " + vals.get('contact_lastname', self.contact_lastname)
         else:
             return False
 

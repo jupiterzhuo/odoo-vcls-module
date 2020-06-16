@@ -104,7 +104,7 @@
                         <group string="Internal">
                             <field name="user_id" options="{'no_create': True,'no_create_edit':True,'no_open':True}"/>
                             <field name="company_id" options="{'no_create': True,'no_create_edit':True,'no_open':True}" required="True"/>
-                            <field name="pricelist_id" groups="vcls_security.group_finance_invoice_administrator,vcls_security.vcls_account_manager" options="{'no_create': True,'no_create_edit':True,'no_open':True}"/>
+                            <field name="pricelist_id" groups="vcls_security.group_finance_invoice_administrator,vcls_security.vcls_account_manager,vcls_security.group_project_controller" options="{'no_create': True,'no_create_edit':True,'no_open':True}"/>
                             <field name="currency_id" invisible="1"/>
                             <field name="parent_id" options="{'no_create': True}" readonly="1"/>
                             <field name="link_rates" attrs="{'invisible': [('parent_id', '=', False)]}" readonly="1"/>
