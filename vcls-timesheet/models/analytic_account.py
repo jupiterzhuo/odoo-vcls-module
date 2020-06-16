@@ -664,4 +664,4 @@ class AnalyticLine(models.Model):
         fp_ts = timesheets.filtered(lambda t: t.so_line.order_id.invoicing_mode == 'fixed_price')
         if fp_ts:
             fp_ts.write({'stage_id': 'fixed_price'})
-            _logger.info("Found {} invoiceable timesheets set as fixed_price status.")
+            _logger.info("Found {} invoiceable timesheets set as fixed_price status.".format(len(fp_ts)))
