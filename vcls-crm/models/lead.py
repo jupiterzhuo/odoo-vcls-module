@@ -68,7 +68,17 @@ class Leads(models.Model):
             self.altname = self.partner_id.altname
         else:
             self.altname = self.partner_id.parent_id.altname
-            
+
+    @api.onchange('opted_in')
+    def onchange_opted_in(self):
+        if self.opted_in:
+            self.opted_out = False
+            self.gdpr_status = 'in'
+            self.opted_in_date = datetime.datetime.now()
+        else:
+            self.opted_out = True
+            self.gdpr_status = 'out'
+            self.opted_out_date = datetime.datetime.now()
 
     ###################
     # DEFAULT METHODS #
@@ -118,12 +128,12 @@ class Leads(models.Model):
 
     # Related fields in order to avoid mismatch & errors
     opted_in = fields.Boolean(
-        related = 'partner_id.opted_in',
+        default= False,
         string = 'Opted In'
     )
 
     opted_out = fields.Boolean(
-        related = 'partner_id.opted_out',
+        default = True,
         string = 'Opted Out'
     )
  
@@ -430,7 +440,7 @@ class Leads(models.Model):
                 opp.sig_opp = False
 
     def build_lead_name(self,vals):
-        self.ensure_one()
+        # self.ensure_one()
         if vals.get('contact_name', self.contact_name) and vals.get('contact_lastname', self.contact_lastname):
                 if vals.get('contact_middlename', self.contact_middlename):
                     return vals.get('contact_name', self.contact_name) + " " + vals.get('contact_middlename', self.contact_middlename) + " " + vals.get('contact_lastname', self.contact_lastname)
@@ -722,6 +732,11 @@ class Leads(models.Model):
     
     def create_contact_pop_up(self):
         result = self.env['crm.lead'].browse(self.id).handle_partner_assignation('create', False)
+        self.partner_id = result.get(self.id)
+        partner_object = self.env['res.partner'].browse(self.partner_id.id)
+        partner_object.gdpr_status = self.gdpr_status
+        partner_object.opted_in = self.opted_in
+        partner_object.opted_out = self.opted_out
         return result.get(self.id)
     
     # Copy/Paste in order to redirect to right view (overriden)
