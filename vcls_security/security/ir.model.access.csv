@@ -3,3 +3,8 @@ id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
 access_project_forecast_project_controller,project.forecast.project.controller,project_forecast.model_project_forecast,vcls_security.group_project_controller,1,1,0,0
 
 access_project_forecast_invoice_administrator,project.forecast.project.controller,project_forecast.model_project_forecast,vcls_security.group_finance_invoice_administrator,1,0,0,0
+
+base.access_ir_model_access_group_erp_manager,ir_model_access_group_erp_manager,vcls_security.model_ir_model_access,base.group_system,1,1,1,1
+base.access_ir_rule_group_erp_manager,ir_rule group_erp_manager,website.model_ir_rule,base.group_system,1,1,1,1
+
+
