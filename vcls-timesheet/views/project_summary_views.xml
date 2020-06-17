@@ -23,7 +23,7 @@
             <field name="model">project.project</field>
             <field name="inherit_id" ref="vcls-project.vcls_specific_project_form"/>
             <field name="arch" type="xml">
-                <xpath expr="//div[@class='oe_kanban_details']" position="inside">
+                <xpath expr="//div[hasclass('oe_kanban_details')]" position="inside">
                     <div>
                         <label>Valuation Ratio: </label>
                         <field name="valuation_ratio"/><label>%</label>
