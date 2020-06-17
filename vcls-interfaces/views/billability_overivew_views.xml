@@ -9,7 +9,7 @@
             <tree>
                 <field name="employee_name"/>
                 <field name="billability_percent"/>
-                <field name="non_billability_percent"/>
+                <!-- <field name="non_billability_percent"/> -->
                 <field name="start_date"/>
                 <field name="end_date"/>
                 <field name="week_number"/>
@@ -52,6 +52,7 @@
                 <field name='office'/>
                 <field name='company'/>
                 <field name='department'/>
+                <field name='job_title'/>
                 <filter string="Billable" name='billable' domain="[('consultancy_percentage', '&gt;', 0)]"/>
                 <separator/>
                 <filter string="Last 4 Weeks" name="last_month" domain="[('start_date','&gt;', (context_today() - datetime.timedelta(weeks=4)).strftime('%Y-%m-%d'))]"/>
@@ -62,6 +63,7 @@
                 <filter string="Company" name="groupby_company" domain="[]" context="{'group_by':'company'}"/>
                 <filter string="Department" name="groupby_department" domain="[]" context="{'group_by':'department'}"/>
                 <filter string="Employee" name="groupby_employee" domain="[]" context="{'group_by':'employee_name'}"/>
+                <filter string="Job Title" name="groupby_employee" domain="[]" context="{'group_by':'job_title'}"/>
                 <separator/>
                 <filter string="Week" name="groupby_week" domain="[]" context="{'group_by':'start_date'}"/>
                 </group>
@@ -100,23 +102,18 @@
                 <field name="employee_start_date"/>
                 <field name="employee_end_date"/>
                 <field name="valued_billable_hours"/>
-                <field name="valued_non_billable_hours"/>
                 <field name="consultancy_percentage"/>
                 </group>
                 <group>
                 <field name="effective_capacity"/>
                 <field name="worked"/>
                 <field name="leaves"/>
-                <field name="offs"/>
                 <field name="days_duration"/>
-                <field name="out_of_contract"/>
                 <field name="bank_holiday"/>
-                <field name="weekends"/>
                 <field name="days"/>
                 </group>
                 <group>
                 <field name="raw_weekly_capacity"/>
-                <field name="working_percentage"/>
                 <field name="contract_start"/>
                 <field name="contract_end"/>
                 <field name="week_number"/>
@@ -127,7 +124,6 @@
                 <field name="billable_hours"/>
                 <field name="non_billable_hours"/>
                 <field name="billability_percent"/>
-                <field name="non_billability_percent"/>
                 </group>
             </form>
         </field>
