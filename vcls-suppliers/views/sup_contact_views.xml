@@ -30,16 +30,17 @@
                     <group>
                         <group>
                             <field name="company_id"/>
-                            <field name="supplier_legacy_code" attrs="{'readonly':[('freeze_legacy_code','=',True)]}"/>
-                            <button string="MERGE YOOZ DATA" class="oe_highlight" name="merge_yooz" type="object" attrs="{'readonly':[('freeze_legacy_code','=',True)]}"/>
                             <field name="property_product_pricelist" string="Trading Pricelist"/>
+                            <field name="project_supplier_type_id"/>
+                            <field name="expertise_area_ids" widget="many2many_tags"/>
                         </group>
                         <group>
+                            <field name="supplier_legacy_code" attrs="{'readonly':[('freeze_legacy_code','=',True)]}"/>
+                            <button string="MERGE YOOZ DATA" class="oe_highlight" name="merge_yooz" type="object" attrs="{'readonly':[('freeze_legacy_code','=',True)]}"/>
                             <field name="siret"/>
                             <field name="siren"/>
                             <field name="vat_number"/>
-                            <field name="project_supplier_type_id"/>
-                            <field name="expertise_area_ids" widget="many2many_tags"/>
+                            <field name="bank_ids"/>
                         </group>
                     </group>
                     </page>
