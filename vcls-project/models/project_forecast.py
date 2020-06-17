@@ -42,7 +42,7 @@ class ProjectForecast(models.Model):
 
     @api.multi
     def get_rate(self,project,employee):
-        self.ensure_one()
+        #self.ensure_one()
         map_line = project.sale_line_employee_ids.filtered(lambda l: l.employee_id == employee)
         if map_line:
             return map_line[0].sale_line_id.product_id.product_tmpl_id
