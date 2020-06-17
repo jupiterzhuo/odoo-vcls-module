@@ -116,7 +116,7 @@ class ProjectForecast(models.Model):
             if not vals.get('rate_id',False):
                 #if the rate_id is not provided we look for the related employee in the mapping table
                 project = self.env['project.project'].browse(vals['project_id'])
-                employee = self.env['rh.employee'].browse(vals['employee_id'])
+                employee = self.env['hr.employee'].browse(vals['employee_id'])
                 rate = self.get_rate(project,employee)
                 if rate:
                     vals['rate_id']=rate.id
