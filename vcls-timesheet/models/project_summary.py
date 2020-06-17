@@ -15,5 +15,5 @@ class ProjectSummary(models.Model):
     @api.multi
     @api.depends("project_id.valuation_ratio")
     def compute_valuation_ratio(self):
-        for task in self:
-            self.valuation_ratio = self.project_id.valuation_ratio
+        for summary in self:
+            summary.valuation_ratio = summary.project_id.valuation_ratio
