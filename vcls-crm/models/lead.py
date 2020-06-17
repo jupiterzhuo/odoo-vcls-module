@@ -430,7 +430,7 @@ class Leads(models.Model):
                 opp.sig_opp = False
 
     def build_lead_name(self,vals):
-        self.ensure_one()
+        #self.ensure_one()
         if vals.get('contact_name', self.contact_name) and vals.get('contact_lastname', self.contact_lastname):
                 if vals.get('contact_middlename', self.contact_middlename):
                     return vals.get('contact_name', self.contact_name) + " " + vals.get('contact_middlename', self.contact_middlename) + " " + vals.get('contact_lastname', self.contact_lastname)
