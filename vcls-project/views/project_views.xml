@@ -167,7 +167,6 @@
                                     'default_consumed_completed_ratio': consummed_completed_ratio,
                                 }"                                
                             />
-
                             <field name="summary_ids" mode="kanban">
                                 <kanban create="0">
                                     <field name="completion_ratio"/>
@@ -178,14 +177,16 @@
                                             <div class="oe_kanban_global_click">
                                                 <div class="oe_kanban_details">
                                                     <strong>
+                                                        <label>Creation Date: </label>
                                                         <field name="create_date"/>
                                                     </strong>
                                                     <div>
-                                                        <field name="completion_ratio" widget="percentage" nolabel="0"/>
+                                                        <label>Completion Ratio: </label>
+                                                        <field name="completion_ratio"/> <label>%</label>
                                                     </div>
                                                     <div>
-                                                        <field name="consumed_completed_ratio" string= "BC / TC" widget="percentage"
-                                                            nolabel="0"/>
+                                                        <label>BC / TC: </label>
+                                                        <field name="consumed_completed_ratio" string= "BC / TC"/><label>%</label>
                                                     </div>
                                                 </div>
                                             </div>
