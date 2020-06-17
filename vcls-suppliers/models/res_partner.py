@@ -33,6 +33,12 @@ class ProjectSupplierType(models.Model):
 class ContactExt(models.Model):
 
     _inherit = 'res.partner'
+
+    _sql_constraints = [
+                     ('supplier_code_unique', 
+                      'unique(supplier_legacy_code)',
+                      'This supplier code already exists.')
+                    ]
     
     #################
     # CUSTOM FIELDS #
@@ -58,7 +64,15 @@ class ContactExt(models.Model):
         string='Skills',
         comodel_name='res.partner.skill',
         inverse_name='user_id',
-    ) 
+    )
+
+    supplier_legacy_code = fields.Char()
+    freeze_legacy_code = fields.Boolean(
+        readonly=True
+    )
+
+    siren = fields.Char()
+    vat_number = fields.Char()
 
     def action_po(self):
         return {
@@ -70,6 +84,62 @@ class ContactExt(models.Model):
             'type': 'ir.actions.act_window',
             'context': {'search_default_partner_id': self.id},
         } 
+    
+    def merge_yooz(self):
+        for rec in self:
+            if not rec.supplier_legacy_code:
+                raise UserError("Please document a legacy supplier code for {}".format(rec.name))
+
+            related_contact = self.with_context(active_test=False).search([('active','=',False),('name','=',rec.supplier_legacy_code)])
+            if related_contact:
+                rec.write({
+                    'name': rec.name if rec.name else related_contact[0].name,
+                    'company_id': False if len(related_contact)>1 else related_contact[0].company_id.id,
+                    'country_id': related_contact[0].country_id.id if related_contact[0].country_id else False,
+                    'siret': self.merge_list_string(related_contact.mapped('siret')),
+                    'siren': self.merge_list_string(related_contact.mapped('siren')),
+                    'vat_number': self.merge_list_string(related_contact.mapped('vat_number')),
+                    'phone': self.merge_list_string(related_contact.mapped('phone')),
+                    'fax': self.merge_list_string(related_contact.mapped('fax')),
+                    'email': self.merge_list_string(related_contact.mapped('fax')),
+                    'street': self.merge_list_string(related_contact.mapped('street')),
+                    'street2': self.merge_list_string(related_contact.mapped('street2')),
+                    'zip': self.merge_list_string(related_contact.mapped('zip')),
+                    'city': self.merge_list_string(related_contact.mapped('city')),
+                    'website': self.merge_list_string(related_contact.mapped('website')),
+                })
+
+                banking = self.merge_list_string(related_contact.mapped('comment')),
+                if len(banking)>1:
+                    sep = banking.find('|')
+                    if sep == 1:
+                        iban = False
+                        bic = banking[1:]
+                    elif sep == len(banking):
+                        iban = banking[:-1]
+                        bic = False
+                    else:
+                        iban = banking.split('|')[0]
+                        bic = banking.split('|')[1]
+                    
+                    if iban:
+                        existing_account = self.env['res.partner.bank'].search([('acc_number','=',iban)],limit=1)
+                        if not existing_account:
+                            self.env['res.partner.bank'].create({
+                                'acc_number':iban,
+                                'company_id':False,
+                                'partner_id':rec.id,
+                            })
+                        else:
+                            existing_account.write({'partner_id':rec.id})
+
+    
+    def merge_list_string(self,source):
+        for item in source:
+            if item != '':
+                return item
+        return False
+        
     
     @api.model
     def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
