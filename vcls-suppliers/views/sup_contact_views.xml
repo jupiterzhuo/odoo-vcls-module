@@ -26,6 +26,7 @@
                 <xpath expr="/form/sheet/notebook/page[4]" position="after">
                     <page name="suppliers" string="Supplier Info" attrs="{'invisible': [('see_supplier', '=', False)]}">
                     <field name="see_supplier" invisible="1"/>
+                    <field name="freeze_legacy_code" invisible="1"/>
                     <group>
                         <group>
                             <field name="company_id"/>
