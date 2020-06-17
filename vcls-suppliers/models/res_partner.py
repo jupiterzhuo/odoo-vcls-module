@@ -93,6 +93,7 @@ class ContactExt(models.Model):
             related_contact = self.with_context(active_test=False).search([('active','=',False),('name','=',rec.supplier_legacy_code)])
             if related_contact:
                 rec.write({
+                    'company_type': 'company',
                     'name': rec.name if rec.name else related_contact[0].name,
                     'company_id': False if len(related_contact)>1 else related_contact[0].company_id.id,
                     'country_id': related_contact[0].country_id.id if related_contact[0].country_id else False,
@@ -101,7 +102,7 @@ class ContactExt(models.Model):
                     'vat_number': self.merge_list_string(related_contact.mapped('vat_number')),
                     'phone': self.merge_list_string(related_contact.mapped('phone')),
                     'fax': self.merge_list_string(related_contact.mapped('fax')),
-                    'email': self.merge_list_string(related_contact.mapped('fax')),
+                    'email': self.merge_list_string(related_contact.mapped('email')),
                     'street': self.merge_list_string(related_contact.mapped('street')),
                     'street2': self.merge_list_string(related_contact.mapped('street2')),
                     'zip': self.merge_list_string(related_contact.mapped('zip')),
