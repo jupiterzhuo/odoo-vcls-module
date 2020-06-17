@@ -82,7 +82,7 @@ class SaleOrder(models.Model):
                     ('amount', '<=', 0.0),
                     ('project_id', '!=', False),
                     # OCA override
-                    ('stage_id', 'in', ['invoiceable','invoiced','historical']),
+                    ('stage_id', 'in', ['invoiceable','invoiced','historical','fixed_price']),
                 ]
                 if order.timesheet_limit_date:
                     domain.append(
@@ -152,7 +152,7 @@ class SaleOrderLine(models.Model):
         # We add the condition on the timesheet stage_id
         domain = expression.AND([
                 domain,
-                [('stage_id', 'in', ['invoiceable','invoiced','historical'])]]
+                [('stage_id', 'in', ['invoiceable','invoiced','historical','fixed_price'])]]
             )
         #_logger.info("Delivered QTY Domain {}".format(domain))
         return domain
@@ -165,7 +165,7 @@ class SaleOrderLine(models.Model):
             return timesheets
 
         timesheets = timesheets.filtered(
-                lambda r: r.stage_id in ['invoiceable', 'invoiced','historical']
+                lambda r: r.stage_id in ['invoiceable', 'invoiced','historical','fixed_price']
             )
 
         def ts_filter(rec):

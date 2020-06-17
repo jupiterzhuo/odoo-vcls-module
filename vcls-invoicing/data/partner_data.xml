@@ -5,7 +5,7 @@
         <record id="res_partner_vcls_account_payable" model="res.partner">
             <field name="name">Account payable</field>
             <field name="function">Accountant</field>
-            <field name="email">accountpayable@voisinconsulting.com</field>
+            <field name="email">accountspayable@voisinconsulting.com</field>
             <field name="category_id" eval="[(4, ref('vcls-contact.category_vcls'))]"/>
             <field name="customer" eval="False"/>
             <field name="supplier" eval="False"/>
