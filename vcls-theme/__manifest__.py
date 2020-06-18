@@ -35,6 +35,7 @@
         'vcls-expenses',
         'vcls_marketing',
         'vcls-interfaces',
+        'hr_timesheet_attendance',
     ],
 
     # always loaded
