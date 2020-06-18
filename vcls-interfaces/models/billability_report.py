@@ -38,7 +38,7 @@ class BillabilityReport(models.Model):
     days_duration = fields.Integer(string='Day Duration [d]')
     leaves = fields.Integer(string='Leaves [h]')
     worked = fields.Integer(string='Worked [d]')
-    effective_capacity = fields.Integer(string='Effective Capacity [h]')
+    effective_capacity = fields.Float(string='Effective Capacity [h]')
 
     year = fields.Integer(string='Year', readonly=True)
     week_number = fields.Integer(string='Week number', readonly=True, group_operator="avg")
@@ -46,7 +46,7 @@ class BillabilityReport(models.Model):
     end_date = fields.Date(string='Week end date', readonly=True)
     billable_hours = fields.Float(readonly=True, string="Billable Hours [h]")
     valued_billable_hours = fields.Float(readonly=True, string="Revised Billable Hours [h]")
-    non_billable_hours = fields.Float(readonly=True)
+    non_billable_hours = fields.Float(readonly=True, string='Non Billable Hours [h]')
     billability_percent = fields.Float(readonly=True, string='Billability [%]', digits = (12,2), store=True, group_operator="avg", default=None)
     total_time_coded = fields.Float(string='Time Coded [h]', readonly=True)
     total_time_coded_percent = fields.Float(string='Coding Ratio [%]', readonly=True, group_operator="avg")
@@ -115,11 +115,11 @@ class BillabilityReport(models.Model):
                     continue
                 week_data_line['total_time_coded_percent'] = week_data_line['total_time_coded'] / week_data_line['Effective Capacity [h]'] * 100
                 week_data_line['amount_fte_billable'] = (week_data_line['Effective Capacity [h]'] / 40) * consult_decimal
-                week_data_line['fte_billable_per_staff'] = (week_data_line['valued_billable_hours'] / week_data_line['amount_fte_billable'])
+                week_data_line['fte_billable_per_staff'] = (week_data_line['billable_hours'] / week_data_line['amount_fte_billable'])
                 if consult_decimal == 0:
                     continue
                 #calculate percentages from data
-                week_data_line['billability_percent'] = (week_data_line['valued_billable_hours'] / (week_data_line['Effective Capacity [h]'] * consult_decimal)) * 100
+                week_data_line['billability_percent'] = (week_data_line['billable_hours'] / (week_data_line['Effective Capacity [h]'] * consult_decimal)) * 100
 
 
             data += week_data
