@@ -42,7 +42,7 @@ class ProjectForecast(models.Model):
 
     @api.multi
     def get_rate(self,project,employee):
-        self.ensure_one()
+        #self.ensure_one()
         map_line = project.sale_line_employee_ids.filtered(lambda l: l.employee_id == employee)
         if map_line:
             return map_line[0].sale_line_id.product_id.product_tmpl_id
@@ -116,7 +116,7 @@ class ProjectForecast(models.Model):
             if not vals.get('rate_id',False):
                 #if the rate_id is not provided we look for the related employee in the mapping table
                 project = self.env['project.project'].browse(vals['project_id'])
-                employee = self.env['rh.employee'].browse(vals['employee_id'])
+                employee = self.env['hr.employee'].browse(vals['employee_id'])
                 rate = self.get_rate(project,employee)
                 if rate:
                     vals['rate_id']=rate.id

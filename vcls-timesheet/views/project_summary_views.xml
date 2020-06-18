@@ -1,0 +1,35 @@
+<odoo>
+    <data>
+        <record id="view_project_summary_form_timesheet" model="ir.ui.view">
+            <field name="name">view.project.summary.form.timesheet</field>
+            <field name="model">project.summary</field>
+            <field name="inherit_id" ref="vcls-project.view_project_summary_form"/>
+            <field name="arch" type="xml">
+                <field name="consumed_completed_ratio" position="after">
+                    <field name="valuation_ratio" widget="percentpie" nolabel="1"/>
+                </field>
+                <field name="internal_summary" position="after">
+                    <group string="Dates">
+                        <field name="create_uid"/>
+                        <field name="write_uid"/>
+                        <field name="write_date"/>
+                    </group>
+                </field>
+            </field>
+        </record>
+
+        <record id="view_project_summary_kanban_timesheet" model="ir.ui.view">
+            <field name="name">view.project.summary.kanban.timesheet</field>
+            <field name="model">project.project</field>
+            <field name="inherit_id" ref="vcls-project.vcls_specific_project_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[hasclass('oe_kanban_details')]" position="inside">
+                    <div>
+                        <label>Valuation Ratio: </label>
+                        <field name="valuation_ratio"/><label>%</label>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

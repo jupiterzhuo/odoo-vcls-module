@@ -45,7 +45,7 @@ class SaleOrder(models.Model):
     @api.multi
     def action_view_family_timesheet(self):
         self.ensure_one()
-        action = self.env.ref('hr_timesheet.act_hr_timesheet_line').read()[0]
+        action = self.env.ref('hr_timesheet.act_hr_timesheet_line_by_project').read()[0]
         parent_order_id, child_orders = self._get_family_sales_orders()
         all_orders = parent_order_id | child_orders
         action['domain'] = [('so_line', 'in', all_orders.mapped('order_line').ids)]

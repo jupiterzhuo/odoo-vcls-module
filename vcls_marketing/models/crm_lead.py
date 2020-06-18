@@ -38,7 +38,6 @@ class Leads(models.Model):
 
     opted_out_date = fields.Datetime(
         string = 'Opted Out Date', 
-        related = 'marketing_task_out_id.create_date',
     )
 
     gdpr_status = fields.Selection(
@@ -48,30 +47,14 @@ class Leads(models.Model):
             ('out', 'Out'),
         ],
         string = 'GDPR Status',
-        compute = '_compute_gdpr_status',
+        default = 'out',
     )
 
     @api.onchange('marketing_task_id')
     def _onchange_marketing_task_id(self):
         if self.marketing_task_id:
             self.marketing_project_id=self.marketing_task_id.project_id
-
-    @api.depends('marketing_task_id', 'marketing_task_out_id')
-    def _compute_gdpr_status(self):
-        for record in self:
-            if record.marketing_task_out_id or record.opted_out:
-                record.gdpr_status = 'out'
-            elif record.gdpr_status != 'out' and (record.opted_in or record.marketing_task_id):
-                record.gdpr_status = 'in'
-            else:
-                record.gdpr_status = 'undefined'
-
-            """if record.marketing_task_id and not record.marketing_task_out_id:
-                record.gdpr_status = 'in'
-            elif record.marketing_task_out_id:
-                record.gdpr_status = 'out'"""
             
-    
     @api.onchange('partner_id')
     def _get_marketing_info(self):
         for lead in self:

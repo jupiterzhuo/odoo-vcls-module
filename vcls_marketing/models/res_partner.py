@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api, http, _
+import datetime
 
 
 class Contacts(models.Model):
@@ -52,23 +53,13 @@ class Contacts(models.Model):
             ('out', 'Out'),
         ],
         string = 'GDPR Status',
-        compute = '_compute_gdpr_status',
+        default = 'out',
     )
 
     @api.onchange('marketing_task_id')
     def _onchange_marketing_task_id(self):
         if self.marketing_task_id:
             self.marketing_project_id=self.marketing_task_id.project_id
-
-    @api.depends('marketing_task_id', 'marketing_task_out_id')
-    def _compute_gdpr_status(self):
-        for record in self:
-            if record.marketing_task_out_id or record.opted_out:
-                record.gdpr_status = 'out'
-            elif record.gdpr_status != 'out' and (record.opted_in or record.marketing_task_id):
-                record.gdpr_status = 'in'
-            else:
-                record.gdpr_status = 'undefined'
 
     def all_campaigns_pop_up(self):
         #we gather the participants related to the source lead and the current contact
@@ -84,4 +75,14 @@ class Contacts(models.Model):
             'type': 'ir.actions.act_window',
             'domain': domain,
         }
-
+    
+    @api.onchange('opted_in')
+    def onchange_opted_in(self):
+        if self.opted_in:
+            self.opted_out = False
+            self.gdpr_status = 'in'
+            self.opted_in_date = datetime.datetime.now()
+        else:
+            self.opted_out = True
+            self.gdpr_status = 'out'
+            self.opted_out_date = datetime.datetime.now()
