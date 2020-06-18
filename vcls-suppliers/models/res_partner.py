@@ -110,9 +110,10 @@ class ContactExt(models.Model):
                     'website': self.merge_list_string(related_contact.mapped('website')),
                 }
                 rec.write(vals)
+                _logger.info("YOOZ | {}".format(vals))
 
                 banking = self.merge_list_string(related_contact.mapped('comment')),
-                if len(banking)>1:
+                if banking:
                     _logger.info("Found banking {}".format(banking[0]))
                     sep = banking.find('|')
                     if sep == 1:
