@@ -85,7 +85,6 @@
             <field name="res_model">account.analytic.line</field>
             <field name="context">{
                 'search_default_groupby_project':1,
-                'search_default_groupby_deliverable':1, 
                 'search_default_groupby_task':1,
                 'search_default_groupby_employee':1,
                 'grid_anchor': '3000-01-01'}

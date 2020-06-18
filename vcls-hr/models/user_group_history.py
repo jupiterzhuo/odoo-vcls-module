@@ -64,7 +64,7 @@ class ResGroups(models.Model):
     @api.multi
     def write(self, vals):
         # TODO: Groups to be notified
-        notif_groups = self.env.ref('vcls-hr.vcls_group_HR_global') | self.env.ref('vcls-hr.vcls_group_HR_local') | self.env.ref('base.group_system')
+        notif_groups = self.env.ref('vcls-hr.vcls_group_HR_global') | self.env.ref('vcls-hr.vcls_group_HR_local') | self.env.ref('base.group_system') | self.env.ref('base.group_erp_manager')
         hold_users = {group: group.users for group in self & notif_groups}
 
         res = super(ResGroups, self).write(vals)

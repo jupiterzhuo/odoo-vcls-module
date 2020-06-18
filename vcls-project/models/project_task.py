@@ -130,7 +130,7 @@ class ProjectTask(models.Model):
     @api.multi
     def action_log_time(self):
         self.ensure_one()
-        action = self.env.ref('hr_timesheet.act_hr_timesheet_line').read()[0]
+        action = self.env.ref('vcls-timesheet.act_vcls_timesheet_user').read()[0]
         action['views'] = [
           (self.env.ref('vcls-timesheet.account_analytic_line_grid_view_form').id, 'form'),
         ]
