@@ -114,8 +114,9 @@ class ContactExt(models.Model):
 
                 banking = self.merge_list_string(related_contact.mapped('comment')),
                 if banking:
-                    _logger.info("Found banking {}".format(banking[0]))
-                    sep = banking.find('|')
+                    _logger.info("Found banking {}".format(banking))
+                    temp = banking[0]
+                    sep = temp.find('|')
                     if sep == 1:
                         iban = False
                         bic = banking[1:]
@@ -123,8 +124,8 @@ class ContactExt(models.Model):
                         iban = banking[:-1]
                         bic = False
                     else:
-                        iban = banking.split('|')[0]
-                        bic = banking.split('|')[1]
+                        iban = temp.split('|')[0]
+                        bic = temp.split('|')[1]
                     
                     if iban:
                         _logger.info("Found iban {}".format(iban))
@@ -145,8 +146,9 @@ class ContactExt(models.Model):
     
     def merge_list_string(self,source):
         for item in source:
-            if item != '':
-                return item
+            if str(item) != '':
+                return str(item)
+                break
         return False
         
     
