@@ -135,6 +135,7 @@ class ContactExt(models.Model):
                                 'acc_number':iban,
                                 'company_id':False,
                                 'partner_id':rec.id,
+                                'name':'SUPPLIER.' + rec.supplier_legacy_code,
                             })
                         else:
                             existing_account.write({'partner_id':rec.id})
