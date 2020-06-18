@@ -92,7 +92,7 @@ class ContactExt(models.Model):
 
             related_contact = self.with_context(active_test=False).search([('active','=',False),('name','=',rec.supplier_legacy_code)])
             if related_contact:
-                rec.write({
+                vals={
                     'company_type': 'company',
                     'name': rec.name if rec.name else related_contact[0].name,
                     'company_id': False if len(related_contact)>1 else related_contact[0].company_id.id,
@@ -108,10 +108,12 @@ class ContactExt(models.Model):
                     'zip': self.merge_list_string(related_contact.mapped('zip')),
                     'city': self.merge_list_string(related_contact.mapped('city')),
                     'website': self.merge_list_string(related_contact.mapped('website')),
-                })
+                }
+                rec.write(vals)
 
                 banking = self.merge_list_string(related_contact.mapped('comment')),
                 if len(banking)>1:
+                    _logger.info("Found banking {}".format(banking[0]))
                     sep = banking.find('|')
                     if sep == 1:
                         iban = False
@@ -124,6 +126,7 @@ class ContactExt(models.Model):
                         bic = banking.split('|')[1]
                     
                     if iban:
+                        _logger.info("Found iban {}".format(iban))
                         existing_account = self.env['res.partner.bank'].search([('acc_number','=',iban)],limit=1)
                         if not existing_account:
                             self.env['res.partner.bank'].create({
