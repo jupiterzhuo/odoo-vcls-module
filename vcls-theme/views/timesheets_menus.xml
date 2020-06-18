@@ -15,7 +15,7 @@
             name="My Timesheets | Grid" 
             sequence="1" 
             parent="hr_timesheet.timesheet_menu_root" 
-            action="hr_timesheet.act_hr_timesheet_line" 
+            action="vcls-timesheet.act_vcls_timesheet_user" 
         />
 
         <menuitem 
@@ -25,6 +25,8 @@
             parent="hr_timesheet.timesheet_menu_root" 
             action="vcls-timesheet.act_hr_timesheet_list" 
         />
+
+        <delete model="ir.ui.menu" id="hr_timesheet_attendance.menu_hr_timesheet_attendance_report" />
 
         <menuitem id="menu_lm_analysis"
             name="Managee's Time Analysis" 
@@ -71,10 +73,5 @@
             groups="vcls_security.group_project_controller,vcls-hr.vcls_group_superuser_lvl2,vcls-hr.vcls_group_head"
             action="vcls-timesheet.action_pc_all_timesheet_pivot"
         />
-
-        
-        
-
-        
     </data>
 </odoo>
