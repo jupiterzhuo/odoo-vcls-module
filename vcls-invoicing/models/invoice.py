@@ -741,7 +741,7 @@ class Invoice(models.Model):
                                                                     ('res_id', '=', self.id),
                                                                     ('name', 'like', report_name)]) + 1
         return (self.timesheet_limit_date and self.timesheet_limit_date.strftime('%Y-%m-%d') or '') \
-            + project_string + report_name + '_V' + str(count_attachments)
+            + project_string + report_name + '_V' + str(count_attachments) + '.pdf'
 
     @api.multi
     def generate_report(self, report_template, report_name, message):
