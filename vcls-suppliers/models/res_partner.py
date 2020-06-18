@@ -133,6 +133,10 @@ class ContactExt(models.Model):
                             })
                         else:
                             existing_account.write({'partner_id':rec.id})
+                
+            for contact in related_contact:
+                contact.name = '_YOOZED_' + contact.name
+
 
     
     def merge_list_string(self,source):
