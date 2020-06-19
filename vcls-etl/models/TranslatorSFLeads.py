@@ -16,8 +16,22 @@ class TranslatorSFLeads(TranslatorSFGeneral.TranslatorSFGeneral):
         result = {}
 
         context = odoo.env.context
-        if context.get('custom_context')=='test':
-            raise UserError("{}".format(context))
+
+        # We process the key updates required by Marketing
+        if SF_Leads['Inactive_Lead__c']:
+            result['active'] = False
+
+        if SF_Leads['Opted_In__c']:
+            result['opted_in'] = True
+        if SF_Leads['Unsubscribed_from_Marketing_Comms__c']:
+            if SF_Leads['Unsubscribed_from_Marketing_Comms__c'] == 'Unsubscribed':
+                result['opted_in'] = False
+        if SF_Leads['Content_Name__c']:
+            result['content_name'] = SF_Leads['Content_Name__c']
+                	
+        if context.get('custom_context')=='small_update':
+            result['log_info'] = 'small_update {}'.format(result['active'])
+            return result
 
         ### IDENTIFICATION
         if SF_Leads['Salutation']:
@@ -70,8 +84,6 @@ class TranslatorSFLeads(TranslatorSFGeneral.TranslatorSFGeneral):
         if SF_Leads['Rating']:
             result['priority'] = TranslatorSFLeads.convertRating(SF_Leads)
 
-        #Content_Name__c
-
         result['customer_currency_id'] = TranslatorSFGeneral.TranslatorSFGeneral.convertCurrency(SF_Leads['CurrencyIsoCode'],odoo)
         if SF_Leads['First_VCLS_Contact_Point__c']:
             result['initial_vcls_contact'] = TranslatorSFGeneral.TranslatorSFGeneral.toOdooId(SF_Leads['First_VCLS_Contact_Point__c'],"res.partner","Contact", odoo)
@@ -80,7 +92,7 @@ class TranslatorSFLeads(TranslatorSFGeneral.TranslatorSFGeneral):
         #fax
         if SF_Leads['Functional_Focus__c']:
             result['functional_focus_id'] = mapOdoo.convertRef(SF_Leads['Functional_Focus__c'],odoo,'partner.functional.focus',False)
-        #Inactive_Lead__c
+        
         if SF_Leads['Industry']:
             result['industry_id'] = mapOdoo.convertRef(SF_Leads['Industry'],odoo,'res.partner.industry',False)
         result['contact_us_message'] = SF_Leads['Contact_us_Message__c']
@@ -97,8 +109,7 @@ class TranslatorSFLeads(TranslatorSFGeneral.TranslatorSFGeneral):
         result['conversion_date'] = SF_Leads['ConvertedDate']
         if SF_Leads['LinkedIn_Profile__c']:
             result['linkedin_url'] = TranslatorSFGeneral.TranslatorSFGeneral.convertUrl(SF_Leads['LinkedIn_Profile__c'])
-        if SF_Leads['Opted_In__c']:
-            result['opted_in'] = SF_Leads['Opted_In__c']
+        
         
         result['log_info'] = result['name']
 

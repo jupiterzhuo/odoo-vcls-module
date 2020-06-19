@@ -86,7 +86,9 @@ class salesforceSync(models.Model):
                 #we initiate a sync object
                 sync = self.env['etl.salesforce.{}'.format(template.externalObjName.lower())]
                 #we add context to the sync
-                sync = sync.with_context(custom_context=custom_context)
+                if template.priority%10 != 1: #this means this is not a creation
+                    sync = sync.with_context(custom_context=custom_context)
+                    
                 translator = sync.getSFTranslator(sfInstance)
                 counter = 0
 
