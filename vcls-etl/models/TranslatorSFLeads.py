@@ -1,4 +1,5 @@
 from . import TranslatorSFGeneral
+from odoo.exceptions import UserError, ValidationError
 import logging
 _logger = logging.getLogger(__name__)
 
@@ -13,6 +14,10 @@ class TranslatorSFLeads(TranslatorSFGeneral.TranslatorSFGeneral):
     def translateToOdoo(SF_Leads, odoo, SF):
         mapOdoo = odoo.env['map.odoo']
         result = {}
+
+        context = odoo.env.context
+        if context.get('custom_context')=='test':
+            raise UserError("{}".format(context))
 
         ### IDENTIFICATION
         if SF_Leads['Salutation']:
