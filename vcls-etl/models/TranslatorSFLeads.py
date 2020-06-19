@@ -26,9 +26,11 @@ class TranslatorSFLeads(TranslatorSFGeneral.TranslatorSFGeneral):
 
         if SF_Leads['Opted_In__c']:
             result['opted_in'] = True
+            result['gdpr_status'] = 'in'
         if SF_Leads['Unsubscribed_from_Marketing_Comms__c']:
             if SF_Leads['Unsubscribed_from_Marketing_Comms__c'] == 'Unsubscribed':
                 result['opted_in'] = False
+                result['gdpr_status'] = 'out'
         if SF_Leads['Content_Name__c']:
             result['content_name'] = SF_Leads['Content_Name__c']
                 	
