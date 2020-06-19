@@ -56,6 +56,8 @@ class Contacts(models.Model):
         default = 'out',
     )
 
+    content_name = fields.Char()
+
     @api.onchange('marketing_task_id')
     def _onchange_marketing_task_id(self):
         if self.marketing_task_id:
