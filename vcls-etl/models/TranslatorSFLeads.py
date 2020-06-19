@@ -20,6 +20,8 @@ class TranslatorSFLeads(TranslatorSFGeneral.TranslatorSFGeneral):
         # We process the key updates required by Marketing
         if SF_Leads['Inactive_Lead__c']:
             result['active'] = False
+        else:
+            result['active'] = True
 
         if SF_Leads['Opted_In__c']:
             result['opted_in'] = True
