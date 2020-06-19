@@ -18,6 +18,7 @@ class TranslatorSFLeads(TranslatorSFGeneral.TranslatorSFGeneral):
         context = odoo.env.context
 
         # We process the key updates required by Marketing
+        result['type'] = 'lead'
         if SF_Leads['Inactive_Lead__c']:
             result['active'] = False
         else:
@@ -61,7 +62,6 @@ class TranslatorSFLeads(TranslatorSFGeneral.TranslatorSFGeneral):
         if SF_Leads['LeadSource']:
             #_logger.info("Lead Source | {}".format(SF_Leads['LeadSource']))
             result['marketing_project_id'] = mapOdoo.convertRef(SF_Leads['LeadSource'],odoo,'project.project',False)
-        result['type'] = 'lead'
 
         result = TranslatorSFLeads.partner_finder(result,SF_Leads,odoo)
         
