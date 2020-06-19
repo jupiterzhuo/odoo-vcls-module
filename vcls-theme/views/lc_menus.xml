@@ -189,6 +189,13 @@
             name="Request for Suppliers"
             parent="menu_lc_root"
             action="action_my_rfq"
+            sequence="10"
+        />
+        <menuitem
+            id="menu_lc_current_month_progression"
+            name="Monthly Overview"
+            parent="menu_lc_root"
+            action="vcls-timesheet.action_monthly_overview"
             sequence="9"
         />
 
