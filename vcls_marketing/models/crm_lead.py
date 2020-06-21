@@ -50,6 +50,8 @@ class Leads(models.Model):
         default = 'out',
     )
 
+    content_name = fields.Char()
+
     @api.onchange('marketing_task_id')
     def _onchange_marketing_task_id(self):
         if self.marketing_task_id:
@@ -75,6 +77,7 @@ class Leads(models.Model):
         """
         data = super()._create_lead_partner_data(name, is_company, parent_id)
         data['origin_lead_id'] = self.id
+        data['content_name'] = self.content_name
         data['marketing_project_id'] = self.marketing_project_id.id
         data['marketing_task_id'] = self.marketing_task_id.id
         data['marketing_task_ids'] = [(6, 0, self.marketing_task_ids.ids)]
