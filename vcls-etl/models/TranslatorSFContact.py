@@ -10,12 +10,26 @@ class TranslatorSFContact(TranslatorSFGeneral.TranslatorSFGeneral):
     def translateToOdoo(SF_Contact, odoo, SF):
         mapOdoo = odoo.env['map.odoo']
         result = {}
+        context = odoo.env.context
         #_logger.info("ETL Contact | {}".format(SF_Contact))
 
         ### DEFAULT VALUES
         result['is_company'] = False
         result['company_type'] = 'person'
         result['type'] = 'contact'
+
+        if SF_Contact['Inactive_Contact__c']:
+            result['active'] = False
+        else:
+            result['active'] = True
+        if SF_Contact['Unsubscribed_from_Marketing_Comms__c']:
+            if SF_Contact['Unsubscribed_from_Marketing_Comms__c'] == 'Unsubscribed':
+                result['opted_in'] = False
+                result['gdpr_status'] = 'out'
+
+        if context.get('custom_context')=='small_update':
+            result['log_info'] = 'small_update {}'.format(result['active'])
+            return result
 
         ### IDENTIFICATION
         if SF_Contact['Salutation']:
