@@ -58,6 +58,7 @@
                                     <group>
                                         <field name="function" attrs="{'required': [('is_company', '=', False)]}"/>
                                         <field name="parent_id" widget="res_partner_many2one" placeholder="Company" domain="[('is_company', '=', True)]" attrs="{'invisible': ['|', '&amp;', ('is_company','=', True),('parent_id', '=', False),('company_name', '!=', False),('company_name', '!=', '')]}"/>
+                                        <field name="company_id" options="{'no_create': 1, 'no_create_edit': 1}"/>
                                     </group>
                                 </group>
 

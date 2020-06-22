@@ -72,7 +72,7 @@ class AnalyticLine(models.Model):
         default=0.0,
         copy=False,
     )
-    
+
     required_lc_comment = fields.Boolean(compute='get_required_lc_comment')
 
     rate_id = fields.Many2one(
@@ -86,6 +86,7 @@ class AnalyticLine(models.Model):
         readonly=True,
         store=True,
         default=0.0,
+        group_operator="avg",
     )
 
     so_line_currency_id = fields.Many2one(
@@ -112,7 +113,33 @@ class AnalyticLine(models.Model):
     employee_type = fields.Selection(
         related='employee_id.employee_type',
     )
- 
+
+    calculated_amount = fields.Float(
+        compute='_compute_calculated_amount',
+        string="Revenue",
+        help="Unite Price x Revised Time",
+        store=True,
+        group_operator="sum",
+        )
+
+    calculated_delta_time = fields.Float(
+        compute='_compute_calculated_delta_time',
+        string="Delta Time",
+        help="Revised Time - Coded Time",
+        store=True,
+        group_operator="sum",
+        )
+
+    @api.depends('unit_amount_rounded', 'so_line_unit_price')
+    def _compute_calculated_amount(self):
+        for line in self:
+            line.calculated_amount = line.unit_amount_rounded * line.so_line_unit_price
+
+    @api.depends('unit_amount_rounded', 'unit_amount')
+    def _compute_calculated_delta_time(self):
+        for line in self:
+            line.calculated_delta_time = line.unit_amount_rounded - line.unit_amount
+
     @api.depends('task_id','task_id.parent_id')
     def _compute_reporting_task(self):
         for ts in self:
