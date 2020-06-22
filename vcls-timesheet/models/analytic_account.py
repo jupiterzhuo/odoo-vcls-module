@@ -133,12 +133,12 @@ class AnalyticLine(models.Model):
     @api.depends('unit_amount_rounded', 'so_line_unit_price')
     def _compute_calculated_amount(self):
         for line in self:
-            line.current_period_amount = line.unit_amount_rounded * line.so_line_unit_price
+            line.calculated_amount = line.unit_amount_rounded * line.so_line_unit_price
 
     @api.depends('unit_amount_rounded', 'unit_amount')
     def _compute_calculated_delta_time(self):
         for line in self:
-            line.current_period_delta_time = line.unit_amount_rounded - line.unit_amount
+            line.calculated_delta_time = line.unit_amount_rounded - line.unit_amount
 
     @api.depends('task_id','task_id.parent_id')
     def _compute_reporting_task(self):
