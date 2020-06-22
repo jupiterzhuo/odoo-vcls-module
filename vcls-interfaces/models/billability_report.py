@@ -112,17 +112,15 @@ class BillabilityReport(models.Model):
                 if week_data_line['Effective Capacity [h]'] == 0:
                     week_data_line['amount_fte_billable'] = None
                     week_data_line['total_time_coded_percent'] = None
-                else:
-                    week_data_line['total_time_coded_percent'] = week_data_line['total_time_coded'] / week_data_line['Effective Capacity [h]'] * 100
-                    week_data_line['amount_fte_billable'] = (week_data_line['Effective Capacity [h]'] / 40) * consult_decimal
-                    week_data_line['fte_billable_per_staff'] = (week_data_line['billable_hours'] / week_data_line['amount_fte_billable']) if consult_decimal>0 else False
-                
-                if consult_decimal == 0 or week_data_line['Effective Capacity [h]'] == 0:
                     continue
-                else:
-                    #calculate percentages from data
-                    week_data_line['billability_percent'] = (week_data_line['billable_hours'] / (week_data_line['Effective Capacity [h]'] * consult_decimal)) * 100
-
+                week_data_line['total_time_coded_percent'] = week_data_line['total_time_coded'] / week_data_line['Effective Capacity [h]'] * 100
+                week_data_line['amount_fte_billable'] = (week_data_line['Effective Capacity [h]'] / 40) * consult_decimal
+                if week_data_line['amount_fte_billable'] > 0:
+                    week_data_line['fte_billable_per_staff'] = (week_data_line['billable_hours'] / week_data_line['amount_fte_billable'])
+                if consult_decimal == 0:
+                    continue
+                #calculate percentages from data
+                week_data_line['billability_percent'] = (week_data_line['billable_hours'] / (week_data_line['Effective Capacity [h]'] * consult_decimal)) * 100
 
             data += week_data
         field_mapping = self._get_field_mapping()
