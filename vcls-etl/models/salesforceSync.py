@@ -57,7 +57,7 @@ class salesforceSync(models.Model):
         return "This return the model name of external"
     
     @api.model
-    def sf_process_keys(self,batch_size=False,loop=True,duration=9):
+    def sf_process_keys(self,batch_size=False,loop=True,duration=9,custom_context=''):
         priorities = self.env['etl.sync.keys'].search([('state','not in',['upToDate','postponed'])]).mapped('priority')
         if priorities:
             top_priority = max(priorities)
@@ -85,6 +85,10 @@ class salesforceSync(models.Model):
                 _logger.info("ETL | Found {} {} keys {} with priority {}".format(len(to_process),template.externalObjName,template.state,template.priority))
                 #we initiate a sync object
                 sync = self.env['etl.salesforce.{}'.format(template.externalObjName.lower())]
+                #we add context to the sync
+                if template.priority%10 != 1: #this means this is not a creation
+                    sync = sync.with_context(custom_context=custom_context)
+                    
                 translator = sync.getSFTranslator(sfInstance)
                 counter = 0
 
