@@ -86,6 +86,7 @@ class AnalyticLine(models.Model):
         readonly=True,
         store=True,
         default=0.0,
+        group_operator="avg",
     )
 
     so_line_currency_id = fields.Many2one(
@@ -115,14 +116,19 @@ class AnalyticLine(models.Model):
 
     calculated_amount = fields.Float(
         compute='_compute_calculated_amount',
-        string="Current Period Amount",
+        string="Revenue",
         help="Unite Price x Revised Time",
-        store=True)
+        store=True,
+        group_operator="sum",
+        )
+
     calculated_delta_time = fields.Float(
         compute='_compute_calculated_delta_time',
-        string="Current Period Delta Time",
+        string="Delta Time",
         help="Revised Time - Coded Time",
-        store=True)
+        store=True,
+        group_operator="sum",
+        )
 
     @api.depends('unit_amount_rounded', 'so_line_unit_price')
     def _compute_calculated_amount(self):
