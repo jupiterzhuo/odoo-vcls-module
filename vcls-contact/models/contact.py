@@ -219,6 +219,11 @@ class ResPartner(models.Model):
         store = True,
     )
 
+    company_id = fields.Many2one(
+        'res.company',
+        default=False,
+    )
+
     ###################
     # COMPUTE METHODS #
     ###################
