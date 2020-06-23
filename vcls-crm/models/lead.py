@@ -109,7 +109,7 @@ class Leads(models.Model):
         string='Account Manager', 
         track_visibility='onchange', 
         domain=lambda self: [("groups_id", "=", self.env['res.groups'].search([('name','=', 'Account Manager')]).id)],
-        default='default_am',
+        default=False,
         )
 
     date_closed = fields.Datetime('Closed Date', readonly=False, copy=False)
@@ -366,7 +366,7 @@ class Leads(models.Model):
         
         lead = super(Leads, self).create(vals)
         # VCLS MODS
-        if lead.type == 'lead':
+        if lead.type == 'lead' and lead.message_ids:
             lead.message_ids[0].subtype_id = self.env.ref('vcls-crm.lead_creation')
         elif lead.type == 'opportunity' and lead.partner_id:
             vals.update({'type':'opportunity'})
