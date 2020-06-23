@@ -265,7 +265,7 @@ class CustomerPortal(CustomerPortal):
                         'unit_amount': float(post['unit_amount']),
                         'name': post['name'],
                     }
-                    if post['time_category_id']:
+                    if post.get('time_category_id', False):
                         values.update({'time_category_id': post['time_category_id']})
                     analytic_line = request.env['account.analytic.line'].sudo().create(values)
                     analytic_line._link_portal_analytic_line_purchase(request.env.user)
