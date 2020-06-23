@@ -122,6 +122,7 @@
                     <field name="internal_comment" readonly="1" invisible="1" />
                     <field name="unit_amount" readonly="1" string="Duration (hours)" />
                     <field name="unit_amount_rounded" />
+                    <field name="calculated_amount"/>
                     <field name="employee_id" readonly="1" />
                     <field name="lc_comment" readonly="1" />
                     <field name="adjustment_reason_id" />

@@ -26,10 +26,37 @@
             action="vcls-timesheet.act_hr_timesheet_list" 
         />
 
-        <menuitem id="menu_lm_analysis"
-            name="Managee's Time Analysis" 
+        <menuitem id="menu_time_analysis"
+            name="Time Analysis" 
             sequence="4"
             parent="hr_timesheet.timesheet_menu_root"
+            groups="vcls-hr.vcls_group_lm,vcls-hr.vcls_group_superuser_lvl2"
+        />
+
+        <menuitem id="menu_my_analysis"
+            name="My Time Analysis" 
+            sequence="1"
+            parent="menu_time_analysis"
+        />
+
+        <menuitem id="menu_my_billability"
+            name="Billability Report" 
+            sequence="1"
+            parent="menu_my_analysis"
+            action="vcls-interfaces.action_my_billability_overview_display"
+        />
+
+        <menuitem id="menu_my_time"
+            name="Time Report" 
+            sequence="2"
+            parent="menu_my_analysis"
+            action="vcls-timesheet.action_my_timesheet_report_pivot"
+        />
+
+        <menuitem id="menu_lm_analysis"
+            name="Managee's Time Analysis" 
+            sequence="2"
+            parent="menu_time_analysis"
             groups="vcls-hr.vcls_group_lm,vcls-hr.vcls_group_superuser_lvl2"
         />
 
@@ -51,8 +78,8 @@
 
         <menuitem id="menu_pc_analysis"
             name="Employee's Time Analysis" 
-            sequence="6"
-            parent="hr_timesheet.timesheet_menu_root"
+            sequence="3"
+            parent="menu_time_analysis"
             groups="vcls_security.group_project_controller,vcls-hr.vcls_group_superuser_lvl2,vcls-hr.vcls_group_head"
         />
 

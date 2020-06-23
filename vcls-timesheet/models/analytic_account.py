@@ -114,25 +114,31 @@ class AnalyticLine(models.Model):
     )
 
     calculated_amount = fields.Float(
-        compute='_compute_calculated_amount',
-        string="Current Period Amount",
+        compute='compute_calculated_amount',
+        string="Valorization",
         help="Unite Price x Revised Time",
-        store=True)
+        store=True,
+    )
+
     calculated_delta_time = fields.Float(
-        compute='_compute_calculated_delta_time',
-        string="Current Period Delta Time",
+        compute='compute_calculated_delta_time',
+        string="Delta Time",
         help="Revised Time - Coded Time",
-        store=True)
+    )
 
     @api.depends('unit_amount_rounded', 'so_line_unit_price')
-    def _compute_calculated_amount(self):
+    def compute_calculated_amount(self):
+        print("COMPUUUUUUUUUUTE")
+        # test = self.env['account.analytic.line'].search()
+        # for line in test:
+        #     line.calculated_amount = line.unit_amount_rounded * line.so_line_unit_price
         for line in self:
-            line.current_period_amount = line.unit_amount_rounded * line.so_line_unit_price
+            line.calculated_amount = line.unit_amount_rounded * line.so_line_unit_price
 
     @api.depends('unit_amount_rounded', 'unit_amount')
-    def _compute_calculated_delta_time(self):
+    def compute_calculated_delta_time(self):
         for line in self:
-            line.current_period_delta_time = line.unit_amount_rounded - line.unit_amount
+            line.calculated_delta_time = line.unit_amount_rounded - line.unit_amount
 
     @api.depends('task_id','task_id.parent_id')
     def _compute_reporting_task(self):
