@@ -42,13 +42,46 @@
             </field>
         </record>
 
+        <record id="action_my_all_timesheet_pivot" model="ir.actions.act_window">
+            <field name="name">My Report</field>
+            <field name="res_model">timesheet.report</field>
+            <field name="view_mode">pivot</field>
+            <field name='view_id' ref='timesheet_lm_report_pivot' />
+            <field name = 'domain'>[('date','&gt;=',(context_today()-relativedelta(months=1)).strftime('%Y-%m-01')),('employee_id.user_id','=',uid)]</field>
+            <field name = "context">{
+                "search_default_groupby_department":0,
+                "search_default_groupby_employee":1,
+                "search_default_groupby_billability":1,
+                "search_default_groupby_project":1,
+                }</field>
+        </record>
+
         <record id="action_lm_all_timesheet_pivot" model="ir.actions.act_window">
             <field name="name">Line Manager Report</field>
             <field name="res_model">timesheet.report</field>
             <field name="view_mode">pivot</field>
             <field name='view_id' ref='timesheet_lm_report_pivot' />
             <field name = 'domain'>[('date','&gt;=',(context_today()-relativedelta(months=1)).strftime('%Y-%m-01')),('employee_id.parent_id.user_id','=',uid)]</field>
-            <field name = "context">{'group_by': ['employee_id','billability','project_id','task_id']}</field>
+            <field name = "context">{
+                "search_default_groupby_department":0,
+                "search_default_groupby_employee":1,
+                "search_default_groupby_billability":1,
+                "search_default_groupby_project":1,
+                }</field>
+        </record>
+
+        <record id="action_pc_all_timesheet_pivot" model="ir.actions.act_window">
+            <field name="name">Timesheet Analysis</field>
+            <field name="res_model">timesheet.report</field>
+            <field name="view_mode">pivot</field>
+            <field name='view_id' ref='timesheet_pc_report_pivot'/>
+            <field name = 'domain'>[('employee_id','!=',False),('date','&gt;=',(context_today()-relativedelta(days=context_today().weekday(),weeks=4)).strftime('%Y-%m-%d'))]</field>
+            <field name = "context">{
+                "search_default_groupby_department":1,
+                "search_default_groupby_employee":0,
+                "search_default_groupby_billability":0,
+                "search_default_groupby_project":0,
+                }</field>
         </record>
 
         <record id="timesheet_pc_report_pivot" model="ir.ui.view">
@@ -68,20 +101,7 @@
             </field>
         </record>
 
-        <record id="action_pc_all_timesheet_pivot" model="ir.actions.act_window">
-            <field name="name">Timesheet Analysis</field>
-            <field name="res_model">timesheet.report</field>
-            <field name="view_mode">pivot</field>
-            <field name='view_id' ref='timesheet_pc_report_pivot'/>
-            <field name = 'domain'>[('employee_id','!=',False),('date','&gt;=',(context_today()-relativedelta(days=context_today().weekday(),weeks=4)).strftime('%Y-%m-%d'))]</field>
-            <field name = "context">{
-                "search_default_groupby_department":1,
-                "search_default_groupby_employee":0,
-                "search_default_groupby_billability":0,
-                "search_default_groupby_project":0,
-                }</field>
-        </record>
-
+        
         <record id='vcls_timesheet_lc_monthly_overview_tree' model='ir.ui.view'>
             <field name="name">vcls.timesheet.lc.view.monthly.progression.tree</field>
             <field name="model">account.analytic.line</field>
