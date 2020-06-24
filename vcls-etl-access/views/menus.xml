@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+    
+        <record model="ir.actions.act_window" id="action_bh_client_project">
+            <field name="name">Client Project</field>
+            <field name="domain" eval="[('company_id','=',ref('vcls-hr.company_BH'))]"/>
+            <field name="res_model">account.analytic.line</field>
+            <field name="view_mode">tree,pivot</field>
+            <field name="view_id" ref="view_bh_client_project"/>
+            <field name="search_view_id" ref="view_bh_client_project_search"/>
+            <field name="context">{'group_by':['project_id', 'date:week','date:day','employee_id']}</field>
+        </record>
+
+        <record model="ir.actions.act_window" id="action_bh_employee_total_hours">
+            <field name="name">Employee Total Hours</field>
+            <field name="domain" eval="[('company_id','=',ref('vcls-hr.company_BH'))]"/>
+            <field name="res_model">account.analytic.line</field>
+            <field name="view_mode">tree,pivot</field>
+            <field name="view_id" ref="view_bh_employee_total_hours"/>
+            <field name="search_view_id" ref="view_bh_client_project_search"/>
+            <field name="context">{'group_by':['employee_id', 'project_id','date:week']}</field>
+        </record>
+
+        <menuitem 
+			name="BH Reporting" 
+			parent="vcls-theme.menu_bd_root" 
+			id="menu_bh_reporting" 
+			action="" 
+			sequence="11"/>
+
+        <menuitem 
+			name="Client Project" 
+			parent="menu_bh_reporting" 
+			id="menu_bh_client_project" 
+			action="action_bh_client_project" 
+			sequence="1" />
+        
+        <menuitem 
+			name="Client" 
+			parent="menu_bh_reporting" 
+			id="menu_bh_client" 
+			action="" 
+			sequence="2" />
+
+
+        <menuitem 
+			name="Employee Total Hours" 
+			parent="menu_bh_reporting" 
+			id="menu_bh_employee_total_hours" 
+			action="action_bh_employee_total_hours" 
+			sequence="3" />
+            
+    </data>
+</odoo>

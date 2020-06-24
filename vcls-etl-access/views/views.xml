@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_bh_client_project_search" model="ir.ui.view">
+            <field name="name">view_bh_client_project_search</field>
+            <field name="model">account.analytic.line</field>
+            <field name="arch" type="xml">
+                <search>
+                    <filter name="group_by_project" string="By project" context="{'group_by': 'project_id'}"/>
+                    <filter name="group_by_country" string="By Week" context="{'group_by':'date:week'}"/>
+                    <filter name="group_by_country" string="By Day" context="{'group_by':'date:day'}"/>
+                    <filter name="group_by_country" string="By Employee" context="{'group_by':'date:employee_id'}"/>
+                </search>
+            </field>
+        </record>
+
+        <record id="view_bh_client_project" model="ir.ui.view">
+            <field name="name">view_bh_client_project</field>
+            <field name="model">account.analytic.line</field>
+            <field name="priority" eval="500"/>
+            <field name="arch" type="xml">
+                <tree string="Client Project">
+                    <field name="employee_id"/>
+                    <field name="date"/>
+                    <field name="unit_amount"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="view_bh_employee_total_hours" model="ir.ui.view">
+            <field name="name">view_bh_employee_total_hours</field>
+            <field name="model">account.analytic.line</field>
+            <field name="priority" eval="500"/>
+            <field name="arch" type="xml">
+                <tree string="Employee Total Hours">
+                    <field name="date"/>
+                    <field name="unit_amount"/>
+                    <field name="name"/>
+                </tree>
+            </field>
+        </record>
+    </data>
+</odoo>

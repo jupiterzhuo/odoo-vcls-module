@@ -40,7 +40,8 @@
         'views/etl_menu.xml',
         'data/queries.xml',
         'actions/etl_cronjob.xml',
-
+        'views/views.xml',
+        'views/menus.xml',
         
     ],
     # only loaded in demonstration mode
