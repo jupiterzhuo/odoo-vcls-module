@@ -28,6 +28,7 @@ class SaleAdvancePaymentInv(models.TransientModel):
         if self.advance_payment_method in ('percentage', 'fixed'):
             return super(SaleAdvancePaymentInv, self).create_invoices()
         context = self._context.copy()
+        context['group_invoice_method'] = self.group_invoice_method
         active_orders = self.env['sale.order'].browse(self._context.get('active_ids', []))
         related_orders = active_orders
         pos = self.env['invoicing.po']
@@ -37,11 +38,23 @@ class SaleAdvancePaymentInv(models.TransientModel):
                 related_orders |= order.parent_id | order.parent_sale_order_id | order.child_ids
 
         elif self.group_invoice_method == 'program':
+            program_id = False
             for order in active_orders:
-                programs = self.env['sale.order'].browse(self._context.get('active_ids', [])).mapped('program_id')
-                sale_orders = self.env['sale.order'].search([('program_id', 'in', programs.ids)])
-                related_orders |= sale_orders
-                context['group_invoice_method'] = self.group_invoice_method
+                #we test if program_id is populated and unique
+                if not order.program_id and not order.parent_id:
+                    raise ValidationError("The Order {} has no defined program. Please update or select another mode.".format(order.name))
+                if not program_id and order.program_id:
+                    program_id = order.program_id
+                if program_id and order.program_id:
+                    if program_id != order.program_id:
+                        raise ValidationError("The Order {} is not part of the program {}.".format(order.name,program_id.name))
+            if not program_id:
+                raise ValidationError("No program found, please select another invoicing mode.")
+            else:
+                sale_orders = self.env['sale.order'].search([('program_id', '=', program_id.id)])
+                for order in sale_orders:
+                    related_orders |= order.parent_id | order.parent_sale_order_id | order.child_ids
+                
 
         # we filter out orders without anything to invoice
         related_orders = related_orders.filtered(lambda so: sum(so.order_line.mapped('untaxed_amount_to_invoice')) > 0)

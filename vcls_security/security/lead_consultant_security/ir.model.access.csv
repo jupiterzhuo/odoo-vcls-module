@@ -14,5 +14,3 @@ access_purchase_order_lc,purchase.order.lc,purchase.model_purchase_order,vcls_se
 access_purchase_order_line_lc,purchase.order.line.lc,purchase.model_purchase_order_line,vcls_security.vcls_lc,1,0,0,0
 access_project_forecast_lc,project.forecast,project_forecast.model_project_forecast,vcls_security.vcls_lc,1,1,1,0
 access_opportunity_lc,access_opportunity_default,crm.model_crm_lead,vcls_security.vcls_lc,1,0,0,0
-access_account_invoice_line_lc,account_invoice.line lc,account.model_account_invoice_line,vcls_security.vcls_lc,1,0,0,0
-access_account_invoice_lc,account_invoice lc,account.model_account_invoice,vcls_security.vcls_lc,1,0,0,0

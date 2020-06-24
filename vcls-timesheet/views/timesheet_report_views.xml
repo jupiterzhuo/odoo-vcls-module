@@ -1,6 +1,31 @@
 <odoo>
     <data>
 
+        <record id="timesheet_report_search" model="ir.ui.view">
+            <field name="name">timesheet.report.search</field>
+            <field name="model">timesheet.report</field>
+            <field name="arch" type="xml">
+                <search string="Timesheet Report">
+                    <field name="employee_id"/>
+                    <field name="department_id"/>
+                    <field name="billability" string="Billability Status"/>
+                    <field name="project_id"/>
+                    <field name="task_id"/>
+                    <field name="date"/>
+                    <!--<filter name="mine" string="My Timesheets" domain="[('user_id', '=', uid)]"/>-->
+                    <separator/>
+                    <filter name="month" string="Date" date="date"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Employee" name="groupby_employee" domain="[]" context="{'group_by':'employee_id'}"/>
+                        <filter string="Department" name="groupby_department" domain="[]" context="{'group_by':'department_id'}"/>
+                        <filter string="Billability Status" name="groupby_billability" domain="[]" context="{'group_by':'billability'}"/>
+                        <filter string="Project" name="groupby_project" domain="[]" context="{'group_by':'project_id'}"/>
+                        <filter string="Task" name="groupby_task" domain="[]" context="{'group_by':'task_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
         <record id="timesheet_lm_report_pivot" model="ir.ui.view">
             <field name="name">timesheet.lm.report.pivot</field>
             <field name="model">timesheet.report</field>
@@ -17,24 +42,58 @@
             </field>
         </record>
 
+        <record id="action_my_all_timesheet_pivot" model="ir.actions.act_window">
+            <field name="name">My Report</field>
+            <field name="res_model">timesheet.report</field>
+            <field name="view_mode">pivot</field>
+            <field name='view_id' ref='timesheet_lm_report_pivot' />
+            <field name = 'domain'>[('date','&gt;=',(context_today()-relativedelta(months=1)).strftime('%Y-%m-01')),('employee_id.user_id','=',uid)]</field>
+            <field name = "context">{
+                "search_default_groupby_department":0,
+                "search_default_groupby_employee":1,
+                "search_default_groupby_billability":1,
+                "search_default_groupby_project":1,
+                }</field>
+        </record>
+
         <record id="action_lm_all_timesheet_pivot" model="ir.actions.act_window">
             <field name="name">Line Manager Report</field>
             <field name="res_model">timesheet.report</field>
             <field name="view_mode">pivot</field>
             <field name='view_id' ref='timesheet_lm_report_pivot' />
             <field name = 'domain'>[('date','&gt;=',(context_today()-relativedelta(months=1)).strftime('%Y-%m-01')),('employee_id.parent_id.user_id','=',uid)]</field>
-            <field name = "context">{'group_by': ['employee_id','billability','project_id','task_id']}</field>
+            <field name = "context">{
+                "search_default_groupby_department":0,
+                "search_default_groupby_employee":1,
+                "search_default_groupby_billability":1,
+                "search_default_groupby_project":1,
+                }</field>
+        </record>
+
+        <record id="action_pc_all_timesheet_pivot" model="ir.actions.act_window">
+            <field name="name">Timesheet Analysis</field>
+            <field name="res_model">timesheet.report</field>
+            <field name="view_mode">pivot</field>
+            <field name='view_id' ref='timesheet_pc_report_pivot'/>
+            <field name = 'domain'>[('employee_id','!=',False),('date','&gt;=',(context_today()-relativedelta(days=context_today().weekday(),weeks=4)).strftime('%Y-%m-%d'))]</field>
+            <field name = "context">{
+                "search_default_groupby_department":1,
+                "search_default_groupby_employee":0,
+                "search_default_groupby_billability":0,
+                "search_default_groupby_project":0,
+                }</field>
         </record>
 
         <record id="timesheet_pc_report_pivot" model="ir.ui.view">
             <field name="name">timesheet.lm.report.pivot</field>
             <field name="model">timesheet.report</field>
             <field name="arch" type="xml">
-                <pivot string="PC Timesheet Report">
+                <pivot string="Timesheet Analysis">
                     <field name="employee_email" type="row"/>
+                    <field name="employee_id" type="row"/>
+                    <field name="department_id" type="row"/>
                     <field name="billability" type="row"/>
-                    <field name = "project_id" type="row" />
-                    <!--<field name = "deliverable_id" type="row" />-->
+                    <field name="project_id" type="row" />
                     <field name = "task_id" type="row" />
                     <field name = "date" type = "col" interval="week" />
                     <field name="unit_amount" type="measure"/>
@@ -42,36 +101,89 @@
             </field>
         </record>
 
-        <record id="action_pc_all_timesheet_pivot" model="ir.actions.act_window">
-            <field name="name">PC Timesheet Report</field>
-            <field name="res_model">timesheet.report</field>
-            <field name="view_mode">pivot</field>
-            <field name='view_id' ref='timesheet_pc_report_pivot'/>
-            <field name = 'domain'>[('date','&gt;=',(context_today()-relativedelta(months=1)).strftime('%Y-%m-01'))]</field>
-            <field name = "context">{'group_by': ['employee_email','billability','project_id','task_id']}</field>
+        
+        <record id='vcls_timesheet_lc_monthly_overview_tree' model='ir.ui.view'>
+            <field name="name">vcls.timesheet.lc.view.monthly.progression.tree</field>
+            <field name="model">account.analytic.line</field>
+            <field name="arch" type="xml">
+                <tree string="Monthly Progression" create="0" edit="0" >
+                    <field name="date" readonly="1" />
+                    <field name="project_id" readonly="1" />
+                    <field name="task_id" readonly="1"/>
+                    <field name="rate_id" string="Role" readonly="1"/>
+                    <field name="so_line_unit_price" string="Rate" readonly="1"/>
+                    <field name="time_category_id" readonly="1"/>
+                    <field name="name" readonly="1"/>
+                    <field name="internal_comment" readonly="1" invisible="1" />
+                    <field name="unit_amount" readonly="1" string="Duration (hours)" />
+                    <field name="unit_amount_rounded" />
+                    <field name="employee_id" readonly="1" />
+                    <field name="calculated_amount" readonly="1" />
+                    <field name="calculated_delta_time" readonly="1" />
+                </tree>
+            </field>
         </record>
 
-        <menuitem id="menu_lm_timesheet"
-                  name="Managee's Time Analysis" sequence="4"
-                  parent="hr_timesheet.timesheet_menu_root"
-                  groups="vcls-hr.vcls_group_lm,vcls-hr.vcls_group_superuser_lvl2"
-                  action="action_lm_all_timesheet_pivot"
-        />
+        <record id="search_view_monthly_overview" model="ir.ui.view">
+            <field name="name">current.mont.progression</field>
+            <field name="model">account.analytic.line</field>
+            <field name="arch" type="xml">
+                <search string="Search Purchase Order">
+                    <field name="employee_id"/>
+                    <field name="project_id"/>
+                    <field name="task_id"/>
+                    <field name="reporting_task_id"/>
+                    <field name="name"/>
+                    <field name="rate_id"/>
+                    <filter name="last_n_this" string="Last Month and This Month" domain="[('date','&gt;=',(context_today()-relativedelta(months=1)).strftime('%Y-%m-01'))]"/>
+                    <group expand="0" string="Group By">
+                        <filter string="Projects" name="project" domain="[]" context="{'group_by':'project_id'}"/>
+                        <filter string="Reporting Task" name="reporting_task" domain="[]" context="{'group_by':'reporting_task_id'}"/>
+                        <filter string="Task" name="task" domain="[]" context="{'group_by':'task_id'}"/>
+                        <filter string="Time Category" name="time_category" domain="[]" context="{'group_by':'time_category_id'}"/>
+                        <filter string="Rate" name="rate" domain="[]" context="{'group_by':'rate_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
 
-        <menuitem id="menu_pc_timesheet"
-                  name="Employee's Time Analysis" sequence="6"
-                  parent="hr_timesheet.timesheet_menu_root"
-                  groups="vcls_security.group_project_controller,vcls-hr.vcls_group_superuser_lvl2"
-                  action="action_pc_all_timesheet_pivot"
-        />
+        <record id="vcls_timesheet_lc_monthly_overview_pivot" model="ir.ui.view">
+            <field name="name">vcls.timesheet.lc.monthly.overview.pivot</field>
+            <field name="model">account.analytic.line</field>
+            <field name="arch" type="xml">
+                <pivot string="Monthly Overview">
+                    <field name = "date" type = "col" interval="month"/>
+                    <field name="unit_amount_rounded" type="measure" string="Time"/>
+                    <field name="so_line_unit_price" type="measure" string="Price"/>
+                    <field name="calculated_amount" type="measure" string="Total"/>
+                </pivot>
+            </field>
+        </record>
 
-        <!--
-        <menuitem id="menu_lm_timesheet_tree"
-            name="Pivot View"
-            sequence="2"
-            parent="menu_lm_timesheet"
-            action="action_lm_all_timesheet_pivot"
-        />-->
+        <record id="action_monthly_overview" model="ir.actions.act_window">
+            <field name="name">Monthly Overview (Last Month and This Month)</field>
+            <field name="res_model">account.analytic.line</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">pivot</field>
+            <field name="domain">[('project_id','!=',False),('project_id.user_id', '=', uid)]</field>
+            <field name="search_view_id" ref="search_view_monthly_overview"/>
+            <field name="context">{
+                "search_default_project":1,
+                "search_default_reporting_task":1,
+                "search_default_task":1,
+                "search_default_time_category":1,
+                "search_default_rate":1,
+                "search_default_last_n_this":1,
+                }
+            </field>
+            <!--<field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'pivot', 'view_id': ref('vcls_timesheet_lc_monthly_overview_pivot')}),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('vcls_timesheet_lc_monthly_overview_tree')}),
+            ]"/>-->
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'pivot', 'view_id': ref('vcls_timesheet_lc_monthly_overview_pivot')}),
+            ]"/>
+        </record>
 
     </data>
 </odoo> 

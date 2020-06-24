@@ -22,7 +22,7 @@ class AnalyticLine(models.Model):
         ('lc_review', '1. LC review'), 
         ('pc_review', '2. PC review'), 
         ('carry_forward', 'Carry Forward'),
-        ('adjustment_validation', '4. Adjustment Validation'),
+        ('fixed_price', '4. Fixed Price'),
         ('invoiceable', '5. Invoiceable'),
         ('invoiced', '6. Invoiced'),
         ('historical','7. Historical'),
@@ -72,7 +72,7 @@ class AnalyticLine(models.Model):
         default=0.0,
         copy=False,
     )
-    
+
     required_lc_comment = fields.Boolean(compute='get_required_lc_comment')
 
     rate_id = fields.Many2one(
@@ -86,6 +86,7 @@ class AnalyticLine(models.Model):
         readonly=True,
         store=True,
         default=0.0,
+        group_operator="avg",
     )
 
     so_line_currency_id = fields.Many2one(
@@ -108,7 +109,37 @@ class AnalyticLine(models.Model):
         store = True,
         default = 'na',
         )
-    
+
+    employee_type = fields.Selection(
+        related='employee_id.employee_type',
+    )
+
+    calculated_amount = fields.Float(
+        compute='_compute_calculated_amount',
+        string="Revenue",
+        help="Unite Price x Revised Time",
+        store=True,
+        group_operator="sum",
+        )
+
+    calculated_delta_time = fields.Float(
+        compute='_compute_calculated_delta_time',
+        string="Delta Time",
+        help="Revised Time - Coded Time",
+        store=True,
+        group_operator="sum",
+        )
+
+    @api.depends('unit_amount_rounded', 'so_line_unit_price')
+    def _compute_calculated_amount(self):
+        for line in self:
+            line.calculated_amount = line.unit_amount_rounded * line.so_line_unit_price
+
+    @api.depends('unit_amount_rounded', 'unit_amount')
+    def _compute_calculated_delta_time(self):
+        for line in self:
+            line.calculated_delta_time = line.unit_amount_rounded - line.unit_amount
+
     @api.depends('task_id','task_id.parent_id')
     def _compute_reporting_task(self):
         for ts in self:
@@ -381,13 +412,14 @@ class AnalyticLine(models.Model):
 
         if new_stage=='invoiceable':
             timesheets_in = timesheets.filtered(lambda r: (r.stage_id=='pc_review' or r.stage_id=='carry_forward'))
-
-            #adj_validation_timesheets = timesheets_in.filtered(lambda r: r.required_lc_comment == True)
-            #invoiceable_timesheets = (timesheets_in - adj_validation_timesheets) if adj_validation_timesheets else timesheets_in
-
-            #adj_validation_timesheets.write({'stage_id': 'adjustment_validation'})
-            #invoiceable_timesheets.write({'stage_id': 'invoiceable'})
-            timesheets_in.write({'stage_id': 'invoiceable'})
+            #fixed price usecase
+            fp_ts = timesheets_in.filtered(lambda t: t.so_line.order_id.invoicing_mode == 'fixed_price')
+            if fp_ts:
+                fp_ts.write({'stage_id': 'fixed_price'})
+            #t&m usecase
+            tm_ts = timesheets_in.filtered(lambda t: t.so_line.order_id.invoicing_mode == 'tm')
+            if tm_ts:
+                tm_ts.write({'stage_id': 'invoiceable'})
 
         elif new_stage=='outofscope':
             timesheets_in = timesheets.filtered(lambda r: (r.stage_id=='pc_review' or r.stage_id=='carry_forward'))
@@ -517,8 +549,7 @@ class AnalyticLine(models.Model):
         self.search([('stage_id', '=', 'lc_review')]).write({'stage_id': 'pc_review'})
 
     def pc_review_approve_timesheets(self):
-        self.search([('stage_id', '=', 'pc_review'), ('lc_comment', '=', False)]).\
-            write({'stage_id': 'invoiceable'})
+        self.search([('stage_id', '=', 'pc_review'), ('lc_comment', '=', False)])._pc_change_state('invoiceable')
 
     @api.model
     def _clean_0_ts(self):
@@ -537,15 +568,64 @@ class AnalyticLine(models.Model):
         days = hourly_offset//24
         remainder = hourly_offset%24
         now = fields.Datetime.now()
+        timestamp_end = now + timedelta(minutes=9)
 
-        timesheets = self.search([
+        #we look for employees to smart_timesheets
+        employees = self.env['hr.employee'].search([('do_smart_timesheeting','=',True)])
+
+        for emp in employees:
+            if fields.Datetime.now()>timestamp_end:#to avoid timeout
+                break
+            else:
+                tasks = self.env['project.task']
+                #we get timesheets
+                timesheets = self.search([
+                    ('employee_id','=',emp.id),
+                    ('project_id', '!=', False),
+                    ('unit_amount', '>', 0),
+                    ('date', '>', now - timedelta(days=days+7,hours=remainder)),
+                    ('date', '<', now - timedelta(days=days,hours=remainder)),
+                ])
+                
+                if timesheets:
+                    _logger.info("SMART TIMESHEETING: Found {} timesheets for {}".format(len(timesheets),emp.name))
+                    tasks |= timesheets.mapped('task_id')
+                    for task in tasks.filtered(lambda t: t.stage_allow_ts):
+                        if task.project_id.parent_id:
+                            parent_project_id = task.project_id.parent_id
+                        else:
+                            parent_project_id = task.project_id
+
+                        _logger.info("SMART TIMESHEETING: {} on {}".format(task.name,emp.name))
+                        #we finally create the ts
+                        self.create({
+                            'date': now + timedelta(days=1),
+                            'task_id': task.id,
+                            'unit_amount': 0.0,
+                            'company_id': task.company_id.id,
+                            'project_id': task.project_id.id,
+                            'main_project_id': parent_project_id.id,
+                            'employee_id': emp.id,
+                            'name': "/",
+                        })
+                
+                #employee processed
+                emp.do_smart_timesheeting = False 
+
+
+        """timesheets = self.search([
             ('project_id', '!=', False),
             ('unit_amount', '>', 0),
             ('date', '>', now - timedelta(days=days+7,hours=remainder)),
             ('date', '<', now - timedelta(days=days,hours=remainder)),
         ])
 
-        for task in timesheets.mapped('task_id'):
+        tasks |= timesheets.mapped('task_id')
+        _logger.info("SMART TIMESHEETING: {} unique tasks in {} for {} timesheets".format(len(tasks),len(timesheets.mapped('task_id')),len(timesheets)))
+        tasks=tasks.sorted(key=lambda r: r.id)
+        _logger.info("SMART TIMESHEETING: {} ".format(tasks.mapped('id')))
+
+        for task in tasks:
             if task.project_id.parent_id:
                 parent_project_id = task.project_id.parent_id
             else:
@@ -553,7 +633,7 @@ class AnalyticLine(models.Model):
 
             task_ts = timesheets.filtered(lambda t: t.task_id.id == task.id and t.task_id.stage_allow_ts)
             for employee in task_ts.mapped('employee_id'):
-                #_logger.info("SMART TIMESHEETING: {} on {}".format(task.name,employee.name))
+                _logger.info("SMART TIMESHEETING: {} on {}".format(task.name,employee.name))
                 #we finally create the ts
                 self.create({
                     'date': now + timedelta(days=1),
@@ -564,7 +644,7 @@ class AnalyticLine(models.Model):
                     'main_project_id': parent_project_id.id,
                     'employee_id': employee.id,
                     'name': "/",
-                })
+                })"""
 
 
     def _timesheet_preprocess(self, vals):
@@ -604,3 +684,11 @@ class AnalyticLine(models.Model):
                 if ts:
                     _logger.info("Processing Rate_id for map line for {} as {} with {} timesheets".format(map_line.employee_id.name,rate_id.name,len(ts)))
                     ts.write({'rate_id':rate_id.id})
+
+    @api.model
+    def _set_fixed_price_timesheets(self):
+        timesheets = self.search([('is_timesheet','=',True),('employee_id','!=',False),('project_id','!=',False),('stage_id','=','invoiceable')])
+        fp_ts = timesheets.filtered(lambda t: t.so_line.order_id.invoicing_mode == 'fixed_price')
+        if fp_ts:
+            fp_ts.write({'stage_id': 'fixed_price'})
+            _logger.info("Found {} invoiceable timesheets set as fixed_price status.".format(len(fp_ts)))

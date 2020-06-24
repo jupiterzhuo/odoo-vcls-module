@@ -33,6 +33,7 @@
                 <field name="model">project.project</field>
                 <field name="inherit_id" ref="vcls-project.vcls_specific_project_form"/>
                 <field name="arch" type="xml">
+                    
                     <button name="toggle_active" position="before">
                         <button
                             class="oe_stat_button"
@@ -50,6 +51,8 @@
             <field name="model">project.task</field>
             <field name="inherit_id" ref="project.view_task_form2"/>
             <field name="arch" type="xml">
+
+
                 <button name="action_assign_to_me" position="after">
                     <field name="connected_employee_seniority_level_id" invisible="1"/>
                     <field name="id" invisible="1"/>
@@ -114,6 +117,16 @@
                 <field name="model">project.project</field>
                 <field name="inherit_id" ref="vcls-project.vcls_specific_project_form"/>
                 <field name="arch" type="xml">
+                
+                    <xpath expr="//button[@name='%(vcls-project.project_summary_action_new)d']" position="attributes">
+                        <attribute name="context">{
+                            'default_project_id': active_id,
+                            'default_completion_ratio': completion_ratio,
+                            'default_consumed_completed_ratio': consummed_completed_ratio,
+                            'default_valuation_ratio': valuation_ratio,
+                        }</attribute>
+                    </xpath>
+
                     <button name="toggle_active" position="before">
                         <button
                             class="oe_stat_button"

@@ -1,6 +1,37 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <data>
+        <record model="ir.ui.view" id="inherited_purchase_approval_view">
+            <field name="name">inherited.purchase.approval.view</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_supplier_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='company_id']" position="replace">
+                </xpath>
+                <xpath expr="//field[@name='partner_id']" position="before">
+                    <field name='company_id' required="1" options='{"no_open": True, "no_create": True,"no_create_edit": True}'/>
+                </xpath> 
+                <xpath expr="//button[@name='action_invoice_open']" position="before">
+                    <field name='ready_for_approval' invisible="1"/>
+                    <button string="Ready for Approval" type="object" class="btn-primary" name="action_purchase_approval" attrs="{'invisible': [('ready_for_approval', '=', True)]}"/>
+                </xpath>
+                <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='account_id']" position="attributes">
+                    <attribute name="required">1</attribute>
+                    <options name="no_open">1</options>
+                    <options name="no_create">1</options>
+                    <options name="no_create_edit">1</options>
+                    <!--<attribute name="options">'{"no_open": True, "no_create": True,"no_create_edit": True}'</attribute>-->
+                </xpath>
+                <xpath expr="//field[@name='invoice_line_ids']/tree/field[@name='account_analytic_id']" position="attributes">
+                    <attribute name="required">1</attribute>
+                    <options name="no_open">1</options>
+                    <options name="no_create">1</options>
+                    <options name="no_create_edit">1</options>
+                    <!--<attribute name="options">'{"no_open": True, "no_create": True,"no_create_edit": True}'</attribute>-->
+                </xpath>
+            </field>
+        </record>
+
         <record model="ir.ui.view" id="purchase_order_form_inherit">
             <field name="name">purchase.order.form.inherit</field>
             <field name="model">purchase.order</field>
@@ -126,5 +157,13 @@
 
             </field>
         </record>
+
+        <record id="purchase.action_invoice_pending" model="ir.actions.act_window">
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('vcls-invoicing.ia_invoices_view_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('vcls-suppliers.inherited_purchase_approval_view')}),
+            ]"/>
+        </record>
+
     </data>
 </odoo>

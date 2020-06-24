@@ -1,0 +1,106 @@
+<odoo>
+    <data>
+
+        <menuitem 
+            name="To Validate" 
+            id="timesheet_grid.menu_timesheet_grid_validate" 
+            parent="hr_timesheet.timesheet_menu_root" 
+            groups="hr_timesheet.group_timesheet_manager" 
+            sequence="10" 
+            active="False" 
+        />
+
+        <menuitem 
+            id="hr_timesheet.timesheet_menu_activity_mine" 
+            name="My Timesheets | Grid" 
+            sequence="1" 
+            parent="hr_timesheet.timesheet_menu_root" 
+            action="vcls-timesheet.act_vcls_timesheet_user" 
+        />
+
+        <menuitem 
+            id="hr_timesheet.timesheet_menu_activity_mine_tree" 
+            name="My Timesheets | List" 
+            sequence="2" 
+            parent="hr_timesheet.timesheet_menu_root" 
+            action="vcls-timesheet.act_hr_timesheet_list" 
+        />
+
+        <menuitem id="hr_timesheet_attendance.menu_hr_timesheet_attendance_report"
+            active="False"
+        />
+
+        <menuitem id="menu_time_analysis"
+            name="Time Analysis" 
+            sequence="4"
+            parent="hr_timesheet.timesheet_menu_root"
+        />
+
+        <menuitem id="menu_time_analysis_my"
+            name="My Time Analysis" 
+            sequence="1"
+            parent="menu_time_analysis"
+        />
+
+        <menuitem id="menu_my_billability"
+            name="Billability Report" 
+            sequence="1"
+            parent="menu_time_analysis_my"
+            action="vcls-interfaces.action_billability_overview_display_my"
+        />
+
+        <menuitem id="menu_my_analysis"
+            name="Time Report" 
+            sequence="2"
+            parent="menu_time_analysis_my"
+            action="vcls-timesheet.action_my_all_timesheet_pivot"
+        />
+
+        <menuitem id="menu_lm_analysis"
+            name="Managee's Time Analysis" 
+            sequence="2"
+            parent="menu_time_analysis"
+            groups="vcls-hr.vcls_group_lm,vcls-hr.vcls_group_superuser_lvl2"
+        />
+
+        <menuitem id="menu_lm_billability"
+            name="Billability Report" 
+            sequence="1"
+            parent="menu_lm_analysis"
+            groups="vcls-hr.vcls_group_lm,vcls-hr.vcls_group_superuser_lvl2"
+            action="vcls-interfaces.action_billability_overview_display_lm"
+        />
+
+        <menuitem id="menu_lm_time"
+            name="Time Report" 
+            sequence="2"
+            parent="menu_lm_analysis"
+            groups="vcls-hr.vcls_group_lm,vcls-hr.vcls_group_superuser_lvl2"
+            action="vcls-timesheet.action_lm_all_timesheet_pivot"
+        />
+
+        <menuitem id="menu_pc_analysis"
+            name="Employee's Time Analysis" 
+            sequence="3"
+            parent="menu_time_analysis"
+            groups="vcls_security.group_project_controller,vcls-hr.vcls_group_superuser_lvl2,vcls-hr.vcls_group_head"
+        />
+
+        <menuitem id="menu_pc_billability"
+            name="Billability Report" 
+            sequence="1"
+            parent="menu_pc_analysis"
+            groups="vcls_security.group_project_controller,vcls-hr.vcls_group_superuser_lvl2,vcls-hr.vcls_group_head"
+            action="vcls-interfaces.action_billability_overview_display"
+        />
+
+        <menuitem id="menu_pc_time"
+            name="Time Report" 
+            sequence="2"
+            parent="menu_pc_analysis"
+            groups="vcls_security.group_project_controller,vcls-hr.vcls_group_superuser_lvl2,vcls-hr.vcls_group_head"
+            action="vcls-timesheet.action_pc_all_timesheet_pivot"
+        />
+        
+    </data>
+</odoo>

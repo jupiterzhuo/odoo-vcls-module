@@ -63,6 +63,7 @@ class SaleSubscription(models.Model):
         if deliver_subs:
             _logger.info("SUB | {} deliver subscriptions to process.".format(len(deliver_subs)))
             for sub in deliver_subs:
+                break_sub = False
                 #we find related so_lines
                 so_lines = self.env['sale.order.line'].search([('subscription_id','=',sub.id)])
                 _logger.info("SUB | Found SO lines {} related to {}".format(so_lines.mapped('name'),sub.display_name))
@@ -70,15 +71,41 @@ class SaleSubscription(models.Model):
                     #we get the related so_line
                     found = so_lines.filtered(lambda s: s.product_id == line.product_id)
                     if found:
+                        
                         if len(found)>1: #if several lines related to the same product, we try to match the name
                             so_line = found.filtered(lambda n: n.name == line.name)
                         else:
                             so_line = found
-                        _logger.info("SUB | Adding {} on {} for {} in {}".format(line.quantity,so_line.qty_delivered,so_line.name,so_line.order_id.name))
+                        
+                        if len(so_line)!=1:
+                            #there is a problem, we need to bypass this subscription
+                            break_sub = True
+                            _logger.info("SUB | Unable to process {} because no matching so line was found.".format(found.mapped('order_id.name')))
+                            break
+
+                        _logger.info("SUB | Adding {} on {} for {} in {}".format(line.quantity,so_line.qty_delivered,so_line.name,so_line.order_id.name)) 
+                        _logger.info("SUB | Manual vs  Delivered Before {} {} Method {}".format(so_line.qty_delivered_manual,so_line.qty_delivered,so_line.qty_delivered_method))
                         so_line.qty_delivered += line.quantity
+                        #so_line.qty_delivered = so_line.qty_delivered_manual
+                        #so_line._inverse_qty_delivered() #we mimic the manual change of the delivered qty by calling the onchange method
+                        _logger.info("SUB | Manual vs  Delivered After {} {}".format(so_line.qty_delivered_manual,so_line.qty_delivered))
+                
+                if break_sub:
+                    continue
 
                 next_date = sub.recurring_next_date or current_date
                 periods = {'daily': 'days', 'weekly': 'weeks', 'monthly': 'months', 'yearly': 'years'}
                 invoicing_period = relativedelta(**{periods[sub.recurring_rule_type]: sub.recurring_interval})
                 new_date = next_date + invoicing_period
                 sub.write({'recurring_next_date': new_date.strftime('%Y-%m-%d')})
+    
+    @api.model
+    def clean_subs_delivery_method(self):
+        #we look for lines beeing subscription but with a timesheet delivery method
+        to_update = self.env['sale.order.line'].search([('vcls_type','=','subscription'),('qty_delivered_method','=','timesheet')])
+        for line in to_update:
+            _logger.info("BAD SUBS {} with {} {}".format(line.order_id.name,line.product_id.name,line.name))
+        if to_update:
+            to_update.write({
+                'qty_delivered_method':'manual',
+            })

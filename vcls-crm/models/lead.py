@@ -68,7 +68,17 @@ class Leads(models.Model):
             self.altname = self.partner_id.altname
         else:
             self.altname = self.partner_id.parent_id.altname
-            
+
+    @api.onchange('opted_in')
+    def onchange_opted_in(self):
+        if self.opted_in:
+            self.opted_out = False
+            self.gdpr_status = 'in'
+            self.opted_in_date = datetime.datetime.now()
+        else:
+            self.opted_out = True
+            self.gdpr_status = 'out'
+            self.opted_out_date = datetime.datetime.now()
 
     ###################
     # DEFAULT METHODS #
@@ -99,7 +109,7 @@ class Leads(models.Model):
         string='Account Manager', 
         track_visibility='onchange', 
         domain=lambda self: [("groups_id", "=", self.env['res.groups'].search([('name','=', 'Account Manager')]).id)],
-        default='default_am',
+        default=False,
         )
 
     date_closed = fields.Datetime('Closed Date', readonly=False, copy=False)
@@ -111,14 +121,19 @@ class Leads(models.Model):
 
     manual_probability = fields.Boolean()
 
+    child_ids = fields.Many2many(
+        'res.partner',
+        compute='_compute_child_ids',
+    )
+
     # Related fields in order to avoid mismatch & errors
     opted_in = fields.Boolean(
-        related = 'partner_id.opted_in',
+        default= False,
         string = 'Opted In'
     )
 
     opted_out = fields.Boolean(
-        related = 'partner_id.opted_out',
+        default = True,
         string = 'Opted Out'
     )
  
@@ -351,7 +366,7 @@ class Leads(models.Model):
         
         lead = super(Leads, self).create(vals)
         # VCLS MODS
-        if lead.type == 'lead':
+        if lead.type == 'lead' and lead.message_ids:
             lead.message_ids[0].subtype_id = self.env.ref('vcls-crm.lead_creation')
         elif lead.type == 'opportunity' and lead.partner_id:
             vals.update({'type':'opportunity'})
@@ -374,7 +389,7 @@ class Leads(models.Model):
             
             #Lead naming convention
             if (lead_vals.get('type',lead.type) == 'lead'):
-                temp = self.build_lead_name(lead_vals)
+                temp = lead.build_lead_name(lead_vals)
                 if temp:
                     lead_vals['name'] = temp
 
@@ -412,6 +427,10 @@ class Leads(models.Model):
     # COMPUTE METHODS #
     ###################
 
+    def _compute_child_ids(self):
+           for partner in self.partner_id:
+               self.child_ids = partner.child_ids if partner.child_ids else False
+
     @api.depends('tag_ids')
     def _compute_sig_opp(self):
         for opp in self:
@@ -420,13 +439,12 @@ class Leads(models.Model):
             else:
                 opp.sig_opp = False
 
-    @api.model
     def build_lead_name(self,vals):
-        if vals.get('contact_name', False) and vals.get('contact_lastname', False):
-                if vals.get('contact_middlename', False):
-                    return vals['contact_name'] + " " + vals['contact_middlename'] + " " + vals['contact_lastname']
+        if vals.get('contact_name', self.contact_name) and vals.get('contact_lastname', self.contact_lastname):
+                if vals.get('contact_middlename', self.contact_middlename):
+                    return vals.get('contact_name', self.contact_name) + " " + vals.get('contact_middlename', self.contact_middlename) + " " + vals.get('contact_lastname', self.contact_lastname)
                 else:
-                    return vals['contact_name'] + " " + vals['contact_lastname']
+                    return vals.get('contact_name', self.contact_name) + " " + vals.get('contact_lastname', self.contact_lastname)
         else:
             return False
 
@@ -713,6 +731,11 @@ class Leads(models.Model):
     
     def create_contact_pop_up(self):
         result = self.env['crm.lead'].browse(self.id).handle_partner_assignation('create', False)
+        self.partner_id = result.get(self.id)
+        partner_object = self.env['res.partner'].browse(self.partner_id.id)
+        partner_object.gdpr_status = self.gdpr_status
+        partner_object.opted_in = self.opted_in
+        partner_object.opted_out = self.opted_out
         return result.get(self.id)
     
     # Copy/Paste in order to redirect to right view (overriden)

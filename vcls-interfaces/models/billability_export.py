@@ -63,7 +63,7 @@ class BillabilityExport(models.Model):
             'Leaves [d]': 0,
             'Worked [d]': 0,
             'Effective Capacity [h]': 0,
-            'Control [d]': -1,
+            # 'Control [d]': -1,
         }
         
         all_days = set(start_date + timedelta(days=x) for x in range((end_date-start_date).days + 1))
@@ -155,8 +155,8 @@ class BillabilityExport(models.Model):
                     distribution['Worked [d]'] += max(budget,0)
                     
                     #KPI's
-                    distribution['Effective Capacity [h]'] = distribution['Worked [d]']*distribution['Day Duration [h]']
-                    distribution['Control [d]'] = distribution['Days [d]'] - (distribution['Weekends [d]'] + distribution['Bank Holiday [d]'] + distribution['Out of Contract [d]'] + distribution['Offs [d]'] + distribution['Leaves [d]'] + distribution['Worked [d]'])
+                distribution['Effective Capacity [h]'] = distribution['Worked [d]']*distribution['Day Duration [h]']
+                # distribution['Control [d]'] = distribution['Days [d]'] - (distribution['Weekends [d]'] + distribution['Bank Holiday [d]'] + distribution['Out of Contract [d]'] + distribution['Offs [d]'] + distribution['Leaves [d]'] + distribution['Worked [d]'])
                     
                          
                 data.append(self.build_row(contract,distribution))   
@@ -187,6 +187,7 @@ class BillabilityExport(models.Model):
             'Working Percentage': contract.resource_calendar_id.effective_percentage,
             'Raw Weekly Capacity [h]': contract.resource_calendar_id.effective_hours,
             'Employee Internal ID': contract.employee_id.id,
+            'Consult %' : contract.consultancy_percentage
         }
         line = {**line, **distribution}
  

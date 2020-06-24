@@ -9,3 +9,4 @@ access_payroll_line_admin,interfaces.payroll.line.admin,vcls-interfaces.model_ex
 access_billability_export_controlling,interfaces.billability.export.controlling,vcls-interfaces.model_export_billability,vcls_security.group_project_controller,1,1,1,1
 access_billability_export_admin,interfaces.billability.export.admin,vcls-interfaces.model_export_billability,base.group_system,1,1,1,1
 access_billability_report_pc,access_billability_report_pc,vcls-interfaces.model_billability_report,vcls_security.group_project_controller,1,0,0,0
+access_billability_report_lm,access_billability_report_lm,vcls-interfaces.model_billability_report,vcls-hr.vcls_group_lm,1,0,0,0

@@ -190,6 +190,9 @@ class SaleOrder(models.Model):
         We Extend the dictionnary for the invoice creation with VCLS customs.
         """
         invoice_vals = super(SaleOrder, self)._prepare_invoice()
+        group_invoice_method = self._context.get('group_invoice_method','')
+        if group_invoice_method == 'program':
+            invoice_vals['invoice_is_program'] = True
         #project_info
 
         for vcls_type in self.mapped('order_line.product_id.vcls_type'):
@@ -200,15 +203,17 @@ class SaleOrder(models.Model):
         if self.timesheet_limit_date:
             invoice_vals['timesheet_limit_date'] = self.timesheet_limit_date
             if self.invoicing_frequency == 'month':
-                invoice_vals['period_start'] = self.timesheet_limit_date + relativedelta(months=-1,days=1)
+                invoice_vals['period_start'] = self.timesheet_limit_date.replace(day=1) #self.timesheet_limit_date + relativedelta(months=-1,days=1)
             elif self.invoicing_frequency == 'trimester':
-                invoice_vals['period_start'] = self.timesheet_limit_date + relativedelta(months=-3,days=1)
+                invoice_vals['period_start'] = self.timesheet_limit_date.replace(day=1) + relativedelta(months=-2) #self.timesheet_limit_date + relativedelta(months=-3,days=1)
             else:
                 pass
         else:
             pass
 
         #related models
+        if self.program_id:
+            invoice_vals['program_id'] = self.program_id.id
         if self.po_id:
             invoice_vals['po_id'] = self.po_id.id
         if self.invoice_template:

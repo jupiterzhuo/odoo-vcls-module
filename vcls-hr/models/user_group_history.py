@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, api, fields, _
+from odoo.exceptions import UserError, ValidationError
 
 
 class UserGroupHistory(models.Model):
@@ -16,6 +17,14 @@ class UserGroupHistory(models.Model):
         self.ensure_one()
         # TODO: Change the 'test.' when you change the module name
         self.env.ref('vcls-hr.email_template_user_group_history').send_mail(self.id)
+    
+    @api.multi
+    def write(self, vals):
+        raise ValidationError("Modification of this record is not authorized.")
+
+    @api.multi
+    def unlink(self):
+        raise ValidationError("Deletion of this record is not authorized.")
 
 
 class ResUsers(models.Model):
@@ -24,7 +33,7 @@ class ResUsers(models.Model):
     @api.multi
     def write(self, vals):
         # TODO: Groups to be notified
-        notif_groups = self.env.ref('vcls-hr.vcls_group_HR_global') | self.env.ref('vcls-hr.vcls_group_HR_local') | self.env.ref('base.group_system')
+        notif_groups = self.env.ref('vcls-hr.vcls_group_HR_global') | self.env.ref('vcls-hr.vcls_group_HR_local') | self.env.ref('base.group_system') | self.env.ref('base.group_erp_manager')
         hold_groups = {user: user.groups_id for user in self}
 
         res = super(ResUsers, self).write(vals)
@@ -55,7 +64,7 @@ class ResGroups(models.Model):
     @api.multi
     def write(self, vals):
         # TODO: Groups to be notified
-        notif_groups = self.env.ref('vcls-hr.vcls_group_HR_global') | self.env.ref('vcls-hr.vcls_group_HR_local') | self.env.ref('base.group_system')
+        notif_groups = self.env.ref('vcls-hr.vcls_group_HR_global') | self.env.ref('vcls-hr.vcls_group_HR_local') | self.env.ref('base.group_system') | self.env.ref('base.group_erp_manager')
         hold_users = {group: group.users for group in self & notif_groups}
 
         res = super(ResGroups, self).write(vals)

@@ -58,6 +58,7 @@
                                     <group>
                                         <field name="function" attrs="{'required': [('is_company', '=', False)]}"/>
                                         <field name="parent_id" widget="res_partner_many2one" placeholder="Company" domain="[('is_company', '=', True)]" attrs="{'invisible': ['|', '&amp;', ('is_company','=', True),('parent_id', '=', False),('company_name', '!=', False),('company_name', '!=', '')]}"/>
+                                        <field name="company_id" options="{'no_create': 1, 'no_create_edit': 1}"/>
                                     </group>
                                 </group>
 
@@ -366,6 +367,9 @@
                 </filter>
                 <filter name="supplier" position="replace">
                     <filter string="Suppliers" name="supplier" domain="[('supplier','=',True)]"/>
+                    <separator/>
+                    <filter string="GDPR opt in" name="gdpr_opt_in" domain="[('opted_in','=',True)]"/>
+                    <separator/>
                 </filter>
 
                 <!-- GROUP BY -->
@@ -467,7 +471,7 @@
         <!-- used to visualize all externals -->
         <record model="ir.actions.act_window" id="action_contact_all_externals">
             <field name="name">All External Contacts</field>
-            <field name="domain" eval="[('is_internal','=',False),('stage','in',[2,3,4])]"/>
+            <field name="domain" eval="[('is_internal','=',False),('stage','in',[2,3,4,5])]"/>
             <field name="res_model">res.partner</field>
             <field name="view_mode">kanban,tree,form,activity</field>
         </record>

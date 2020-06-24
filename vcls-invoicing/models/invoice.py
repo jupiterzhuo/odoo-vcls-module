@@ -24,11 +24,7 @@ ACTIVITYREPORT = '_ActivityReport'
 class Invoice(models.Model):
     _inherit = 'account.invoice'
 
-    #def _get_default_po_id(self):
-        #return self.env['sale.order'].search([('invoice_ids', 'in', [self.id])], limit=1).po_id
-
     po_id = fields.Many2one('invoicing.po',
-                            #default = _get_default_po_id,
                             help="This field will appear on the invoice",
                             string ='Client PO ref.')
 
@@ -43,20 +39,11 @@ class Invoice(models.Model):
     temp_name = fields.Char(
         compute='compute_temp_name',
     )
-    program_name = fields.Char(
-        compute='compute_program_name',
-    )
-    program_description = fields.Char(
-        compute='compute_program_description',
-    )
-    invoice_is_program = fields.Boolean()
-
 
     period_start = fields.Date()
     lc_laius = fields.Text(help="If this will appear on the invoice")
     scope_of_work = fields.Text(help="This field will NOT appear on the invoice. Changing the field here will not change the project Scope of Word")
     vcls_due_date = fields.Date(string='Custom Due Date', compute='_compute_vcls_due_date')
-    #origin_sale_orders = fields.Char(compute='compute_origin_sale_orders',string='Origin')
 
     ready_for_approval = fields.Boolean(default=False)
 
@@ -138,24 +125,6 @@ class Invoice(models.Model):
                     project_string += project.sale_order_id.internal_ref + ' | ' 
             invoice.temp_name = "{} from {} to {}".format(project_string,invoice.period_start,invoice.timesheet_limit_date)
 
-    @api.multi
-    def compute_program_name(self):
-        list_projects = self.origin.split(', ')
-        for invoice in self:
-            if len(list_projects) > 1:
-                self.invoice_is_program = True
-            program_name = ""
-            for project in invoice.project_ids:
-                if project.program_id.name:
-                    invoice.program_name = project.program_id.name
-
-    @api.multi
-    def compute_program_description(self):
-        for invoice in self:
-            program_description = ""
-            for project in invoice.project_ids:
-                if project.program_id.product_description:
-                    invoice.program_description = project.program_id.product_description
 
     @api.multi
     def _compute_attachment_count(self):
@@ -235,7 +204,7 @@ class Invoice(models.Model):
         for parent_task, list_tasks in list_timesheet_to_compute.items():
             number_tasks = len(list_tasks)
             for task_individual in list_tasks:
-                for timesheet_id in task_individual.timesheet_ids.filtered(lambda t: t.timesheet_invoice_id.id == self.id):
+                for timesheet_id in task_individual.timesheet_ids.filtered(lambda t: t.timesheet_invoice_id.id == self.id and t.unit_amount_rounded>0):
                     if self.merge_subtask and timesheet_id.task_id.parent_id:  # if the task has a parent and we want to merge
                         current_task_id = timesheet_id.task_id.parent_id
                     else:
@@ -274,8 +243,23 @@ class Invoice(models.Model):
                         time_category_rate_matrix_data[time_category_matrix_key] += unit_amount
                         time_category_row_data.setdefault(time_category_id, None)
 
-        # reorder rate_product_ids columns according to the most expensive one
-        rate_product_ids = rate_product_ids
+            for key, value in task_rate_matrix_data.items():
+                for index, nb in enumerate(value):
+                    value[index] = round(nb, 2)
+                task_rate_matrix_data[key] = value
+      
+            for key, value in project_rate_matrix_data.items():
+                project_rate_matrix_data[key] = round(value, 2)
+
+            for key, value in time_category_rate_matrix_data.items():
+                time_category_rate_matrix_data[key] = round(value, 2)
+
+        # reorder projects_row_data columns according to the sale.order.line sequence to  mimic the sale order
+        # structure looks like: OrderedDict([(project.project(146,), OrderedDict([(project.task(945,), [...]), (project.task(946,), [...]), (project.task(943,), [...])]))])
+        if projects_row_data and projects_row_data[project_id]:
+            projects_row_data[project_id] = OrderedDict(sorted(list(list(projects_row_data.items())[0][1].items()), key= lambda x : x[0][0].sale_line_id.sequence))
+
+        # reorder rate_product_ids columns according to the most hours coded one
         rate_product_ids = product_obj.browse(OrderedSet([
             couple[1].id for couple in
             sorted(
@@ -338,7 +322,7 @@ class Invoice(models.Model):
         self.ensure_one()
         data = OrderedDict()
         total_not_taxed = 0.
-        for timesheet_id in self.timesheet_ids.filtered(lambda t: t.so_line.qty_invoiced)\
+        for timesheet_id in self.timesheet_ids.filtered(lambda t: t.so_line.qty_invoiced and t.unit_amount_rounded>0)\
                 .sorted(lambda t: t.so_line.price_unit, reverse=True):
             rate_sale_line_id = timesheet_id.so_line
 
@@ -369,6 +353,7 @@ class Invoice(models.Model):
                 rate_sale_line_id.product_uom
             )
             values['qty'] += qty
+            values['qty'] = round(values['qty'], 2)
             total_not_taxed += qty * values['price']
         # assert abs(total_not_taxed - self.amount_untaxed) < 0.001, _('Something went wrong')
         return data, total_not_taxed
@@ -391,7 +376,7 @@ class Invoice(models.Model):
         self.ensure_one()
         data = OrderedDict()
         total_not_taxed = 0.
-        for timesheet_id in self.timesheet_ids.filtered(lambda t: t.so_line.qty_invoiced)\
+        for timesheet_id in self.timesheet_ids.filtered(lambda t: t.so_line.qty_invoiced and t.unit_amount_rounded>0)\
                 .sorted(lambda t: t.so_line.price_unit, reverse=True):
             rate_sale_line_id = timesheet_id.so_line
 
@@ -419,6 +404,7 @@ class Invoice(models.Model):
                 rate_sale_line_id.product_uom
             )
             values['qty'] += qty
+            values['qty'] = round(values['qty'], 2)
             total_not_taxed += qty * values['price']
         # assert abs(total_not_taxed - self.amount_untaxed) < 0.001, _('Something went wrong')
         return data, total_not_taxed
@@ -567,6 +553,9 @@ class Invoice(models.Model):
         invoice._onchange_partner_id()
         _logger.info("INVOICE CREATE ID {} VALS {}".format(invoice.id, vals))
         invoice._message_subscribe_account_payable()
+        bank_with_currency = self.env['res.partner.bank'].search([('company_id', '=', invoice.company_id.id),('currency_id', '=', invoice.currency_id.id)],limit=1)
+        if bank_with_currency:
+            invoice.partner_bank_id = bank_with_currency
         return invoice
 
     def _message_subscribe_account_payable(self):
@@ -755,7 +744,7 @@ class Invoice(models.Model):
                                                                     ('res_id', '=', self.id),
                                                                     ('name', 'like', report_name)]) + 1
         return (self.timesheet_limit_date and self.timesheet_limit_date.strftime('%Y-%m-%d') or '') \
-            + project_string + report_name + '_V' + str(count_attachments)
+            + project_string + report_name + '_V' + str(count_attachments) + '.pdf'
 
     @api.multi
     def generate_report(self, report_template, report_name, message):

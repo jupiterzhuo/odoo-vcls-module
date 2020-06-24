@@ -48,17 +48,18 @@
                     <field name="invoicing_frequency" force_save="1"/>
                     <field name="communication_rate" force_save="1"/>
                 </xpath>
+                <!--
                 <xpath expr="//field[@name='pricelist_id']" position="attributes">
                     <attribute name="attrs">{'readonly': [('financial_config_readonly', '!=', True)]}</attribute>
                     <attribute name="force_save">1</attribute>
-                </xpath>
+                </xpath>-->
                 <xpath expr="//field[@name='fiscal_position_id']" position="after">
-                    <field name="invoice_template" attrs="{'readonly': [('financial_config_readonly', '!=', True)]}" force_save="1" options="{'no_create_edit': True,'no_open':True}"/>
+                    <!--<field name="invoice_template" attrs="{'readonly': [('financial_config_readonly', '!=', True)]}" force_save="1" options="{'no_create_edit': True,'no_open':True}"/>-->
+                    <field name="invoice_template" force_save="1" options="{'no_create_edit': True,'no_open':True}"/>
                     <field name="merge_subtask"/>
                     <field name="activity_report_template" attrs="{'readonly': [('financial_config_readonly', '!=', True)]}" force_save="1" options="{'no_create_edit': True,'no_open':True}"/>
                 </xpath>
                 <xpath expr="//field[@name='pricelist_id']" position="attributes">
-                    <attribute name="attrs">{'readonly': [('financial_config_readonly', '!=', True)]}</attribute>
                     <attribute name="force_save">1</attribute>
                 </xpath>
                 <xpath expr="//group[@name='sale_pay']" position="attributes">

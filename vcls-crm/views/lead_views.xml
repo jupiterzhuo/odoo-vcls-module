@@ -44,6 +44,9 @@
                 <!-- ADD THINGS HERE -->
                 <xpath expr="//field[@name='source_id']" position="after">
                     <field name = 'lead_stage_id' />
+                <separator/>
+                <filter string="GDPR opt in" name="gdpr_opt_in" domain="[('opted_in','=',True)]"/>
+                <separator/>
                 </xpath>
 
             </field>
@@ -289,7 +292,8 @@
                             </field>
                         </group>
                         <group string="Client Stakeholders" colspan="2">
-                            <field name="stakeholder_ids" nolabel="1" domain="[('id','=',partner_id)]" options="{'no_quick_create': True, 'no_create_edit': True, 'no_create': True}" string="">
+                            <field name="child_ids" invisible="1"/>
+                            <field name="stakeholder_ids" nolabel="1" domain="['|',('id', '=', partner_id),('id', '=', child_ids)]" options="{'no_quick_create': True, 'no_create_edit': True, 'no_create': True}" string="">
                                 <tree editable="bottom" create = '1'>
                                     <field name="name" />
                                 </tree>
@@ -614,6 +618,9 @@
         <field name="model">crm.lead</field>
         <field name="inherit_id" ref="crm.view_crm_case_opportunities_filter"/>
         <field name="arch" type="xml">
+            <xpath expr="//filter[@name='assigned_to_me']" position="after">
+                <filter string="Followed Opportunities" name="followed" domain="[('message_is_follower','=', True)]"/>
+            </xpath>
 
             <xpath expr="//filter[@name='salesperson']" position="replace">
                 <filter string="Account Manager" name="salesperson" context="{'group_by':'user_id'}"/>

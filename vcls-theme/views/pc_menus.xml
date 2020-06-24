@@ -11,6 +11,7 @@
                 </field>
                 <xpath expr="//filter[@name='Manager']" position="replace">
                         <filter name="Manager" string="Lead Consultant" context="{'group_by': 'user_id'}"/>
+                        <filter name="account_manager_id" string="Account Manager" context="{'group_by': 'account_manager_id'}"/>
                 </xpath>
                 <xpath expr="//filter[@name='Partner']" position="replace">
                         <filter name="Partner" string="Client" context="{'group_by': 'partner_id'}"/>
@@ -95,6 +96,22 @@
                 sequence="5"
                 action="vcls-timesheet.action_pc_all_timesheet_tree"
         />
+
+        <menuitem
+                id="menu_pc_timesheets_tools"
+                name="HELPERS"
+                parent="menu_pc_timesheets"
+                sequence="6"
+        />
+
+        <menuitem
+                id="menu_pc_timesheets_tools_recoder"
+                name="Recoder"
+                parent="menu_pc_timesheets_tools"
+                sequence="1"
+                action="vcls-timesheet.action_timesheet_recode"
+        />
+
         <menuitem
                 id="menu_pc_project_follow_up"
                 name="Project Follow-Up"
@@ -123,5 +140,15 @@
                 parent="menu_pc_root"
                 sequence="5"
                 action="vcls-invoicing.action_po"/>
+
+        <!--<menuitem
+            id="menu_billability_overview"
+            name="Billability Overview"
+            parent="vcls-theme.menu_pc_root"
+            sequence="34"
+            action="vcls-interfaces.action_billability_overview_display"
+            groups="vcls_security.group_project_controller"
+        />-->
+
     </data>
 </odoo>

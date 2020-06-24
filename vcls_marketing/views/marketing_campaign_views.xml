@@ -8,7 +8,7 @@
             <field name="model">marketing.campaign</field>
             <field name="inherit_id" ref="marketing_automation.marketing_campaign_view_form"/>
             <field name="arch" type="xml">
-                <xpath expr="//div[@class='o_ma_hierarchy']" position="before">
+                <xpath expr="//sheet/group[1]" position="after">
                     <group>
                         <field name="marketing_project_id" readonly="1"/>
                         <field name="marketing_task_id" domain="[('stage_id','in',['Planned','In Progress']),('task_type','=','marketing')]"/>

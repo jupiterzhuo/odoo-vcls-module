@@ -12,7 +12,7 @@ class TimesheetForecastReport(models.Model):
         ('lc_review', '1. LC review'), 
         ('pc_review', '2. PC review'), 
         ('carry_forward', 'Carry Forward'),
-        ('adjustment_validation', '3. Adjustment Validation'),
+        ('fixed_price', '3. Fixed Price'),
         ('invoiceable', '4. Invoiceable'),
         ('invoiced', '5. Invoiced'),
         ('historical','6. Historical'),
@@ -130,7 +130,7 @@ class TimesheetForecastReport(models.Model):
                 CASE WHEN "{table}"."stage_id" = 'draft' THEN 0 
                  WHEN "{table}"."stage_id" = 'lc_review' THEN 1  
                  WHEN "{table}"."stage_id" = 'pc_review' THEN 2 
-                 WHEN "{table}"."stage_id" = 'adjustment_validation' THEN 3 
+                 WHEN "{table}"."stage_id" = 'fixed_price' THEN 3 
                  WHEN "{table}"."stage_id" = 'invoiceable' THEN 4 
                  WHEN "{table}"."stage_id" = 'invoiced' THEN 5 
                  WHEN "{table}"."stage_id" = 'historical' THEN 6

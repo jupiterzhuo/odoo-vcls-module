@@ -23,6 +23,15 @@ class SaleReport(models.Model):
         string="Expected End Date",
     )
 
+    currency_id = fields.Many2one(
+        comodel_name = 'res.currency',
+        compute = '_compute_currency',
+        store=True) 
+    
+    def _compute_currency(self):
+        for rec in self:
+            rec.base_currency_id = self.env.ref('base.EUR')
+
     def _query(self, with_clause='', fields={}, groupby='', from_clause=''):
         fields['expected_end_date'] = ",  s.expected_end_date as expected_end_date"
         fields['expected_start_date'] = ", s.expected_start_date as expected_start_date"

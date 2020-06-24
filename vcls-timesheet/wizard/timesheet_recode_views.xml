@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        
+        <record model="ir.ui.view" id="timesheet_recode_wizard_form">
+            <field name="name">timesheet.recode.wizard.form</field>
+            <field name="model">tool.timesheet.recode</field>
+            <field name="arch" type="xml">
+                <form string="Tool Timesheet Recode">
+                    <group>
+                        <field name="mode" widget="radio"/>
+                        <field name="include_childs"/>
+                        <field name="rate_ids" invisible="1"/>
+                    </group>
+                    <group>
+                        <group string="Source">
+                            <field name="source_project_id" attrs="{'required':[('mode','in',['replace_rate','update_status'])]}" options="{'no_create': True, 'no_create_edit' : True}"/>
+                            <field name="source_rate_id" attrs="{'required':[('mode','in',['replace_rate'])],'invisible':[('mode','in',['update_status'])]}" domain="[('id','in',rate_ids)]" options="{'no_create': True, 'no_create_edit' : True}"/>
+                            <field name="source_task_id" options="{'no_create': True, 'no_create_edit' : True}"/>
+                            <field name="source_employee_id" options="{'no_create': True, 'no_create_edit' : True}"/>
+                            <field name="date_range_start"/>
+                            <field name="date_range_end"/> 
+                            <field name="source_status" attrs="{'invisible':[('mode','in',['replace_rate'])],'required':[('mode','in',['update_status'])]}"/>
+                        </group>
+                        <group string="Target">
+                            <field name="target_rate_id" attrs="{'invisible':[('mode','in',['update_status'])],'required':[('mode','in',['replace_rate'])]}" domain="[('id','in',rate_ids)]" options="{'no_create': True, 'no_create_edit' : True}"/>
+                            <field name="target_status" attrs="{'invisible':[('mode','in',['replace_rate'])],'required':[('mode','in',['update_status'])]}"/>
+                        </group>
+                    </group>
+                    <group>
+                        <field name="run_date" readonly="1"/>
+                        <field name="info" readonly="1"/>
+                    </group>
+                    <footer>
+                        <button string="Test"
+                            name="run_test" type="object" class="btn-primary"/>
+                        
+                        <button string="Run"
+                            name="run_real" type="object" class="btn-secondary o_mail_send" attrs="{'invisible':[('run_date','!=',False)]}"/>
+                        
+                    </footer>
+                </form>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="timesheet_recode_wizard_tree">
+            <field name="name">timesheet.recode.wizard.tree</field>
+            <field name="model">tool.timesheet.recode</field>
+            <field name="arch" type="xml">
+                <tree string="Timesheet Recoder">
+                    
+                    <field name="mode"/>
+                    <field name="create_date"/>
+                    <field name="create_uid"/>
+                    <field name="source_project_id"/>
+                    <field name="run_date"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_timesheet_recode" model="ir.actions.act_window">
+            <field name="name">Timesheet Recoder</field>
+            <field name="res_model">tool.timesheet.recode</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+        <!--
+        <record id="lead_quotation_wizard_form_action" model="ir.actions.act_window">
+            <field name="name">Generate quotation</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">lead.quotation.wizard</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="lead_quotation_wizard_form"/>
+            <field name="target">new</field>
+        </record>
+
+        <record id="crm_case_form_view_oppor" model="ir.ui.view">
+            <field name="name">crm.lead.oppor.inherited.crm</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="sale_crm.crm_case_form_view_oppor"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='%(sale_crm.sale_action_quotations_new)d']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+                <xpath expr="//button[@name='%(sale_crm.sale_action_quotations_new)d']" position="after">
+                    
+                    <button string="New Quotation"
+                        name="%(vcls-crm.lead_quotation_wizard_form_action)d"
+                        type="action" class="oe_highlight"
+                        attrs="{'invisible': ['&amp;', ('probability', '=', 0), ('active', '=', False)]}"
+                        context="{'search_default_partner_id': partner_id,
+                                  'default_partner_id': partner_id,
+                                  'default_team_id': team_id,
+                                  
+                                  
+                                  'default_origin': name,
+                                  }"
+                        groups="vcls_security.vcls_account_manager,sales_team.group_sale_manager"
+                    />
+                </xpath>
+            </field>
+        </record>-->
+
+    </data>
+
+</odoo>
