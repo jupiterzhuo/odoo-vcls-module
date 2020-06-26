@@ -12,9 +12,7 @@
     'website': "http://www.voisinconsulting.com",
 
     'category': 'Uncategorized',
-
-
-    'version': '1.3.14',
+    'version': '1.3.16',
 
 
     # any module necessary for this one to work correctly
