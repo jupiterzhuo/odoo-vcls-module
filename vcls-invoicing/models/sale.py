@@ -78,6 +78,17 @@ class SaleOrder(models.Model):
 
     invoicing_comment = fields.Text()
 
+    invoice_admin_id = fields.Many2one(
+        'res.users',
+        compute='_compute_invoice_admin_id_from_partner_id',
+        store=True,
+    )
+
+    @api.depends('partner_id.invoice_admin_id')
+    def _compute_invoice_admin_id_from_partner_id(self):
+        for rec in self:
+            rec.invoice_admin_id = rec.partner_id.invoice_admin_id
+
     @api.depends('order_line','order_line.untaxed_amount_to_invoice','order_line.qty_invoiced')
     def _compute_invoiceable_amount(self):
         for so in self:
