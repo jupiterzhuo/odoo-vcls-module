@@ -87,24 +87,20 @@ class Invoice(models.Model):
             activity_type = self.env['mail.activity.type'].search([('name', '=', 'Invoice Review')], limit=1)
             if activity_type:
                 users_to_notify = self.env['res.users']
-                if invoice.company_id.supplier_approver_id:
-                    users_to_notify |= invoice.company_id.supplier_approver_id
 
                 for invoice_line in invoice.invoice_line_ids:
-                    if invoice_line.account_analytic_id.project_ids:
+                    if invoice_line.account_analytic_id.project_ids.user_id:
                         users_to_notify |= invoice_line.account_analytic_id.project_ids.mapped('user_id')
-                        """project = self.env['project.project'].search([('analytic_account_id', '=', invoice_line.account_analytic_id.id)], limit=1)
-                        if project and project.user_id:
-                            users_to_notify |= project.user_id
-                    if invoice_line.account_id.approver_id:
-                        users_to_notify |= invoice_line.account_id.approver_id"""
-
-                if not users_to_notify:
-                    raise UserError('No one is eligible to approve this')
-
-                else:
-                    _logger.info("Users to notify {}".format(users_to_notify.mapped('name')))
+                    elif invoice_line.company_id.supplier_approver_id:
+                        users_to_notify |= invoice_line.company_id.mapped('supplier_approver_id')
+                    elif invoice_line.account_analytic_id.approver_id:
+                        users_to_notify |= invoice_line.account_analytic_id.mapped('approver_id')
+                    else:
+                        raise UserError('No one is eligible to approve this: {}'.format(invoice_line.name))
+                
+                _logger.info("Users to notify {}".format(users_to_notify.mapped('name')))
                 invoice.write({'ready_for_approval': True})
+
                 for user in users_to_notify:
                     self.env['mail.activity'].create({
                         'res_id': invoice.id,
@@ -115,6 +111,12 @@ class Invoice(models.Model):
                             invoice.name),
                     })
 
+
+"""project = self.env['project.project'].search([('analytic_account_id', '=', invoice_line.account_analytic_id.id)], limit=1)
+                        if project and project.user_id:
+                            users_to_notify |= project.user_id
+                    if invoice_line.account_id.approver_id:
+                        users_to_notify |= invoice_line.account_id.approver_id"""
 
 class PurchaseOrder(models.Model):
 
