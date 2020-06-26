@@ -122,6 +122,8 @@
                     <field name="internal_comment" readonly="1" invisible="1" />
                     <field name="unit_amount" readonly="1" string="Duration (hours)" />
                     <field name="unit_amount_rounded" />
+                    <field name="calculated_delta_time" />
+                    <field name="calculated_amount" />
                     <field name="employee_id" readonly="1" />
                     <field name="lc_comment" readonly="1" />
                     <field name="adjustment_reason_id" />
@@ -404,13 +406,12 @@
         <record id="hr_timesheet.act_hr_timesheet_line_by_project" model="ir.actions.act_window">
             <field name="name">Activities</field>
             <field name="res_model">account.analytic.line</field>
-            <field name="view_type">form</field>
             <field name="view_mode">tree</field>
             <field name="view_id" ref="hr_timesheet.timesheet_view_tree_user"/>
             <field name="domain">[('project_id', '!=', False)]</field>
-            <field name="context">{"default_project_id": active_id,
-                "search_default_project_id": [active_id],
-                "search_default_groupby_deliverable":1,
+            <field name="context">{
+                "default_project_id": active_id,
+                "search_default_groupby_tc":1,
                 "search_default_groupby_task":1
                 }
             </field>
@@ -427,18 +428,23 @@
             </field>
         </record>
 
-        <record id="hr_timesheet.act_hr_timesheet_line" model="ir.actions.act_window">
+        <record id="act_vcls_timesheet_user" model="ir.actions.act_window">
             <field name="name">My Timesheets | Grid</field>
             <field name="res_model">account.analytic.line</field>
-            <field name="context">{
-                'grid_anchor': (datetime.date.today()).strftime('%Y-%m-%d'),
-                'search_default_draft':1,
-                'search_default_groupby_project':1,
-                'search_default_groupby_task':1,
-                'search_default_groupby_tc':1,
-                'search_default_groupby_name':1,
-                }
+            <field name="view_type">form</field>
+            <field name="view_mode">grid,form</field>
+            <field name="domain">[('project_id', '!=', False), ('user_id', '=', uid)]</field>
+             <field name="context">{
+                 'group_by':['project_id', 'task_id', 'time_category_id', 'name'],
+                 'grid_anchor': (datetime.date.today()).strftime('%Y-%m-%d'),
+                 }
             </field>
+
+            <field name="search_view_id" ref='hr_timesheet.hr_timesheet_line_search'/>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'grid', 'view_id': ref('timesheet_grid.timesheet_view_grid_by_project')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('vcls-timesheet.account_analytic_line_grid_view_form')}),
+                ]"/>
         </record>
 
         <record id="act_hr_timesheet_list" model="ir.actions.act_window">
@@ -510,6 +516,9 @@
                 </field>
                 <xpath expr="//tree" position="attributes">
                     <attribute name="decoration-danger">at_risk==True</attribute>
+                    <attribute name="import">0</attribute>
+                    <attribute name="create">0</attribute>
+                    <attribute name="edit">0</attribute>
                 </xpath>
                 <xpath expr="//field[@name='unit_amount']" position="after">
                     <field name="at_risk" invisible="1"/>
@@ -526,7 +535,10 @@
                     <field name="main_project_id" context="{'related_core_team_projects':True}" required="1" domain="[('allow_timesheets','=',True)]"/>
                 </field>
                 <field name="task_id" position="after">
-                    <field name="time_category_id" string="Time Catagory"/>
+                    <field name="time_category_id" string="Time Category"/>
+                </field>
+                <field name="unit_amount" position="replace">
+                    <field name="unit_amount_rounded" string="Revised Time(Hour(s))"/>
                 </field>
             </field>
         </record>

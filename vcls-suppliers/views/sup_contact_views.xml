@@ -26,12 +26,22 @@
                 <xpath expr="/form/sheet/notebook/page[4]" position="after">
                     <page name="suppliers" string="Supplier Info" attrs="{'invisible': [('see_supplier', '=', False)]}">
                     <field name="see_supplier" invisible="1"/>
+                    <field name="freeze_legacy_code" invisible="1"/>
                     <group>
-                        <field name="company_id"/>
-                        <field name="property_product_pricelist" string="Trading Pricelist"/>
-                        <field name="default_currency_id"/>
-                        <field name="project_supplier_type_id"/>
-                        <field name="expertise_area_ids" widget="many2many_tags"/>
+                        <group>
+                            <field name="company_id" options="{'no_create': 1, 'no_create_edit': 1}"/>
+                            <field name="property_product_pricelist" string="Trading Pricelist"/>
+                            <field name="project_supplier_type_id"/>
+                            <field name="expertise_area_ids" widget="many2many_tags"/>
+                        </group>
+                        <group>
+                            <field name="supplier_legacy_code" attrs="{'readonly':[('freeze_legacy_code','=',True)]}"/>
+                            <button string="MERGE YOOZ DATA" class="oe_highlight" name="merge_yooz" type="object" attrs="{'readonly':[('freeze_legacy_code','=',True)]}"/>
+                            <field name="siret"/>
+                            <field name="siren"/>
+                            <field name="vat_number"/>
+                            <field name="bank_ids"/>
+                        </group>
                     </group>
                     </page>
             

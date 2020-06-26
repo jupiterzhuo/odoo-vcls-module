@@ -18,7 +18,9 @@
                             <field name="opted_in_date" widget="date" attrs="{'invisible':['|',('marketing_task_id','=',False),('company_type','=','company')]}"/>
                             <field name="marketing_task_out_id" domain="[('task_type','=','marketing')]" options="{'no_create': True, 'no_create_edit' : True}" attrs="{'invisible':[('company_type','=','company')]}"/>
                             <field name="opted_out_date" widget="date" attrs="{'invisible':['|',('marketing_task_id','=',False),('company_type','=','company')]}"/>
-                            <field name="gdpr_status" attrs="{'invisible':[('company_type','=','company')]}"/>
+                            <field name="gdpr_status" readonly="1" force_save="1" attrs="{'invisible':[('company_type','=','company')]}"/>
+                            <field name="opted_in"/>
+                            <field name="content_name"/>
                         </group>
                         <group string = 'Other Campaigns'>
                             <field name="marketing_task_ids">

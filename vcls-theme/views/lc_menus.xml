@@ -85,7 +85,6 @@
             <field name="res_model">account.analytic.line</field>
             <field name="context">{
                 'search_default_groupby_project':1,
-                'search_default_groupby_deliverable':1, 
                 'search_default_groupby_task':1,
                 'search_default_groupby_employee':1,
                 'grid_anchor': '3000-01-01'}
@@ -189,6 +188,13 @@
             name="Request for Suppliers"
             parent="menu_lc_root"
             action="action_my_rfq"
+            sequence="10"
+        />
+        <menuitem
+            id="menu_lc_current_month_progression"
+            name="Monthly Overview"
+            parent="menu_lc_root"
+            action="vcls-timesheet.action_monthly_overview"
             sequence="9"
         />
 

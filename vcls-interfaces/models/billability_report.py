@@ -31,33 +31,28 @@ class BillabilityReport(models.Model):
     job_title = fields.Char(string="Job Title", readonly=True)
     working_percentage = fields.Char(string="Working Percentage", readonly=True)
     raw_weekly_capacity = fields.Integer(string="Raw Weekly Capacity [h]", readonly=True)
-    consultancy_percentage = fields.Integer(string="Consult %", readonly=True)
+    consultancy_percentage = fields.Integer(string="Consulting [%]", readonly=True)
 
     days = fields.Integer(string='Days [d]')
-    weekends = fields.Integer(string='Weekends [d]')
     bank_holiday = fields.Integer(string='Bank Holiday [h]')
-    out_of_contract = fields.Integer(string='Out of Contract [d]')
     days_duration = fields.Integer(string='Day Duration [d]')
-    offs = fields.Integer(string='Offs [d]')
     leaves = fields.Integer(string='Leaves [h]')
     worked = fields.Integer(string='Worked [d]')
-    effective_capacity = fields.Integer(string='Effective Capacity [h]')
-    control = fields.Integer(string='Control [d]')
+    effective_capacity = fields.Float(string='Effective Capacity [h]')
 
     year = fields.Integer(string='Year', readonly=True)
     week_number = fields.Integer(string='Week number', readonly=True, group_operator="avg")
     start_date = fields.Date(string='Week start date', readonly=True)
     end_date = fields.Date(string='Week end date', readonly=True)
-    billable_hours = fields.Float(readonly=True)
-    valued_billable_hours = fields.Float(readonly=True)
-    non_billable_hours = fields.Float(readonly=True)
-    valued_non_billable_hours = fields.Float(readonly=True)
-    billability_percent = fields.Float(readonly=True, digits = (12,2), store=True, group_operator="avg")
-    non_billability_percent = fields.Float(readonly=True, digits = (12,2), store=True, group_operator="avg")
-    total_time_coded = fields.Float(string='Time coded [h]', readonly=True)
-    total_time_coded_percent = fields.Float(string='coding ratio [%]', readonly=True, group_operator="avg")
-    amount_fte_billable = fields.Float(string='FTE with consult %', help='effective capacity / 40 * consult %', readonly=True)
-
+    billable_hours = fields.Float(readonly=True, string="Billable Hours [h]")
+    valued_billable_hours = fields.Float(readonly=True, string="Revised Billable Hours [h]")
+    non_billable_hours = fields.Float(readonly=True, string='Non Billable Hours [h]')
+    billability_percent = fields.Float(readonly=True, string='Billability [%]', digits = (12,2), store=True, group_operator="avg", default=None)
+    total_time_coded = fields.Float(string='Time Coded [h]', readonly=True)
+    total_time_coded_percent = fields.Float(string='Coding Ratio [%]', readonly=True, group_operator="avg")
+    amount_fte_billable = fields.Float(string='Computed FTE', help='effective capacity / 40 * consult %', readonly=True)
+    fte_billable_per_staff = fields.Float(string='Billable / Staff [h]', readonly=True)
+    
     @api.multi
     @api.depends('employee_id.name', 'week_number', 'year')
     def _get_name(self):
@@ -112,28 +107,26 @@ class BillabilityReport(models.Model):
                 week_data_line['Bank Holiday [d]'] *= week_data_line['Day Duration [h]']
                 week_data_line['Leaves [d]'] *= week_data_line['Day Duration [h]']
                 
+                week_data_line['fte_billable_per_staff'] = False
                 #to avoid division by 0 if there is no capacity
                 if week_data_line['Effective Capacity [h]'] == 0:
                     week_data_line['amount_fte_billable'] = None
-                    week_data_line['billability_percent'] = None
-                    week_data_line['non_billability_percent'] = None
                     week_data_line['total_time_coded_percent'] = None
                     continue
-                week_data_line['non_billability_percent'] = week_data_line['valued_non_billable_hours'] / week_data_line['Effective Capacity [h]'] * 100
                 week_data_line['total_time_coded_percent'] = week_data_line['total_time_coded'] / week_data_line['Effective Capacity [h]'] * 100
                 week_data_line['amount_fte_billable'] = (week_data_line['Effective Capacity [h]'] / 40) * consult_decimal
+                if week_data_line['amount_fte_billable'] > 0:
+                    week_data_line['fte_billable_per_staff'] = (week_data_line['billable_hours'] / week_data_line['amount_fte_billable'])
                 if consult_decimal == 0:
-                    week_data_line['billability_percent'] = None
                     continue
                 #calculate percentages from data
-                week_data_line['billability_percent'] = (week_data_line['valued_billable_hours'] / (week_data_line['Effective Capacity [h]'] * consult_decimal)) * 100
-
+                week_data_line['billability_percent'] = (week_data_line['billable_hours'] / (week_data_line['Effective Capacity [h]'] * consult_decimal)) * 100
 
             data += week_data
         field_mapping = self._get_field_mapping()
         self.search(['|', ('active', '=', False), ('active', '=', False)]).unlink()
         for data_line in data:
-            values = dict([(field_name, data_line[data_key]) for field_name, data_key in field_mapping.items()])
+            values = dict([(field_name, data_line[data_key]) for field_name, data_key in field_mapping.items() if data_key in data_line])
             self.create(values)
 
 
@@ -160,27 +153,28 @@ class BillabilityReport(models.Model):
             'consultancy_percentage':'Consult %',
             'raw_weekly_capacity': 'Raw Weekly Capacity [h]',
             'days': 'Days [d]',
-            'weekends': 'Weekends [d]',
+            # 'weekends': 'Weekends [d]',
             'bank_holiday': 'Bank Holiday [d]',
-            'out_of_contract': 'Out of Contract [d]',
+            # 'out_of_contract': 'Out of Contract [d]',
             'days_duration': 'Day Duration [h]',
-            'offs': 'Offs [d]',
+            # 'offs': 'Offs [d]',
             'leaves': 'Leaves [d]',
             'worked': 'Worked [d]',
             'effective_capacity': 'Effective Capacity [h]',
-            'control': 'Control [d]',
+            # 'control': 'Control [d]',
 
-            'year': 'year',
+            # 'year': 'year',
             'week_number': 'week_number',
             'start_date': 'start_date',
             'end_date': 'end_date',
             'billable_hours': 'billable_hours',
             'valued_billable_hours': 'valued_billable_hours',
             'non_billable_hours': 'non_billable_hours',
-            'valued_non_billable_hours': 'valued_non_billable_hours',
+            # 'valued_non_billable_hours': 'valued_non_billable_hours',
             'billability_percent' : 'billability_percent',
-            'non_billability_percent' : 'non_billability_percent',
+            # 'non_billability_percent' : 'non_billability_percent',
             'total_time_coded' : 'total_time_coded',
             'total_time_coded_percent' : 'total_time_coded_percent',
-            'amount_fte_billable' : 'amount_fte_billable'
+            'amount_fte_billable' : 'amount_fte_billable',
+            'fte_billable_per_staff' : 'fte_billable_per_staff'
         }

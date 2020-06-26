@@ -15,7 +15,7 @@
             name="My Timesheets | Grid" 
             sequence="1" 
             parent="hr_timesheet.timesheet_menu_root" 
-            action="hr_timesheet.act_hr_timesheet_line" 
+            action="vcls-timesheet.act_vcls_timesheet_user" 
         />
 
         <menuitem 
@@ -26,10 +26,41 @@
             action="vcls-timesheet.act_hr_timesheet_list" 
         />
 
-        <menuitem id="menu_lm_analysis"
-            name="Managee's Time Analysis" 
+        <menuitem id="hr_timesheet_attendance.menu_hr_timesheet_attendance_report"
+            active="False"
+        />
+
+        <menuitem id="menu_time_analysis"
+            name="Time Analysis" 
             sequence="4"
             parent="hr_timesheet.timesheet_menu_root"
+        />
+
+        <menuitem id="menu_time_analysis_my"
+            name="My Time Analysis" 
+            sequence="1"
+            parent="menu_time_analysis"
+        />
+
+        <menuitem id="menu_my_billability"
+            name="Billability Report" 
+            sequence="1"
+            parent="menu_time_analysis_my"
+            action="vcls-interfaces.action_billability_overview_display_my"
+            active = "False"
+        />
+
+        <menuitem id="menu_my_analysis"
+            name="Time Report" 
+            sequence="2"
+            parent="menu_time_analysis_my"
+            action="vcls-timesheet.action_my_all_timesheet_pivot"
+        />
+
+        <menuitem id="menu_lm_analysis"
+            name="Managee's Time Analysis" 
+            sequence="2"
+            parent="menu_time_analysis"
             groups="vcls-hr.vcls_group_lm,vcls-hr.vcls_group_superuser_lvl2"
         />
 
@@ -39,6 +70,7 @@
             parent="menu_lm_analysis"
             groups="vcls-hr.vcls_group_lm,vcls-hr.vcls_group_superuser_lvl2"
             action="vcls-interfaces.action_billability_overview_display_lm"
+            active = "False"
         />
 
         <menuitem id="menu_lm_time"
@@ -51,8 +83,8 @@
 
         <menuitem id="menu_pc_analysis"
             name="Employee's Time Analysis" 
-            sequence="6"
-            parent="hr_timesheet.timesheet_menu_root"
+            sequence="3"
+            parent="menu_time_analysis"
             groups="vcls_security.group_project_controller,vcls-hr.vcls_group_superuser_lvl2,vcls-hr.vcls_group_head"
         />
 
@@ -71,10 +103,6 @@
             groups="vcls_security.group_project_controller,vcls-hr.vcls_group_superuser_lvl2,vcls-hr.vcls_group_head"
             action="vcls-timesheet.action_pc_all_timesheet_pivot"
         />
-
-        
-        
-
         
     </data>
 </odoo>

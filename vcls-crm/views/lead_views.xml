@@ -44,6 +44,12 @@
                 <!-- ADD THINGS HERE -->
                 <xpath expr="//field[@name='source_id']" position="after">
                     <field name = 'lead_stage_id' />
+                <separator/>
+                <filter string="GDPR opt in" name="gdpr_opt_in" domain="[('opted_in','=',True)]"/>
+                <separator/>
+                </xpath>
+                <xpath expr="//filter[@name='opportunities']" position="after">
+                    <filter string="Lead To Opp" name="lead2opp" domain="['|',('type','=','lead'),('date_conversion','!=',False)]"/>
                 </xpath>
 
             </field>
