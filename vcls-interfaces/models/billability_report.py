@@ -122,7 +122,6 @@ class BillabilityReport(models.Model):
                 #calculate percentages from data
                 week_data_line['billability_percent'] = (week_data_line['billable_hours'] / (week_data_line['Effective Capacity [h]'] * consult_decimal)) * 100
 
-
             data += week_data
         field_mapping = self._get_field_mapping()
         self.search(['|', ('active', '=', False), ('active', '=', False)]).unlink()
