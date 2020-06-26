@@ -126,7 +126,9 @@
                             'default_valuation_ratio': valuation_ratio,
                         }</attribute>
                     </xpath>
-
+                    <xpath expr="//field[@name='allow_timesheets']" position="after">
+                        <field name="timesheet_open"/>
+                    </xpath>
                     <button name="toggle_active" position="before">
                         <button
                             class="oe_stat_button"
