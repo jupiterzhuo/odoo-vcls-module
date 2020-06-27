@@ -60,7 +60,7 @@ class salesforceSync(models.Model):
     def populate_campaigns(self,duration=9):
         timestamp_end = datetime.now() + timedelta(minutes=duration) - timedelta(seconds=10)
         #we search for non-populated campaigns
-        keys = self.env['etl.sync.keys'].search([('externalObjName','=','Campaign'),('search_value','!=','processed')])
+        keys = self.env['etl.sync.keys'].search([('externalObjName','=','Campaign')])
         _logger.info("Found {} campaigns to sync".format(len(keys)))
         sfInstance = self.getSFInstance()
 
