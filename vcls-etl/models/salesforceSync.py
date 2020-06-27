@@ -102,6 +102,8 @@ class salesforceSync(models.Model):
                             if lead_key:
                                 query = "SELECT name FROM crm_lead WHERE id='{}'".format(int(lead_key.odooId))
                                 self.env.cr.execute(query)
+                                test = self.env.cr.fetchone()
+                                _logger.info("{}".format(test))
                                 lead = self.env['crm.lead'].browse(int(lead_key.odooId))
                                 """lead.write({
                                     'marketing_task_ids':[(4, campaign.id, 0)],
