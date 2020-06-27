@@ -95,9 +95,9 @@ class salesforceSync(models.Model):
                                 test = self.env.cr.fetchone()
                                 if test:
                                     contact = self.env['res.partner'].browse(int(contact_key.odooId))
-                                    """contact.write({
+                                    contact.write({
                                         'marketing_task_ids':[(4, campaign.id, 0)],
-                                    })"""
+                                    })
                                     _logger.info("Campaing {} added to contact {}".format(campaign.name,contact.name))
                         if rec['LeadId']:
                             lead_key = self.env['etl.sync.keys'].search([('externalId','=',rec['LeadId']),('search_value','=',False)],limit=1)
@@ -107,10 +107,11 @@ class salesforceSync(models.Model):
                                 test = self.env.cr.fetchone()
                                 if test:
                                     lead = self.env['crm.lead'].browse(int(lead_key.odooId))
-                                    """lead.write({
+                                    lead.write({
                                         'marketing_task_ids':[(4, campaign.id, 0)],
-                                    })"""
+                                    })
                                     _logger.info("Campaing {} added to lead {}".format(campaign.name,lead.name))
+                    key.write({'search_value':'updated'})
 
             if datetime.now() > timestamp_end:
                 break
