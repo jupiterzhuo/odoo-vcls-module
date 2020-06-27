@@ -88,7 +88,7 @@ class salesforceSync(models.Model):
                     _logger.info("Found {} members in campaign {} {}".format(len(records),key.externalId,campaign.name))
                     for rec in records:
                         if rec['ContactId']:
-                            contact_key = self.env['etl.sync.keys'].search([('externalId','=',rec['ContactId']),('search_value','!=','deleted')],limit=1)
+                            contact_key = self.env['etl.sync.keys'].search([('externalId','=',rec['ContactId']),('search_value','=',False)],limit=1)
                             if contact_key:
                                 contact = self.env['res.partner'].browse(int(contact_key.odooId))
                                 """contact.write({
@@ -96,7 +96,7 @@ class salesforceSync(models.Model):
                                 })"""
                                 _logger.info("Campaing {} added to contact {}".format(campaign.name,contact.name))
                         if rec['LeadId']:
-                            lead_key = self.env['etl.sync.keys'].search([('externalId','=',rec['LeadId']),('search_value','!=','deleted')],limit=1)
+                            lead_key = self.env['etl.sync.keys'].search([('externalId','=',rec['LeadId']),('search_value','=',False)],limit=1)
                             if lead_key:
                                 lead = self.env['crm.lead'].browse(int(lead_key.odooId))
                                 """lead.write({
