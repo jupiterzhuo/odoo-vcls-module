@@ -60,6 +60,7 @@ class salesforceSync(models.Model):
     def flag_deleted_keys(self,models=[]):
         for m in models:
             keys = self.env['etl.sync.keys'].search([('externalObjName','=',m['ext_name']),('odooModelName','=',m['int_name']),('search_value','=',False)])
+            _logger.info("Found {} keys for {} {}".format(len(keys),m['ext_name'],m['int_name']))
             for key in keys:
                 try:
                     record = self.env[key.odooModelName].browse(key.odooId)
