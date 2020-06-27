@@ -59,7 +59,7 @@ class salesforceSync(models.Model):
     @api.model
     def flag_deleted_keys(self,models=[]):
         for m in models:
-            keys = self.env['etl.sync.keys'].search([('externalObjName','=',m['ext_name']),('odooModelName','=',m['int_name']),('search_value','=',False)])
+            keys = self.env['etl.sync.keys'].search([('externalObjName','=',m['ext_name']),('odooModelName','=',m['int_name'])])
             _logger.info("Found {} keys for {} {}".format(len(keys),m['ext_name'],m['int_name']))
             for key in keys:
                 record = self.env[key.odooModelName].browse(int(key.odooId))
@@ -103,6 +103,9 @@ class salesforceSync(models.Model):
                                     'marketing_task_ids':[(4, campaign.id, 0)],
                                 })"""
                                 _logger.info("Campaing {} added to lead {}".format(campaign.name,lead.name))
+
+            if datetime.now() > timestamp_end:
+                break
             
     
     @api.model
