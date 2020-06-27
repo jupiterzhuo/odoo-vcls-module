@@ -90,6 +90,8 @@ class salesforceSync(models.Model):
                         if rec['ContactId']:
                             contact_key = self.env['etl.sync.keys'].search([('externalId','=',rec['ContactId']),('search_value','=',False)],limit=1)
                             if contact_key:
+                                query = "SELECT name FROM res_partner WHERE id='{}'".format(int(contact_key.odooId))
+                                self.env.cr.execute(query)
                                 contact = self.env['res.partner'].browse(int(contact_key.odooId))
                                 """contact.write({
                                     'marketing_task_ids':[(4, campaign.id, 0)],
@@ -98,6 +100,8 @@ class salesforceSync(models.Model):
                         if rec['LeadId']:
                             lead_key = self.env['etl.sync.keys'].search([('externalId','=',rec['LeadId']),('search_value','=',False)],limit=1)
                             if lead_key:
+                                query = "SELECT name FROM crm_lead WHERE id='{}'".format(int(lead_key.odooId))
+                                self.env.cr.execute(query)
                                 lead = self.env['crm.lead'].browse(int(lead_key.odooId))
                                 """lead.write({
                                     'marketing_task_ids':[(4, campaign.id, 0)],
