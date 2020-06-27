@@ -68,7 +68,26 @@ class salesforceSync(models.Model):
             sql = "SELECT ContactId,LeadId FROM CampaignMember WHERE CampaignId='{}'".format(key.externalId)
             records = sfInstance.getConnection().query_all(sql)['records']
             if records:
-                _logger.info("Found {} members in campaign {}".format(len(records),key.externalId))
+                campaign = self.env['project.task'].browse(int(key.odooId))
+                if campaign:
+                    _logger.info("Found {} members in campaign {} {}".format(len(records),key.externalId,campaign.name))
+                    for rec in records:
+                        if rec['ContactId']:
+                            contact_key = self.env['etl.sync.keys'].search([('externalId','=',rec['ContactId'])],limit=1)
+                            if contact_key:
+                                contact = self.env['res.partner'].browse(int(contact_key.odooId))
+                                """contact.write({
+                                    'marketing_task_ids':[(4, campaign.id, 0)],
+                                })"""
+                                _logger.info("Campaing {} added to contact {}".format(campaign.name,contact.name))
+                        if rec['LeadId']:
+                            lead_key = self.env['etl.sync.keys'].search([('externalId','=',rec['LeadId'])],limit=1)
+                            if lead_key:
+                                lead = self.env['res.partner'].browse(int(lead_key.odooId))
+                                """lead.write({
+                                    'marketing_task_ids':[(4, campaign.id, 0)],
+                                })"""
+                                _logger.info("Campaing {} added to lead {}".format(campaign.name,lead.name))
             
     
     @api.model
