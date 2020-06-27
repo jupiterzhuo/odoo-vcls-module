@@ -56,6 +56,21 @@ class salesforceSync(models.Model):
     def getExtModelName(self):
         return "This return the model name of external"
     
+    @api.models
+    def populate_campaigns(self,duration=9):
+        timestamp_end = datetime.now() + timedelta(minutes=duration) - timedelta(seconds=10)
+        #we search for non-populated campaigns
+        keys = self.env['etl.sync.keys'].search([('externalObjName','=','Campaign'),('search_value','!=','processed')])
+        _logger.info("Found {} campaigns to sync".format(len(keys)))
+        sfInstance = self.getSFInstance()
+
+        for key in keys:
+            sql = "SELECT ContactId,LeadId FROM CampaignMember WHERE CampaignId='{}'".format(key.externalId)
+            records = sfInstance.getConnection().query_all(sql)['records']
+            if records:
+                _logger.info("Found {} members in campaign {}".format(len(records),key.externalId))
+            
+    
     @api.model
     def sf_process_keys(self,batch_size=False,loop=True,duration=9,custom_context=''):
         priorities = self.env['etl.sync.keys'].search([('state','not in',['upToDate','postponed'])]).mapped('priority')
