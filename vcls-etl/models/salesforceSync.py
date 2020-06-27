@@ -56,7 +56,7 @@ class salesforceSync(models.Model):
     def getExtModelName(self):
         return "This return the model name of external"
     
-    @api.models
+    @api.model
     def populate_campaigns(self,duration=9):
         timestamp_end = datetime.now() + timedelta(minutes=duration) - timedelta(seconds=10)
         #we search for non-populated campaigns
