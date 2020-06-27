@@ -83,7 +83,7 @@ class salesforceSync(models.Model):
                         if rec['LeadId']:
                             lead_key = self.env['etl.sync.keys'].search([('externalId','=',rec['LeadId'])],limit=1)
                             if lead_key:
-                                lead = self.env['res.partner'].browse(int(lead_key.odooId))
+                                lead = self.env['crm.lead'].browse(int(lead_key.odooId))
                                 """lead.write({
                                     'marketing_task_ids':[(4, campaign.id, 0)],
                                 })"""
