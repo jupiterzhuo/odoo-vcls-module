@@ -55,12 +55,23 @@ class salesforceSync(models.Model):
 
     def getExtModelName(self):
         return "This return the model name of external"
+
+    @api.model
+    def flag_deleted_keys(self,models=[]):
+        for m in models:
+            keys = self.env['etl.sync.keys'].search([('externalObjName','=',m['ext_name']),('odooModelName','=',m['int_name']),('search_value','=',False)])
+            for key in keys:
+                try:
+                    record = self.env[key.odooModelName].browse(key.odooId)
+                except:
+                    key.write({'search_value':'deleted'})
+                    _logger.info("Record Not Found {} {}".format(key.odooModelName,key.odooId))
     
     @api.model
     def populate_campaigns(self,duration=9):
         timestamp_end = datetime.now() + timedelta(minutes=duration) - timedelta(seconds=10)
         #we search for non-populated campaigns
-        keys = self.env['etl.sync.keys'].search([('externalObjName','=','Campaign')])
+        keys = self.env['etl.sync.keys'].search([('externalObjName','=','Campaign'),('search_value','=',False)])
         _logger.info("Found {} campaigns to sync".format(len(keys)))
         sfInstance = self.getSFInstance()
 
@@ -73,7 +84,7 @@ class salesforceSync(models.Model):
                     _logger.info("Found {} members in campaign {} {}".format(len(records),key.externalId,campaign.name))
                     for rec in records:
                         if rec['ContactId']:
-                            contact_key = self.env['etl.sync.keys'].search([('externalId','=',rec['ContactId'])],limit=1)
+                            contact_key = self.env['etl.sync.keys'].search([('externalId','=',rec['ContactId']),('search_value','!=','deleted')],limit=1)
                             if contact_key:
                                 contact = self.env['res.partner'].browse(int(contact_key.odooId))
                                 """contact.write({
@@ -81,7 +92,7 @@ class salesforceSync(models.Model):
                                 })"""
                                 _logger.info("Campaing {} added to contact {}".format(campaign.name,contact.name))
                         if rec['LeadId']:
-                            lead_key = self.env['etl.sync.keys'].search([('externalId','=',rec['LeadId'])],limit=1)
+                            lead_key = self.env['etl.sync.keys'].search([('externalId','=',rec['LeadId']),('search_value','!=','deleted')],limit=1)
                             if lead_key:
                                 lead = self.env['crm.lead'].browse(int(lead_key.odooId))
                                 """lead.write({
