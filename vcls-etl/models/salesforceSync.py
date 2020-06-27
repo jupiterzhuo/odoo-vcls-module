@@ -63,7 +63,7 @@ class salesforceSync(models.Model):
             _logger.info("Found {} keys for {} {}".format(len(keys),m['ext_name'],m['int_name']))
             for key in keys:
                 try:
-                    record = self.env[key.odooModelName].browse(key.odooId)
+                    record = self.env[key.odooModelName].browse(int(key.odooId))
                     logger.info("Found {} {}".format(key.odooModelName,key.odooId))
                 except:
                     key.write({'search_value':'deleted'})
