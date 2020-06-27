@@ -62,12 +62,14 @@ class salesforceSync(models.Model):
             keys = self.env['etl.sync.keys'].search([('externalObjName','=',m['ext_name']),('odooModelName','=',m['int_name']),('search_value','=',False)])
             _logger.info("Found {} keys for {} {}".format(len(keys),m['ext_name'],m['int_name']))
             for key in keys:
-                try:
+                record = self.env[key.odooModelName].browse(int(key.odooId))
+                key.write({'search_value':False})
+                """try:
                     record = self.env[key.odooModelName].browse(int(key.odooId))
                     logger.info("Found {} {}".format(key.odooModelName,key.odooId))
                 except:
                     key.write({'search_value':'deleted'})
-                    _logger.info("Record Not Found {} {}".format(key.odooModelName,key.odooId))
+                    _logger.info("Record Not Found {} {}".format(key.odooModelName,key.odooId))"""
     
     @api.model
     def populate_campaigns(self,duration=9):
