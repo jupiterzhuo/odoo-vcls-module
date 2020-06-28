@@ -50,7 +50,7 @@
             <field name = 'domain'>[('date','&gt;=',(context_today()-relativedelta(months=1)).strftime('%Y-%m-01')),('employee_id.user_id','=',uid)]</field>
             <field name = "context">{
                 "search_default_groupby_department":0,
-                "search_default_groupby_employee":1,
+                "search_default_groupby_employee":0,
                 "search_default_groupby_billability":1,
                 "search_default_groupby_project":1,
                 }</field>

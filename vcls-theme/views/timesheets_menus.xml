@@ -47,6 +47,7 @@
             sequence="1"
             parent="menu_time_analysis_my"
             action="vcls-interfaces.action_billability_overview_display_my"
+            active = "False"
         />
 
         <menuitem id="menu_my_analysis"
@@ -69,6 +70,7 @@
             parent="menu_lm_analysis"
             groups="vcls-hr.vcls_group_lm,vcls-hr.vcls_group_superuser_lvl2"
             action="vcls-interfaces.action_billability_overview_display_lm"
+            active = "False"
         />
 
         <menuitem id="menu_lm_time"
