@@ -336,8 +336,11 @@ class Invoice(models.Model):
             
             if rate_sale_line_id.product_uom == self.env.ref('uom.product_uom_day'):
                 unit_of_measure = 'Day(s)'
+                factor = 8
             else:
                 unit_of_measure = 'Hour(s)'
+                factor = 1
+
             rates_dict = data.setdefault(service_section_line_id, OrderedDict())
             values = rates_dict.setdefault(
                 rate_sale_line_id, {
@@ -347,14 +350,14 @@ class Invoice(models.Model):
                     'uom_id': rate_sale_line_id.product_uom,
                     'unit_of_measure': unit_of_measure,
                 })
-            timesheet_uom_id = timesheet_id.product_uom_id
+            """timesheet_uom_id = timesheet_id.product_uom_id
             qty = timesheet_uom_id._compute_quantity(
                 timesheet_id.unit_amount_rounded,
                 rate_sale_line_id.product_uom
-            )
-            #values['qty'] += qty
-            values['qty'] += round(qty, 2)
-            #values['qty'] = round(values['qty'], 2)
+            )"""
+            qty = timesheet_id.unit_amount_rounded/factor
+            values['qty'] += qty
+            values['qty'] = round(values['qty'], 2)
             total_not_taxed += qty * values['price']
         # assert abs(total_not_taxed - self.amount_untaxed) < 0.001, _('Something went wrong')
         return data, total_not_taxed
