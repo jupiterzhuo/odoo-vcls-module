@@ -681,7 +681,7 @@ class AnalyticLine(models.Model):
             vals={
                 'unit_amount': sum(twins.mapped('unit_amount')),
                 'unit_amount_rounded': sum(twins.mapped('unit_amount_rounded')),
-                'lc_comment': twins.mapped('lc_comment'),
+                'lc_comment': list(set(twins.filtered(lambda p: p.lc_comment).mapped('lc_comment'))),
             }
             _logger.info("NEG TS | Update {}".format(vals))
             #ts.write(vals)
