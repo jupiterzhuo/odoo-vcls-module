@@ -360,9 +360,6 @@ class Invoice(models.Model):
             #values['qty'] = round(values['qty'], 2)
             total_not_taxed += qty * values['price']
         # assert abs(total_not_taxed - self.amount_untaxed) < 0.001, _('Something went wrong')
-        for block in list(data.keys()):
-            for rate in list(block.keys()):
-                rate['qty']=round(rate['qty'], 2)
 
         return data, total_not_taxed
 
@@ -418,9 +415,7 @@ class Invoice(models.Model):
             #values['qty'] = round(values['qty'], 2)
             total_not_taxed += qty * values['price']
         # assert abs(total_not_taxed - self.amount_untaxed) < 0.001, _('Something went wrong')
-        for block in list(data.keys()):
-            for rate in list(block.keys()):
-                rate['qty']=round(rate['qty'], 2)
+        
         return data, total_not_taxed
 
     @api.multi
