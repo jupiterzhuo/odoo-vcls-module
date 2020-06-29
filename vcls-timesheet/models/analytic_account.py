@@ -668,10 +668,10 @@ class AnalyticLine(models.Model):
             twins = self.search([
                 ('is_timesheet','=',True),
                 ('date','=',ts.date),
-                ('employee_id','=',ts.employee_id),
-                ('project_id','=',ts.project_id),
-                ('task_id','=',ts.task_id),
-                ('time_category_id','=',ts.time_category_id if ts.time_category_id else False),
+                ('employee_id','=',ts.employee_id.id),
+                ('project_id','=',ts.project_id.id),
+                ('task_id','=',ts.task_id.id),
+                ('time_category_id','=',ts.time_category_id.id if ts.time_category_id else False),
                 ('name','=',ts.name),
                 ('stage_id','!=','invoiced'),
                 ])
