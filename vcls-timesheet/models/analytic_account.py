@@ -661,34 +661,43 @@ class AnalyticLine(models.Model):
 
     @api.model
     def merge_negative_ts(self):
-        to_treat = self.search([('is_timesheet','=',True),('employee_id','!=',False),('project_id','!=',False),('stage_id','!=','invoiced'),('unit_amount_rounded','<',0)])
-        for ts in to_treat:
-            _logger.info("NEG TS | {} {} on {} {} with {} {} {}".format(ts.date,ts.employee_id.name,ts.project_id.name,ts.task_id.name,ts.time_category_id.name,ts.name,ts.unit_amount))
-            #we look for others to merge
-            twins = self.search([
-                ('is_timesheet','=',True),
-                ('date','=',ts.date),
-                ('employee_id','=',ts.employee_id.id),
-                ('project_id','=',ts.project_id.id),
-                ('task_id','=',ts.task_id.id),
-                ('time_category_id','=',ts.time_category_id.id if ts.time_category_id else False),
-                ('name','=',ts.name),
-                ('stage_id','!=','invoiced'),
-                ])
+        do_it = True
+        while do_it:
+            ts = self.search([('is_timesheet','=',True),('employee_id','!=',False),('project_id','!=',False),('stage_id','not in',['invoiced','draft']),('unit_amount_rounded','<',0)],limit=1)
+            if not ts:
+                do_it = False
+                break
+            else:
+                _logger.info("NEG TS | {} {} on {} {} with {} {} {}".format(ts.date,ts.employee_id.name,ts.project_id.name,ts.task_id.name,ts.time_category_id.name,ts.name,ts.unit_amount))
+                #we look for others to merge
+                twins = self.search([
+                    ('is_timesheet','=',True),
+                    ('date','=',ts.date),
+                    ('employee_id','=',ts.employee_id.id),
+                    ('project_id','=',ts.project_id.id),
+                    ('task_id','=',ts.task_id.id),
+                    ('time_category_id','=',ts.time_category_id.id if ts.time_category_id else False),
+                    ('name','=',ts.name),
+                    ('stage_id','!=','invoiced'),
+                    ])
+                
+                _logger.info("NEG TS | Found {} twins".format(len(twins)))
+                #we update the source ts
+                new_com = list(set(twins.filtered(lambda p: p.lc_comment).mapped('lc_comment')))
+                vals={
+                    'unit_amount': sum(twins.mapped('unit_amount')),
+                    'unit_amount_rounded': sum(twins.mapped('unit_amount_rounded')),
+                    'lc_comment': new_com if len(new_com)>0 else False,
+                }
+                _logger.info("NEG TS | Update {}".format(vals))
+                ts.write(vals)
+                to_delete = twins - ts
+                if to_delete:
+                    to_delete.unlink()
+                    #pass
             
-            _logger.info("NEG TS | Found {} twins".format(len(twins)))
-            #we update the source ts
-            new_com = list(set(twins.filtered(lambda p: p.lc_comment).mapped('lc_comment')))
-            vals={
-                'unit_amount': sum(twins.mapped('unit_amount')),
-                'unit_amount_rounded': sum(twins.mapped('unit_amount_rounded')),
-                'lc_comment': new_com if len(new_com)>0 else False,
-            }
-            _logger.info("NEG TS | Update {}".format(vals))
-            ts.write(vals)
-            to_delete = twins - ts
-            to_treat -= to_delete #do not try to process eventual
-            if to_delete:
-                to_delete.unlink()
-                #pass
+                
+
+        
+            
 
