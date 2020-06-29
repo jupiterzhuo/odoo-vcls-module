@@ -105,7 +105,7 @@ class Project(models.Model):
     risk_score = fields.Integer(
         string='Risk Score',
         compute='_compute_risk_score',
-        # store=True,
+        store=True,
     )
 
     risk_last_update = fields.Datetime(
@@ -486,7 +486,7 @@ class Project(models.Model):
     @api.depends('task_ids.consummed_completed_ratio')
     def compute_project_consummed_completed_ratio(self):
         for project in self:
-            project.consummed_completed_ratio = (project.budget_consumed / project.completion_ratio) * 100 if project.completion_ratio > 0 else project.budget_consumed / 0.01 * 100
+            project.consummed_completed_ratio = (project.budget_consumed / project.completion_ratio) * 100 if project.completion_ratio > 0 else 0
 
 
     @api.multi
