@@ -685,8 +685,8 @@ class AnalyticLine(models.Model):
                 #we update the source ts
                 new_com = list(set(twins.filtered(lambda p: p.lc_comment).mapped('lc_comment')))
                 vals={
-                    'unit_amount': sum(twins.mapped('unit_amount')),
-                    'unit_amount_rounded': sum(twins.mapped('unit_amount_rounded')),
+                    'unit_amount': max(sum(twins.mapped('unit_amount')),0),
+                    'unit_amount_rounded': max(sum(twins.mapped('unit_amount_rounded')),0),
                     'lc_comment': new_com if len(new_com)>0 else False,
                 }
                 _logger.info("NEG TS | Update {}".format(vals))
