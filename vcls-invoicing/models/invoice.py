@@ -553,9 +553,10 @@ class Invoice(models.Model):
         invoice._onchange_partner_id()
         _logger.info("INVOICE CREATE ID {} VALS {}".format(invoice.id, vals))
         invoice._message_subscribe_account_payable()
-        bank_with_currency = self.env['res.partner.bank'].search([('company_id', '=', invoice.company_id.id),('currency_id', '=', invoice.currency_id.id)],limit=1)
-        if bank_with_currency:
-            invoice.partner_bank_id = bank_with_currency
+        if vals.get("type", False) in ['out_invoice', 'in_refund']:
+            bank_with_currency = self.env['res.partner.bank'].search([('company_id', '=', invoice.company_id.id),('currency_id', '=', invoice.currency_id.id)],limit=1)
+            if bank_with_currency:
+                invoice.partner_bank_id = bank_with_currency
         return invoice
 
     def _message_subscribe_account_payable(self):
