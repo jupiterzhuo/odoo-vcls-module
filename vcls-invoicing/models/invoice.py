@@ -404,8 +404,8 @@ class Invoice(models.Model):
                     'uom_id': rate_sale_line_id.product_uom,
                     'unit_of_measure': unit_of_measure,
                 })
-            timesheet_uom_id = timesheet_id.product_uom_id
-            """qty = timesheet_uom_id._compute_quantity(
+            """timesheet_uom_id = timesheet_id.product_uom_id
+            qty = timesheet_uom_id._compute_quantity(
                 timesheet_id.unit_amount_rounded,
                 rate_sale_line_id.product_uom
             )"""
