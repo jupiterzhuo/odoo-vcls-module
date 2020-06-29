@@ -684,9 +684,9 @@ class AnalyticLine(models.Model):
                 'lc_comment': list(set(twins.filtered(lambda p: p.lc_comment).mapped('lc_comment'))),
             }
             _logger.info("NEG TS | Update {}".format(vals))
-            #ts.write(vals)
+            ts.write(vals)
             to_delete = twins - ts
             if to_delete:
-                #to_delete.unlink()
-                pass
+                to_delete.unlink()
+                #pass
 
