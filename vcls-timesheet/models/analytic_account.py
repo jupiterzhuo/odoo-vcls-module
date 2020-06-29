@@ -613,40 +613,6 @@ class AnalyticLine(models.Model):
                 emp.do_smart_timesheeting = False 
 
 
-        """timesheets = self.search([
-            ('project_id', '!=', False),
-            ('unit_amount', '>', 0),
-            ('date', '>', now - timedelta(days=days+7,hours=remainder)),
-            ('date', '<', now - timedelta(days=days,hours=remainder)),
-        ])
-
-        tasks |= timesheets.mapped('task_id')
-        _logger.info("SMART TIMESHEETING: {} unique tasks in {} for {} timesheets".format(len(tasks),len(timesheets.mapped('task_id')),len(timesheets)))
-        tasks=tasks.sorted(key=lambda r: r.id)
-        _logger.info("SMART TIMESHEETING: {} ".format(tasks.mapped('id')))
-
-        for task in tasks:
-            if task.project_id.parent_id:
-                parent_project_id = task.project_id.parent_id
-            else:
-                parent_project_id = task.project_id
-
-            task_ts = timesheets.filtered(lambda t: t.task_id.id == task.id and t.task_id.stage_allow_ts)
-            for employee in task_ts.mapped('employee_id'):
-                _logger.info("SMART TIMESHEETING: {} on {}".format(task.name,employee.name))
-                #we finally create the ts
-                self.create({
-                    'date': now + timedelta(days=1),
-                    'task_id': task.id,
-                    'unit_amount': 0.0,
-                    'company_id': task.company_id.id,
-                    'project_id': task.project_id.id,
-                    'main_project_id': parent_project_id.id,
-                    'employee_id': employee.id,
-                    'name': "/",
-                })"""
-
-
     def _timesheet_preprocess(self, vals):
         vals = super(AnalyticLine, self)._timesheet_preprocess(vals)
         if vals.get('project_id'):
@@ -692,3 +658,35 @@ class AnalyticLine(models.Model):
         if fp_ts:
             fp_ts.write({'stage_id': 'fixed_price'})
             _logger.info("Found {} invoiceable timesheets set as fixed_price status.".format(len(fp_ts)))
+
+    @api.model
+    def merge_negative_ts(self):
+        to_treat = self.search([('is_timesheet','=',True),('employee_id','!=',False),('project_id','!=',False),('stage_id','!=','invoiced'),('unit_amount_rounded','<',0)])
+        for ts in to_treat:
+            _logger.info("NEG TS | {} {} on {} {} with {} {} {}".format(ts.date,ts.employee_id.name,ts.project_id.name,ts.task_id.name,ts.time_category_id.name,ts.name,ts.unit_amount))
+            #we look for others to merge
+            twins = self.search([
+                ('is_timesheet','=',True),
+                ('date','=',ts.date),
+                ('employee_id','=',ts.employee_id),
+                ('project_id','=',ts.project_id),
+                ('task_id','=',ts.task_id),
+                ('time_category_id','=',ts.time_category_id),
+                ('name','=',ts.name),
+                ('stage_id','!=','invoiced'),
+                ])
+            
+            _logger.info("NEG TS | Found {} twins".format(len(twins)))
+            #we update the source ts
+            vals={
+                'unit_amount': sum(twins.mapped('unit_amount')),
+                'unit_amount_rounded': sum(twins.mapped('unit_amount_rounded')),
+                'lc_comment': twins.mapped('lc_comment'),
+            }
+            _logger.info("NEG TS | Update {}".format(vals))
+            #ts.write(vals)
+            to_delete = twins - ts
+            if to_delete:
+                #to_delete.unlink()
+                pass
+
