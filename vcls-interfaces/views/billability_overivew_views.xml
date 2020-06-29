@@ -53,6 +53,7 @@
                 <field name='company'/>
                 <field name='department'/>
                 <field name='job_title'/>
+                <field name='start_date'/>
                 <filter string="Billable" name='billable' domain="[('consultancy_percentage', '&gt;', 0)]"/>
                 <separator/>
                 <filter string="Last 4 Weeks" name="last_month" domain="[('start_date','&gt;', (context_today() - datetime.timedelta(weeks=4)).strftime('%Y-%m-%d'))]"/>
