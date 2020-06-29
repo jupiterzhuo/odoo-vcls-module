@@ -353,7 +353,7 @@ class Invoice(models.Model):
                 rate_sale_line_id.product_uom
             )
             values['qty'] += qty
-            values['qty'] = round(values['qty'], 2)
+            #values['qty'] = round(values['qty'], 2)
             total_not_taxed += qty * values['price']
         # assert abs(total_not_taxed - self.amount_untaxed) < 0.001, _('Something went wrong')
         return data, total_not_taxed
@@ -404,7 +404,7 @@ class Invoice(models.Model):
                 rate_sale_line_id.product_uom
             )
             values['qty'] += qty
-            values['qty'] = round(values['qty'], 2)
+            #values['qty'] = round(values['qty'], 2)
             total_not_taxed += qty * values['price']
         # assert abs(total_not_taxed - self.amount_untaxed) < 0.001, _('Something went wrong')
         return data, total_not_taxed
