@@ -678,14 +678,16 @@ class AnalyticLine(models.Model):
             
             _logger.info("NEG TS | Found {} twins".format(len(twins)))
             #we update the source ts
+            new_com = list(set(twins.filtered(lambda p: p.lc_comment).mapped('lc_comment')))
             vals={
                 'unit_amount': sum(twins.mapped('unit_amount')),
                 'unit_amount_rounded': sum(twins.mapped('unit_amount_rounded')),
-                'lc_comment': list(set(twins.filtered(lambda p: p.lc_comment).mapped('lc_comment'))),
+                'lc_comment': new_com if len(new_com)>0 else False,
             }
             _logger.info("NEG TS | Update {}".format(vals))
             ts.write(vals)
             to_delete = twins - ts
+            to_treat -= to_delete #do not try to process eventual
             if to_delete:
                 to_delete.unlink()
                 #pass
