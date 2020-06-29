@@ -690,8 +690,13 @@ class AnalyticLine(models.Model):
                     'lc_comment': new_com if len(new_com)>0 else False,
                 }
                 _logger.info("NEG TS | Update {}".format(vals))
-                ts.write(vals)
                 to_delete = twins - ts
+                
+                if (vals['unit_amount'] + vals['unit_amount_rounded']) == 0:
+                    ts.unlink()
+                else:
+                    ts.write(vals)
+                
                 if to_delete:
                     to_delete.unlink()
                     #pass
