@@ -37,6 +37,9 @@ class BillabilityReport(models.Model):
     bank_holiday = fields.Integer(string='Bank Holiday [h]')
     days_duration = fields.Integer(string='Day Duration [d]')
     leaves = fields.Integer(string='Leaves [h]')
+    offs = fields.Integer(string='Offs [d]')
+    
+
     worked = fields.Integer(string='Worked [d]')
     effective_capacity = fields.Float(string='Effective Capacity [h]')
 
@@ -82,7 +85,7 @@ class BillabilityReport(models.Model):
             monday_dates += [last_monday]
         for monday_date in monday_dates:
             sunday_date = monday_date + datetime.timedelta(days=6)
-            week_data = billability.build_data(
+            week_data = billability.sudo().build_data(
                 start_date=monday_date,
                 end_date=sunday_date
             )
@@ -122,7 +125,6 @@ class BillabilityReport(models.Model):
                 #calculate percentages from data
                 week_data_line['billability_percent'] = (week_data_line['billable_hours'] / (week_data_line['Effective Capacity [h]'] * consult_decimal)) * 100
 
-
             data += week_data
         field_mapping = self._get_field_mapping()
         self.search(['|', ('active', '=', False), ('active', '=', False)]).unlink()
@@ -158,7 +160,7 @@ class BillabilityReport(models.Model):
             'bank_holiday': 'Bank Holiday [d]',
             # 'out_of_contract': 'Out of Contract [d]',
             'days_duration': 'Day Duration [h]',
-            # 'offs': 'Offs [d]',
+            'offs': 'Offs [d]',
             'leaves': 'Leaves [d]',
             'worked': 'Worked [d]',
             'effective_capacity': 'Effective Capacity [h]',
