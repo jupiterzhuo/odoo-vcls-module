@@ -671,7 +671,7 @@ class AnalyticLine(models.Model):
                 ('employee_id','=',ts.employee_id),
                 ('project_id','=',ts.project_id),
                 ('task_id','=',ts.task_id),
-                ('time_category_id','=',ts.time_category_id),
+                ('time_category_id','=',ts.time_category_id if ts.time_category_id else False),
                 ('name','=',ts.name),
                 ('stage_id','!=','invoiced'),
                 ])
