@@ -121,21 +121,22 @@ class BillabilityExport(models.Model):
                 # end_date = end_date if contract.date_end > end_date else contract.date_end
                 # end_date = end_date if contract.employee_id.employee_end_date > end_date else contract.employee_id.employee_end_date
                 
-                if contract.date_end and contract.date_end < end_date:
-                    end_date = contract.date_end
-                    if 'Aurore' in contract.name:
-                        _logger.info("end_date change cont:{}".format(end_date))
-                if contract.employee_id.employee_end_date and contract.employee_id.employee_end_date < end_date:
-                    end_date =  contract.employee_id.employee_end_date
-                    if 'Aurore' in contract.name:
-                        _logger.info("end_date change term:{}".format(end_date))
-                if contract.date_end and 'Aurore' in contract.name:
-                    _logger.info("|||cont-end|||:{}".format(contract.date_end))
-                if contract.employee_id.employee_end_date and 'Aurore' in contract.name:
-                    _logger.info("|||employee end date|||:{}".format(contract.employee_id.employee_end_date))
+                # if contract.date_end and contract.date_end < end_date:
+                #     end_date = contract.date_end
+                #     if 'Aurore' in contract.name:
+                #         _logger.info("end_date change cont:{}".format(end_date))
+                # if contract.employee_id.employee_end_date and contract.employee_id.employee_end_date < end_date:
+                #     end_date =  contract.employee_id.employee_end_date
+                #     if 'Aurore' in contract.name:
+                #         _logger.info("end_date change term:{}".format(end_date))
+                # if contract.date_end and 'Aurore' in contract.name:
+                #     _logger.info("|||cont-end|||:{}".format(contract.date_end))
+                # if contract.employee_id.employee_end_date and 'Aurore' in contract.name:
+                #     _logger.info("|||employee end date|||:{}".format(contract.employee_id.employee_end_date))
+                # if 'Aurore' in contract.name:
+                #     _logger.info("|||end_date 128!!!|||:{}".format(end_date))
                 if 'Aurore' in contract.name:
                     _logger.info("|||end_date 128!!!|||:{}".format(end_date))
-
                 contr_worked_days = set(filter(lambda d: d >= contract.date_start and d <= end_date,comp_worked_days))
                 distribution['Out of Contract [d]'] = len(comp_worked_days)-len(contr_worked_days)
                 
