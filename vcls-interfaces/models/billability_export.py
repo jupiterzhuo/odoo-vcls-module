@@ -115,18 +115,31 @@ class BillabilityExport(models.Model):
                 values.remove(correct_contract)
             extra_contracts_list = [v for k,v in extra_contracts.items()]
             extra_contracts_list_flat = [item for sublist in extra_contracts_list for item in sublist]
-
-                
+            # end_date = datetime.datetime.date(2020,6,28)
+            # end_date = datetime.strptime('2020-06-28', '%Y-%m-%d').date()
             for contract in contracts:
                 #if the contract is in extra_contracts, its a duplicate then dont add them to the data
                 if contract in extra_contracts_list_flat:
                     continue
-                
                 if not (contract.resource_calendar_id):
                     raise ValidationError('The contract {} has no working schedule configured.'.format(contract.name))
                     
                 start_date = max(contract.date_start,start_date)
-                end_date = min(contract.date_end if contract.date_end else end_date, contract.employee_id.employee_end_date if contract.employee_id.employee_end_date else end_date)
+
+                # end_date = min(contract.date_end if contract.date_end else end_date, contract.employee_id.employee_end_date if contract.employee_id.employee_end_date else end_date)
+                
+                # end_date = end_date if contract.date_end > end_date else contract.date_end
+                # end_date = end_date if contract.employee_id.employee_end_date > end_date else contract.employee_id.employee_end_date
+                
+                if contract.date_end and contract.date_end < end_date:
+                    end_date = contract.date_end
+                    if 'Aurore' in contract.name:
+                        _logger.info("end_date change cont:{}".format(end_date))
+                if contract.employee_id.employee_end_date and contract.employee_id.employee_end_date < end_date:
+                    end_date =  contract.employee_id.employee_end_date
+                    if 'Aurore' in contract.name:
+                        _logger.info("end_date change term:{}".format(end_date))
+
                 if contract.date_end and 'Aurore' in contract.name:
                     _logger.info("|||cont-end|||:{}".format(contract.date_end))
                 if contract.employee_id.employee_end_date and 'Aurore' in contract.name:
