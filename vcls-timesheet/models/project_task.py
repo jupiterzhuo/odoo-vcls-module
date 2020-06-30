@@ -94,7 +94,7 @@ class ProjectTask(models.Model):
             if task.contractual_budget:
                 task.budget_consumed = task.realized_budget / task.contractual_budget * 100
             else:
-                task.budget_consumed = task.realized_budget / 0.01 * 100
+                task.budget_consumed = 0
 
     @api.depends('date_end')
     def _compute_deadline(self):

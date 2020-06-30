@@ -2,6 +2,8 @@
 
 from odoo import api, fields, models, tools, _
 import datetime
+import logging
+_logger = logging.getLogger(__name__)
 
 
 class BillabilityReport(models.Model):
@@ -37,6 +39,9 @@ class BillabilityReport(models.Model):
     bank_holiday = fields.Integer(string='Bank Holiday [h]')
     days_duration = fields.Integer(string='Day Duration [d]')
     leaves = fields.Integer(string='Leaves [h]')
+    offs = fields.Integer(string='Offs [d]')
+    
+
     worked = fields.Integer(string='Worked [d]')
     effective_capacity = fields.Float(string='Effective Capacity [h]')
 
@@ -82,7 +87,10 @@ class BillabilityReport(models.Model):
             monday_dates += [last_monday]
         for monday_date in monday_dates:
             sunday_date = monday_date + datetime.timedelta(days=6)
-            week_data = billability.build_data(
+            _logger.info("|||MONDAY DATE|||:{}".format(monday_date))
+            _logger.info("|||SUNDAY DATE|||:{}".format(sunday_date))
+            week_data = billability.sudo().build_data(
+
                 start_date=monday_date,
                 end_date=sunday_date
             )
@@ -157,7 +165,7 @@ class BillabilityReport(models.Model):
             'bank_holiday': 'Bank Holiday [d]',
             # 'out_of_contract': 'Out of Contract [d]',
             'days_duration': 'Day Duration [h]',
-            # 'offs': 'Offs [d]',
+            'offs': 'Offs [d]',
             'leaves': 'Leaves [d]',
             'worked': 'Worked [d]',
             'effective_capacity': 'Effective Capacity [h]',
