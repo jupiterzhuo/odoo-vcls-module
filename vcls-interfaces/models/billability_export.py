@@ -7,6 +7,8 @@ import base64
 #Odoo Imports
 from odoo import models, fields, api
 from odoo.exceptions import UserError, ValidationError
+import logging
+_logger = logging.getLogger(__name__)
 
 class BillabilityExport(models.Model):
     _name = 'export.billability'
@@ -52,6 +54,10 @@ class BillabilityExport(models.Model):
         To make comptation easier, we will iterate over Companies in order to compute a default capacity."""
         start_date = start_date or self.start_date
         end_date = end_date or self.end_date
+        
+        _logger.info("|||End Date line 55|||:{}".format(end_date))
+        if self.end_date:
+            _logger.info("|||self.end_date 56|||:{}".format(self.end_date))
         data= []
         distribution = {
             'Days [d]': 0,
@@ -118,9 +124,18 @@ class BillabilityExport(models.Model):
                     
                 start_date = max(contract.date_start,start_date)
                 end_date = min(contract.date_end if contract.date_end else end_date, contract.employee_id.employee_end_date if contract.employee_id.employee_end_date else end_date)
-                
+                if contract.date_end and 'Aurore' in contract.name:
+                    _logger.info("|||cont-end|||:{}".format(contract.date_end))
+                if contract.employee_id.employee_end_date and 'Aurore' in contract.name:
+                    _logger.info("|||employee end date|||:{}".format(contract.employee_id.employee_end_date))
+                if 'Aurore' in contract.name:
+                    _logger.info("|||end_date 128!!!|||:{}".format(end_date))
+
                 contr_worked_days = set(filter(lambda d: d >= contract.date_start and d <= end_date,comp_worked_days))
+
                 distribution['Out of Contract [d]'] = len(comp_worked_days)-len(contr_worked_days)
+                if 'Aurore' in contract.name:
+                    _logger.info("Billability:BILL startdate: {},BILL enddate:{}, Gen WD: {},compWD:{},contractWD:{},cont-Start:{},cont-end:{}".format(start_date,end_date,gen_worked_days,comp_worked_days,contr_worked_days,contract.date_start,contract.date_end))
                 
                 #we get leaves of the employee over the contract period
                 leaves = self.env['hr.leave'].search([('employee_id.id','=',contract.employee_id.id),('state','=','validate'),('date_from','<=',end_date),('date_to','>=',start_date)])
@@ -153,11 +168,17 @@ class BillabilityExport(models.Model):
                     
                     #worked time is the remaining one
                     distribution['Worked [d]'] += max(budget,0)
-                    
+
+                  
+
+                    if 'Aurore' in contract.name:
+                        _logger.info("Billability: DAY: ,employee: {}, offs: {}, leaves: {}".format(d,contract.name,distribution['Offs [d]'],distribution['Leaves [d]']))
                     #KPI's
                 distribution['Effective Capacity [h]'] = distribution['Worked [d]']*distribution['Day Duration [h]']
-                # distribution['Control [d]'] = distribution['Days [d]'] - (distribution['Weekends [d]'] + distribution['Bank Holiday [d]'] + distribution['Out of Contract [d]'] + distribution['Offs [d]'] + distribution['Leaves [d]'] + distribution['Worked [d]'])
-                    
+                if 'Aurore' in contract.name:
+                    _logger.info("||||Billability|||| week start date :{} employee: {}, offs: {}, leaves: {}, day duration: {}, worked: {}".format(start_date,contract.name,distribution['Offs [d]'],distribution['Leaves [d]'],distribution['Day Duration [h]'],distribution['Worked [d]']))
+                # distribution['Control [d]'] = distribution['Days [d]'] - (distribution['Weekends [d]'] + distribution['Bank Holiday [d]'] + distribution['Out of Contract [d]'] + distribution['Offs [d]'] + distribution['Leaves [d]'] + distribution['Worked [d]']
+
                          
                 data.append(self.build_row(contract,distribution))   
         
