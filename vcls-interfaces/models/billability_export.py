@@ -86,7 +86,7 @@ class BillabilityExport(models.Model):
                                                         '|',('employee_id.employee_end_date','>=',start_date),('employee_id.employee_end_date','=',False)])
             
             #TODO: check if contract started during this week, and if so, add last contract
-     
+            
             name_dict = {}
             #makes a dict with names as keys and contracts as values
             for contract in contracts:
@@ -121,6 +121,8 @@ class BillabilityExport(models.Model):
                 
                 contr_worked_days = set(filter(lambda d: d >= contract.date_start and d <= end_date,comp_worked_days))
                 distribution['Out of Contract [d]'] = len(comp_worked_days)-len(contr_worked_days)
+                if 'Aurore' in contract.name:
+                    _logger.info("Billability:BILL startdate: {},BILL enddate:{}, Gen WD: {},compWD:{},contractWD:{},cont-Start:{},cont-end:{}".format(start_date,end_date,gen_worked_days,comp_worked_days,contr_worked_days,contract.date_start,contract.date_end)
                 
                 #we get leaves of the employee over the contract period
                 leaves = self.env['hr.leave'].search([('employee_id.id','=',contract.employee_id.id),('state','=','validate'),('date_from','<=',end_date),('date_to','>=',start_date)])
@@ -153,11 +155,21 @@ class BillabilityExport(models.Model):
                     
                     #worked time is the remaining one
                     distribution['Worked [d]'] += max(budget,0)
+
                     
                     #KPI's
                 distribution['Effective Capacity [h]'] = distribution['Worked [d]']*distribution['Day Duration [h]']
                 # distribution['Control [d]'] = distribution['Days [d]'] - (distribution['Weekends [d]'] + distribution['Bank Holiday [d]'] + distribution['Out of Contract [d]'] + distribution['Offs [d]'] + distribution['Leaves [d]'] + distribution['Worked [d]'])
                     
+
+                    if 'Aurore' in contract.name:
+                        _logger.info("Billability: DAY: ,employee: {}, offs: {}, leaves: {}".format(d,contract.name,distribution['Offs [d]'],distribution['Leaves [d]']))
+                    #KPI's
+                distribution['Effective Capacity [h]'] = distribution['Worked [d]']*distribution['Day Duration [h]']
+                if 'Aurore' in contract.name:
+                    _logger.info("||||Billability|||| week start date :{} employee: {}, offs: {}, leaves: {}, day duration: {}, worked: {}".format(start_date,contract.name,distribution['Offs [d]'],distribution['Leaves [d]'],distribution['Day Duration [h]'],distribution['Worked [d]']))
+                # distribution['Control [d]'] = distribution['Days [d]'] - (distribution['Weekends [d]'] + distribution['Bank Holiday [d]'] + distribution['Out of Contract [d]'] + distribution['Offs [d]'] + distribution['Leaves [d]'] + distribution['Worked [d]']
+
                          
                 data.append(self.build_row(contract,distribution))   
         
