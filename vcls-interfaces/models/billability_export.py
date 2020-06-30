@@ -8,6 +8,9 @@ import base64
 from odoo import models, fields, api
 from odoo.exceptions import UserError, ValidationError
 
+import logging
+_logger = logging.getLogger(__name__)
+
 class BillabilityExport(models.Model):
     _name = 'export.billability'
     _inherit = 'export.excel.mixin'
@@ -155,21 +158,15 @@ class BillabilityExport(models.Model):
                     
                     #worked time is the remaining one
                     distribution['Worked [d]'] += max(budget,0)
-
-                    
-                    #KPI's
-                distribution['Effective Capacity [h]'] = distribution['Worked [d]']*distribution['Day Duration [h]']
-                # distribution['Control [d]'] = distribution['Days [d]'] - (distribution['Weekends [d]'] + distribution['Bank Holiday [d]'] + distribution['Out of Contract [d]'] + distribution['Offs [d]'] + distribution['Leaves [d]'] + distribution['Worked [d]'])
-                    
-
                     if 'Aurore' in contract.name:
                         _logger.info("Billability: DAY: ,employee: {}, offs: {}, leaves: {}".format(d,contract.name,distribution['Offs [d]'],distribution['Leaves [d]']))
+
+                
                     #KPI's
                 distribution['Effective Capacity [h]'] = distribution['Worked [d]']*distribution['Day Duration [h]']
                 if 'Aurore' in contract.name:
                     _logger.info("||||Billability|||| week start date :{} employee: {}, offs: {}, leaves: {}, day duration: {}, worked: {}".format(start_date,contract.name,distribution['Offs [d]'],distribution['Leaves [d]'],distribution['Day Duration [h]'],distribution['Worked [d]']))
                 # distribution['Control [d]'] = distribution['Days [d]'] - (distribution['Weekends [d]'] + distribution['Bank Holiday [d]'] + distribution['Out of Contract [d]'] + distribution['Offs [d]'] + distribution['Leaves [d]'] + distribution['Worked [d]']
-
                          
                 data.append(self.build_row(contract,distribution))   
         

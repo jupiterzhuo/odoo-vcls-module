@@ -55,6 +55,67 @@ class salesforceSync(models.Model):
 
     def getExtModelName(self):
         return "This return the model name of external"
+
+    @api.model
+    def flag_deleted_keys(self,models=[]):
+        for m in models:
+            keys = self.env['etl.sync.keys'].search([('externalObjName','=',m['ext_name']),('odooModelName','=',m['int_name'])])
+            _logger.info("Found {} keys for {} {}".format(len(keys),m['ext_name'],m['int_name']))
+            for key in keys:
+                record = self.env[key.odooModelName].browse(int(key.odooId))
+                key.write({'search_value':False})
+                """try:
+                    record = self.env[key.odooModelName].browse(int(key.odooId))
+                    logger.info("Found {} {}".format(key.odooModelName,key.odooId))
+                except:
+                    key.write({'search_value':'deleted'})
+                    _logger.info("Record Not Found {} {}".format(key.odooModelName,key.odooId))"""
+    
+    @api.model
+    def populate_campaigns(self,duration=9):
+        timestamp_end = datetime.now() + timedelta(minutes=duration) - timedelta(seconds=10)
+        #we search for non-populated campaigns
+        keys = self.env['etl.sync.keys'].search([('externalObjName','=','Campaign'),('search_value','=',False)])
+        _logger.info("Found {} campaigns to sync".format(len(keys)))
+        sfInstance = self.getSFInstance()
+
+        for key in keys:
+            sql = "SELECT ContactId,LeadId FROM CampaignMember WHERE CampaignId='{}'".format(key.externalId)
+            records = sfInstance.getConnection().query_all(sql)['records']
+            if records:
+                campaign = self.env['project.task'].browse(int(key.odooId))
+                if campaign:
+                    _logger.info("Found {} members in campaign {} {}".format(len(records),key.externalId,campaign.name))
+                    for rec in records:
+                        if rec['ContactId']:
+                            contact_key = self.env['etl.sync.keys'].search([('externalId','=',rec['ContactId']),('search_value','=',False)],limit=1)
+                            if contact_key:
+                                query = "SELECT name FROM res_partner WHERE id='{}'".format(int(contact_key.odooId))
+                                self.env.cr.execute(query)
+                                test = self.env.cr.fetchone()
+                                if test:
+                                    contact = self.env['res.partner'].browse(int(contact_key.odooId))
+                                    contact.write({
+                                        'marketing_task_ids':[(4, campaign.id, 0)],
+                                    })
+                                    _logger.info("Campaing {} added to contact {}".format(campaign.name,contact.name))
+                        if rec['LeadId']:
+                            lead_key = self.env['etl.sync.keys'].search([('externalId','=',rec['LeadId']),('search_value','=',False)],limit=1)
+                            if lead_key:
+                                query = "SELECT name FROM crm_lead WHERE id='{}'".format(int(lead_key.odooId))
+                                self.env.cr.execute(query)
+                                test = self.env.cr.fetchone()
+                                if test:
+                                    lead = self.env['crm.lead'].browse(int(lead_key.odooId))
+                                    lead.write({
+                                        'marketing_task_ids':[(4, campaign.id, 0)],
+                                    })
+                                    _logger.info("Campaing {} added to lead {}".format(campaign.name,lead.name))
+                    key.write({'search_value':'updated'})
+
+            if datetime.now() > timestamp_end:
+                break
+            
     
     @api.model
     def sf_process_keys(self,batch_size=False,loop=True,duration=9,custom_context=''):
