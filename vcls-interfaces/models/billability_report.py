@@ -39,6 +39,9 @@ class BillabilityReport(models.Model):
     bank_holiday = fields.Integer(string='Bank Holiday [h]')
     days_duration = fields.Integer(string='Day Duration [d]')
     leaves = fields.Integer(string='Leaves [h]')
+    offs = fields.Integer(string='Offs [d]')
+    
+
     worked = fields.Integer(string='Worked [d]')
     effective_capacity = fields.Float(string='Effective Capacity [h]')
 
@@ -86,7 +89,8 @@ class BillabilityReport(models.Model):
             sunday_date = monday_date + datetime.timedelta(days=6)
             _logger.info("|||MONDAY DATE|||:{}".format(monday_date))
             _logger.info("|||SUNDAY DATE|||:{}".format(sunday_date))
-            week_data = billability.build_data(
+            week_data = billability.sudo().build_data(
+
                 start_date=monday_date,
                 end_date=sunday_date
             )
@@ -161,7 +165,7 @@ class BillabilityReport(models.Model):
             'bank_holiday': 'Bank Holiday [d]',
             # 'out_of_contract': 'Out of Contract [d]',
             'days_duration': 'Day Duration [h]',
-            # 'offs': 'Offs [d]',
+            'offs': 'Offs [d]',
             'leaves': 'Leaves [d]',
             'worked': 'Worked [d]',
             'effective_capacity': 'Effective Capacity [h]',

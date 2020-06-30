@@ -10,6 +10,9 @@ from odoo.exceptions import UserError, ValidationError
 import logging
 _logger = logging.getLogger(__name__)
 
+import logging
+_logger = logging.getLogger(__name__)
+
 class BillabilityExport(models.Model):
     _name = 'export.billability'
     _inherit = 'export.excel.mixin'
@@ -92,7 +95,7 @@ class BillabilityExport(models.Model):
                                                         '|',('employee_id.employee_end_date','>=',start_date),('employee_id.employee_end_date','=',False)])
             
             #TODO: check if contract started during this week, and if so, add last contract
-     
+            
             name_dict = {}
             #makes a dict with names as keys and contracts as values
             for contract in contracts:
@@ -169,10 +172,9 @@ class BillabilityExport(models.Model):
                     #worked time is the remaining one
                     distribution['Worked [d]'] += max(budget,0)
 
-                  
-
                     if 'Aurore' in contract.name:
                         _logger.info("Billability: DAY: ,employee: {}, offs: {}, leaves: {}".format(d,contract.name,distribution['Offs [d]'],distribution['Leaves [d]']))
+
                     #KPI's
                 distribution['Effective Capacity [h]'] = distribution['Worked [d]']*distribution['Day Duration [h]']
                 if 'Aurore' in contract.name:
