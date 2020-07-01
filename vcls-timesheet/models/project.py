@@ -24,6 +24,7 @@ class Project(models.Model):
     cf_budget = fields.Float(string="Carry Forward Budget",readonly=True)
     pc_hours = fields.Float(string="PC Review Hours",readonly=True)
     cf_hours = fields.Float(string="Carry Forward Hours",readonly=True)
+    timesheet_open = fields.Boolean(string="Timesheet is Open",compute='_compute_timesheet_open', store=True,)
 
     budget_consumed = fields.Float(
         string="Budget Consumed",
@@ -45,6 +46,13 @@ class Project(models.Model):
                 project.budget_consumed = project.realized_budget / project.contractual_budget * 100
             else:
                 project.budget_consumed = False
+
+    @api.depends('task_ids.stage_allow_ts')
+    def _compute_timesheet_open(self):
+        for rec in self:
+            all_tasks = rec.task_ids | rec.child_id.mapped('task_ids') | rec.child_id.mapped('task_ids').mapped('child_ids') | rec.task_ids.mapped('child_ids') 
+            bools = all_tasks.mapped('stage_allow_ts')
+            rec.timesheet_open = True if any(bools) else False
 
     @api.multi
     def _get_kpi(self):
