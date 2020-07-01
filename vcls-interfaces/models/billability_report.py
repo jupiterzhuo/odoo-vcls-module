@@ -85,8 +85,6 @@ class BillabilityReport(models.Model):
             monday_dates += [last_monday]
         for monday_date in monday_dates:
             sunday_date = monday_date + datetime.timedelta(days=6)
-            _logger.info("|||MONDAY DATE|||:{}".format(monday_date))
-            _logger.info("|||SUNDAY DATE|||:{}".format(sunday_date))
             week_data = billability.sudo().build_data(
 
                 start_date=monday_date,
