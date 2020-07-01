@@ -180,7 +180,7 @@
             <field name="name">Bad Tasks</field>
             <field name="res_model">project.task</field>
 			<field name="view_type">form</field>
-			<field name="view_mode">tree</field>
+			<field name="view_mode">tree,form</field>
             <field name="domain" eval="[('tag_ids','=',ref('vcls-project.proj_tag_bad_task'))]"/>
             <field name="context">{
                 'default_search_project': 1,
