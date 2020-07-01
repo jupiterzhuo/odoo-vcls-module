@@ -84,6 +84,26 @@
                     </group>
                 </xpath>
 
+                <xpath expr="//field[@name='parent_id']" position="replace">
+                </xpath>
+
+                <xpath expr="//form[1]/sheet[1]/group[1]/group[1]/field[@name='user_id']" position="after">
+                    <field name="parent_id" domain="['project_id','=', project_id]" readonly="0" />
+                </xpath>
+                <xpath expr="//field[@name='project_id']" position="attributes">
+                    <attribute name="readonly">1</attribute>
+                </xpath>
+                <xpath expr="//field[@name='sale_line_id']" position="attributes">
+                    <attribute name="readonly">1</attribute>
+                </xpath>
+                <xpath expr="//field[@name='company_id']" position="attributes">
+                    <attribute name="readonly">1</attribute>
+                </xpath>
+                <xpath expr="//field[@name='date_end']" position="after">
+                    <field name="planned_hours" widget="float_time"/>
+                    <field name="remaining_hours" widget="float_time"/>
+                </xpath>
+
                 <xpath expr="//page[last()]" position="before">
                     <page string="Description Evolutions">
                     <field name="description_evolutions" type="html"/>
