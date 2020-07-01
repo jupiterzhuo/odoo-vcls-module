@@ -37,6 +37,7 @@ class BillabilityReport(models.Model):
     bank_holiday = fields.Integer(string='Bank Holiday [h]')
     days_duration = fields.Integer(string='Day Duration [d]')
     leaves = fields.Integer(string='Leaves [h]')
+    offs = fields.Integer(string='Offs [d]')
     worked = fields.Integer(string='Worked [d]')
     effective_capacity = fields.Float(string='Effective Capacity [h]')
 
@@ -157,7 +158,7 @@ class BillabilityReport(models.Model):
             'bank_holiday': 'Bank Holiday [d]',
             # 'out_of_contract': 'Out of Contract [d]',
             'days_duration': 'Day Duration [h]',
-            # 'offs': 'Offs [d]',
+            'offs': 'Offs [d]',
             'leaves': 'Leaves [d]',
             'worked': 'Worked [d]',
             'effective_capacity': 'Effective Capacity [h]',
