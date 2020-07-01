@@ -195,7 +195,7 @@
                     <!-- <field name="mean_tasks_complete" widget="integer"/> -->
                     <!-- <field name="budget_consumed" widget="integer" string="%BC"/> -->
                     <field name="completion_ratio" widget="integer" string="%TC"/>
-                    <field name="consummed_completed_ratio" widget="integer" string="%TC/%BC"/>
+                    <field name="consummed_completed_ratio" widget="integer" string="BC/TC"/>
                     <field name="user_id"/>
                     <field name="valuation_ratio" widget="integer" string="RA ratio"/>
                     <field name="invoicing_mode"/>
