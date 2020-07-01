@@ -49,7 +49,10 @@
                 <separator/>
                 </xpath>
                 <xpath expr="//filter[@name='opportunities']" position="after">
+                    <separator/>
                     <filter string="Lead To Opp" name="lead2opp" domain="['|',('type','=','lead'),('date_conversion','!=',False)]"/>
+                    <separator/>
+                    <filter string="Archived" name="archived" domain="[('active','=',False)]"/>
                 </xpath>
 
             </field>
