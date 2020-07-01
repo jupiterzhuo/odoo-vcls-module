@@ -74,7 +74,7 @@ class BillabilityExport(models.Model):
         distribution['Weekends [d]'] = distribution['Days [d]']-len(gen_worked_days)
         
         #loop companies to access bank holidays
-        companies = self.env['res.company'].search([('short_name','!=','BH')])
+        companies = self.env['res.company'].search([('short_name','!=','BH'),('short_name','!=','IWAC')])
         for company in companies:
             bank_days = set(self.env['hr.bank.holiday'].search([('company_id.id','=',company.id),('date','>=',start_date),('date','<=',end_date)]).mapped('date'))
             distribution['Bank Holiday [d]'] = len(bank_days)
@@ -106,8 +106,6 @@ class BillabilityExport(models.Model):
                 values.remove(correct_contract)
             extra_contracts_list = [v for k,v in extra_contracts.items()]
             extra_contracts_list_flat = [item for sublist in extra_contracts_list for item in sublist]
-
-                
             for contract in contracts:
                 #if the contract is in extra_contracts, its a duplicate then dont add them to the data
                 if contract in extra_contracts_list_flat:
@@ -116,14 +114,14 @@ class BillabilityExport(models.Model):
                 if not (contract.resource_calendar_id):
                     raise ValidationError('The contract {} has no working schedule configured.'.format(contract.name))
                     
-                start_date = max(contract.date_start,start_date)
-                end_date = min(contract.date_end if contract.date_end else end_date, contract.employee_id.employee_end_date if contract.employee_id.employee_end_date else end_date)
-                
-                contr_worked_days = set(filter(lambda d: d >= contract.date_start and d <= end_date,comp_worked_days))
+                local_start_date = max(contract.date_start,start_date)
+                local_end_date = min(contract.date_end if contract.date_end else end_date, contract.employee_id.employee_end_date if contract.employee_id.employee_end_date else end_date)
+
+                contr_worked_days = set(filter(lambda d: d >= local_start_date and d <= local_end_date,comp_worked_days))#make sure vars are new and make sense
                 distribution['Out of Contract [d]'] = len(comp_worked_days)-len(contr_worked_days)
                 
                 #we get leaves of the employee over the contract period
-                leaves = self.env['hr.leave'].search([('employee_id.id','=',contract.employee_id.id),('state','=','validate'),('date_from','<=',end_date),('date_to','>=',start_date)])
+                leaves = self.env['hr.leave'].search([('employee_id.id','=',contract.employee_id.id),('state','=','validate'),('date_from','<=',local_end_date),('date_to','>=',local_start_date)])#new vars
                 attendances = contract.resource_calendar_id.attendance_ids
                 distribution['Day Duration [h]'] = (contract.resource_calendar_id.effective_hours/len(attendances))*2
                 
