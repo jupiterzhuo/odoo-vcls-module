@@ -2,6 +2,8 @@
 
 from odoo import api, fields, models, tools, _
 import datetime
+import logging
+_logger = logging.getLogger(__name__)
 
 
 class BillabilityReport(models.Model):
@@ -38,8 +40,6 @@ class BillabilityReport(models.Model):
     days_duration = fields.Integer(string='Day Duration [d]')
     leaves = fields.Integer(string='Leaves [h]')
     offs = fields.Integer(string='Offs [d]')
-    
-
     worked = fields.Integer(string='Worked [d]')
     effective_capacity = fields.Float(string='Effective Capacity [h]')
 
@@ -86,6 +86,7 @@ class BillabilityReport(models.Model):
         for monday_date in monday_dates:
             sunday_date = monday_date + datetime.timedelta(days=6)
             week_data = billability.sudo().build_data(
+
                 start_date=monday_date,
                 end_date=sunday_date
             )
@@ -156,7 +157,6 @@ class BillabilityReport(models.Model):
             'consultancy_percentage':'Consult %',
             'raw_weekly_capacity': 'Raw Weekly Capacity [h]',
             'days': 'Days [d]',
-            # 'weekends': 'Weekends [d]',
             'bank_holiday': 'Bank Holiday [d]',
             # 'out_of_contract': 'Out of Contract [d]',
             'days_duration': 'Day Duration [h]',
@@ -173,9 +173,7 @@ class BillabilityReport(models.Model):
             'billable_hours': 'billable_hours',
             'valued_billable_hours': 'valued_billable_hours',
             'non_billable_hours': 'non_billable_hours',
-            # 'valued_non_billable_hours': 'valued_non_billable_hours',
             'billability_percent' : 'billability_percent',
-            # 'non_billability_percent' : 'non_billability_percent',
             'total_time_coded' : 'total_time_coded',
             'total_time_coded_percent' : 'total_time_coded_percent',
             'amount_fte_billable' : 'amount_fte_billable',
