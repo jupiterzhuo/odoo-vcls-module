@@ -588,7 +588,7 @@ class Project(models.Model):
     
     @api.model
     def detect_bad_tasks(self):
-        projects = self.search[('project_type','=','client')]
+        projects = self.search([('project_type','=','client')])
         tag = self.env.ref('vcls-project.proj_tag_bad_task')
         for project in projects:
             #we get authorized parent taks from the sale_order
