@@ -593,11 +593,13 @@ class Project(models.Model):
         for project in projects:
             #we get authorized parent taks from the sale_order
             authorized_tasks = project.sale_order_id.order_line.mapped('task_id')
+            to_update = self.env['project.task']
             bad = project.task_ids.filtered(lambda t: (t.id not in authorized_tasks.ids) and not t.parent_id)
+            for task in bad:
+                to_update |= task | task.child_ids
             if bad:
-                bad |= bad.child_ids
-                _logger.info("Bad Tasks in {} | {}".format(project.name,bad.mapped('name')))
-                bad.write({
+                _logger.info("Bad Tasks in {} | {}".format(project.name,to_update.mapped('name')))
+                to_update.write({
                     'tag_ids':[(4,tag.id,0)],
                 })
 
