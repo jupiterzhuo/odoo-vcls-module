@@ -55,12 +55,7 @@ class BillabilityExport(models.Model):
         Each row will be related to one active contract for the employee over the defined period.
         Each roww will contain related capacity information, including raw capacity and leaves.
         To make comptation easier, we will iterate over Companies in order to compute a default capacity."""
-        start_date = start_date or self.start_date
-        end_date = end_date or self.end_date
-        
-        _logger.info("|||End Date line 55|||:{}".format(end_date))
-        if self.end_date:
-            _logger.info("|||self.end_date 56|||:{}".format(self.end_date))
+       
         data= []
         distribution = {
             'Days [d]': 0,
@@ -83,7 +78,7 @@ class BillabilityExport(models.Model):
         distribution['Weekends [d]'] = distribution['Days [d]']-len(gen_worked_days)
         
         #loop companies to access bank holidays
-        companies = self.env['res.company'].search([('short_name','!=','BH')])
+        companies = self.env['res.company'].search([('short_name','!=','BH'),('short_name','!=','IWAC')])
         for company in companies:
             bank_days = set(self.env['hr.bank.holiday'].search([('company_id.id','=',company.id),('date','>=',start_date),('date','<=',end_date)]).mapped('date'))
             distribution['Bank Holiday [d]'] = len(bank_days)
@@ -115,8 +110,7 @@ class BillabilityExport(models.Model):
                 values.remove(correct_contract)
             extra_contracts_list = [v for k,v in extra_contracts.items()]
             extra_contracts_list_flat = [item for sublist in extra_contracts_list for item in sublist]
-            # end_date = datetime.datetime.date(2020,6,28)
-            # end_date = datetime.strptime('2020-06-28', '%Y-%m-%d').date()
+
             for contract in contracts:
                 #if the contract is in extra_contracts, its a duplicate then dont add them to the data
                 if contract in extra_contracts_list_flat:
@@ -124,37 +118,16 @@ class BillabilityExport(models.Model):
                 if not (contract.resource_calendar_id):
                     raise ValidationError('The contract {} has no working schedule configured.'.format(contract.name))
                     
-                start_date = max(contract.date_start,start_date)
+                local_start_date = max(contract.date_start,start_date)
+                local_end_date = min(contract.date_end if contract.date_end else end_date, contract.employee_id.employee_end_date if contract.employee_id.employee_end_date else end_date)
 
-                # end_date = min(contract.date_end if contract.date_end else end_date, contract.employee_id.employee_end_date if contract.employee_id.employee_end_date else end_date)
-                
-                # end_date = end_date if contract.date_end > end_date else contract.date_end
-                # end_date = end_date if contract.employee_id.employee_end_date > end_date else contract.employee_id.employee_end_date
-                
-                # if contract.date_end and contract.date_end < end_date:
-                #     end_date = contract.date_end
-                #     if 'Aurore' in contract.name:
-                #         _logger.info("end_date change cont:{}".format(end_date))
-                # if contract.employee_id.employee_end_date and contract.employee_id.employee_end_date < end_date:
-                #     end_date =  contract.employee_id.employee_end_date
-                #     if 'Aurore' in contract.name:
-                #         _logger.info("end_date change term:{}".format(end_date))
-                # if contract.date_end and 'Aurore' in contract.name:
-                #     _logger.info("|||cont-end|||:{}".format(contract.date_end))
-                # if contract.employee_id.employee_end_date and 'Aurore' in contract.name:
-                #     _logger.info("|||employee end date|||:{}".format(contract.employee_id.employee_end_date))
-                # if 'Aurore' in contract.name:
-                #     _logger.info("|||end_date 128!!!|||:{}".format(end_date))
-                if 'Aurore' in contract.name:
-                    _logger.info("|||end_date 128!!!|||:{}".format(end_date))
-                contr_worked_days = set(filter(lambda d: d >= contract.date_start and d <= end_date,comp_worked_days))
+                contr_worked_days = set(filter(lambda d: d >= local_start_date and d <= local_end_date,comp_worked_days))#make sure vars are new and make sense
 
                 distribution['Out of Contract [d]'] = len(comp_worked_days)-len(contr_worked_days)
-                if 'Aurore' in contract.name:
-                    _logger.info("Billability:BILL startdate: {},BILL enddate:{}, Gen WD: {},compWD:{},contractWD:{},cont-Start:{},cont-end:{}".format(start_date,end_date,gen_worked_days,comp_worked_days,contr_worked_days,contract.date_start,contract.date_end))
+                
                 
                 #we get leaves of the employee over the contract period
-                leaves = self.env['hr.leave'].search([('employee_id.id','=',contract.employee_id.id),('state','=','validate'),('date_from','<=',end_date),('date_to','>=',start_date)])
+                leaves = self.env['hr.leave'].search([('employee_id.id','=',contract.employee_id.id),('state','=','validate'),('date_from','<=',local_end_date),('date_to','>=',local_start_date)])#new vars
                 attendances = contract.resource_calendar_id.attendance_ids
                 distribution['Day Duration [h]'] = (contract.resource_calendar_id.effective_hours/len(attendances))*2
                 
@@ -185,16 +158,10 @@ class BillabilityExport(models.Model):
                     #worked time is the remaining one
                     distribution['Worked [d]'] += max(budget,0)
 
-                    if 'Aurore' in contract.name:
-                        _logger.info("Billability: DAY: ,employee: {}, offs: {}, leaves: {}".format(d,contract.name,distribution['Offs [d]'],distribution['Leaves [d]']))
-
                     #KPI's
                 distribution['Effective Capacity [h]'] = distribution['Worked [d]']*distribution['Day Duration [h]']
-                if 'Aurore' in contract.name:
-                    _logger.info("||||Billability|||| week start date :{} employee: {}, offs: {}, leaves: {}, day duration: {}, worked: {}".format(start_date,contract.name,distribution['Offs [d]'],distribution['Leaves [d]'],distribution['Day Duration [h]'],distribution['Worked [d]']))
                 # distribution['Control [d]'] = distribution['Days [d]'] - (distribution['Weekends [d]'] + distribution['Bank Holiday [d]'] + distribution['Out of Contract [d]'] + distribution['Offs [d]'] + distribution['Leaves [d]'] + distribution['Worked [d]']
 
-                         
                 data.append(self.build_row(contract,distribution))   
         
         return sorted(data, key=lambda k: k['Employee Name'])
