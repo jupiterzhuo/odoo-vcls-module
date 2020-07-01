@@ -176,5 +176,16 @@
             <field name="domain">[('project_id', 'child_of', [active_id])]</field>
         </record>
 
+        <record id="action_bad_task" model="ir.actions.act_window">
+            <field name="name">Bad Tasks</field>
+            <field name="res_model">project.task</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+            <field name="domain" eval="[('tag_ids','=',ref('vcls-project.proj_tag_bad_task'))]"/>
+            <field name="context">{
+                'default_search_project': 1,
+            }</field>
+        </record>
+
     </data>
 </odoo>

@@ -15,7 +15,7 @@
     # Check https://github.com/odoo/odoo/blob/12.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
     'category': 'Uncategorized',
-    'version': '1.0.26',
+    'version': '1.0.28',
     # any module necessary for this one to work correctly
     'depends': [
         'base',
@@ -51,6 +51,7 @@
         # DATA
         'data/end_of_project_cron.xml',
         'data/project_server_action.xml',
+        'data/project.tags.csv',
         ### VIEWS ###
         'views/project_summary_views.xml',
         'views/task_type_views.xml',

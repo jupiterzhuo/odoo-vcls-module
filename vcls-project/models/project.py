@@ -585,6 +585,23 @@ class Project(models.Model):
         parent_project_id = self.parent_id or self
         family_project_ids = parent_project_id | parent_project_id.child_id
         return family_project_ids
+    
+    @api.model
+    def detect_bad_tasks(self):
+        projects = self.search([('project_type','=','client')])
+        tag = self.env.ref('vcls-project.proj_tag_bad_task')
+        for project in projects:
+            #we get authorized parent taks from the sale_order
+            authorized_tasks = project.sale_order_id.order_line.mapped('task_id')
+            to_update = self.env['project.task']
+            bad = project.task_ids.filtered(lambda t: (t.id not in authorized_tasks.ids) and not t.parent_id)
+            for task in bad:
+                to_update |= task | task.child_ids
+            if bad:
+                _logger.info("Bad Tasks in {} | {}".format(project.name,to_update.mapped('name')))
+                to_update.write({
+                    'tag_ids':[(4,tag.id,0)],
+                })
 
     """@api.onchange('sale_line_employee_ids')
     def _onchange_sale_line_employee_ids(self):
