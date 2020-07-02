@@ -77,6 +77,8 @@ class Invoice(models.Model):
         'account.analytic.account',
     )
 
+    project_name = fields.Char()
+
     @api.multi
     def get_last_report(self):
         self.ensure_one()
@@ -148,6 +150,7 @@ class Invoice(models.Model):
         #we initiate variables
         laius = ""
         sow = ""
+        project_name = []
 
         #loop in projects
         for project in self.project_ids:
@@ -161,6 +164,12 @@ class Invoice(models.Model):
                         laius += "Project Status on {}:\n{}\n\n".format(last_summary.create_date.date(), external_summary)
             else:
                 laius = vals.get('lc_laius',self.lc_laius)
+            
+            #extend project name if the project is a parent
+            if not project.parent_id:
+                project_name.append(project.name)
+            else:
+                project_name.append(project.parent_id.name)
 
             # get sow if non exists
             if not vals.get('scope_of_work',self.scope_of_work):
@@ -168,6 +177,7 @@ class Invoice(models.Model):
                     vals['scope_of_work'] = self.html_to_string(project.scope_of_work)
             else:
                 sow = vals.get('scope_of_work', self.scope_of_work)
+        vals['project_name'] = ';'.join(list(set(project_name)))
         return vals
 
     @api.multi
