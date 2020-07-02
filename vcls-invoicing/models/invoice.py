@@ -177,7 +177,7 @@ class Invoice(models.Model):
                     vals['scope_of_work'] = self.html_to_string(project.scope_of_work)
             else:
                 sow = vals.get('scope_of_work', self.scope_of_work)
-        vals['project_name'] = ';'.join(list(set(project_name)))
+        vals['project_name'] = ', '.join(list(set(project_name)).sort())
         return vals
 
     @api.multi
