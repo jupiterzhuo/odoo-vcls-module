@@ -385,14 +385,14 @@ class ProjectTask(models.Model):
             domain = list(args)
             domain.append(('last_updated_timesheet_date', '!=', False))
             new_order = 'last_updated_timesheet_date desc'
-            las_res = super(ProjectTask, self)._search(domain, offset=offset, limit=limit, order=new_order,
+            las_res = super(ProjectTask, self).search(domain, offset=offset, limit=limit, order=new_order,
                                                        count=count, access_rights_uid=access_rights_uid)
             domain = list(args)
             domain.append(('last_updated_timesheet_date', '=', False))
-            res = super(ProjectTask, self)._search(domain, offset=offset, limit=limit, order=order,
+            res = super(ProjectTask, self).search(domain, offset=offset, limit=limit, order=order,
                                                    count=count, access_rights_uid=access_rights_uid)
             return las_res + res
-        return super(ProjectTask, self)._search(args, offset=offset, limit=limit, order=order,
+        return super(ProjectTask, self).search(args, offset=offset, limit=limit, order=order,
                                                 count=count, access_rights_uid=access_rights_uid)
 
     @api.multi
