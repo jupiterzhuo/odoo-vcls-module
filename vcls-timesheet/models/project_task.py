@@ -380,7 +380,7 @@ class ProjectTask(models.Model):
                 .write_date
 
     @api.model
-    def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
+    def search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
         if self._context.get('desc_order_display'):
             domain = list(args)
             domain.append(('last_updated_timesheet_date', '!=', False))
