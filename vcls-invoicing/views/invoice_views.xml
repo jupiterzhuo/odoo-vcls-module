@@ -41,9 +41,9 @@
                 <xpath expr="//field[@name='partner_bank_id']" position="replace">
                 </xpath>
 
-                <xpath expr="//field[@name='origin']" position="before">
+                <!--<xpath expr="//field[@name='origin']" position="before">
                     <field name="project_name"/>
-                </xpath>
+                </xpath>-->
 
                 <xpath expr="/form/sheet/group" position="replace">
                     <group>
