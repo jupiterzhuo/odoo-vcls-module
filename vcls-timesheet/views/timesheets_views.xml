@@ -467,44 +467,7 @@
                 ]"/>
         </record>
 
-        <!--
-        <menuitem 
-            id="hr_timesheet.timesheet_menu_activity_mine" 
-            name="My Timesheets | Grid" 
-            sequence="1" 
-            parent="hr_timesheet.timesheet_menu_root" 
-            action="hr_timesheet.act_hr_timesheet_line" 
-        />
-
-        <menuitem 
-            id="hr_timesheet.timesheet_menu_activity_mine_tree" 
-            name="My Timesheets | List" 
-            sequence="2" 
-            parent="hr_timesheet.timesheet_menu_root" 
-            action="act_hr_timesheet_list" 
-        />
-
         
-        <menuitem 
-            name="To Validate" 
-            id="timesheet_grid.menu_timesheet_grid_validate" 
-            parent="hr_timesheet.timesheet_menu_root" 
-            groups="hr_timesheet.group_timesheet_manager" 
-            sequence="10" 
-            active="False" 
-        />
-
-        
-        <record id="account_analytic_line_tree_inherit" model="ir.ui.view">
-            <field name="name">account.analytic.line.tree.inherit</field>
-            <field name="model">account.analytic.line</field>
-            <field name="inherit_id" ref="sale_timesheet_rounded.account_analytic_line_tree_inherit" />
-            <field name="arch" type="xml">
-                <xpath expr="//field[@name='unit_amount_rounded']" position="replace">
-                    <field name="unit_amount_rounded" string="Revised Time" sum="Total quantity rounded" widget="float_time" />
-                </xpath>
-            </field>
-        </record>-->
 
         <record id="account_analytic_line_tree_inherited" model="ir.ui.view">
             <field name="name">account.analytic.line.tree.inherited</field>

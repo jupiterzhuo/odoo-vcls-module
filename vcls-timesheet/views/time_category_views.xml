@@ -49,7 +49,7 @@
             <field name="inherit_id" ref="timesheet_grid.timesheet_view_form"/>
             <field name="arch" type="xml">
                 <field name="task_id" position="replace">
-                    <field name="task_id" context="{'default_project_id': project_id}" required="1" class="o_timesheet_tour_task_name"/>
+                    <field name="task_id" context="{'parent_project_id': main_project_id}" domain="[('allow_timesheet','=',True)]" required="1" class="o_timesheet_tour_task_name" options="{'no_create':True,'no_create_edit':True}"/>
                 </field>
                 <field name="unit_amount" position="replace">
                     <field name="unit_amount" string="Hours Spent" required="1"/>
@@ -64,10 +64,10 @@
                     <attribute name="invisible">1</attribute>
                     <attribute name="required">0</attribute>
                 </field>
-                <field name="task_id" position="attributes">
-                    <!--<attribute name="context">{'desc_order_display':True}</attribute>-->
-                    <attribute name="options">{'no_create':True,'no_create_edit':True}</attribute>
-                </field>
+                <!--<field name="task_id" position="attributes">
+                    <attribute name="context">{'desc_order_display':True}</attribute>
+                    <attribute name="options"></attribute>
+                </field>-->
                 <field name="task_id" position="before">
                     <field name="main_project_id" required="1" options="{'no_create':True,'no_create_edit':True}" domain="[('timesheet_open','=',True),('allow_timesheets','=',True),('parent_id','=',False)]"/>
                     <!--<field name="main_project_id" context="{'related_core_team_projects':True}" required="1"/>-->

@@ -26,11 +26,11 @@ class ProjectTask(models.Model):
         compute = '_compute_deadline',
     )
 
-    last_updated_timesheet_date = fields.Datetime(
+    """last_updated_timesheet_date = fields.Datetime(
         compute='get_last_updated_timesheet_date',
         compute_sudo=True,
         store=True
-    )
+    )"""
     forecast_ids = fields.One2many(
         'project.forecast',
         'task_id'
@@ -369,17 +369,32 @@ class ProjectTask(models.Model):
             task.allow_budget_modification = True
         task.invoicing_mode = task.project_id.invoicing_mode
         return task
+    
+    @api.model
+    def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
+        if self._context.get('parent_project_id'):
+            parent = self.env['project.project'].browse(self._context.get('parent_project_id'))
+            projects = parent | parent.child_id
 
-    @api.one
+            domain = list(args)
+            domain.append(('project_id','in',projects.ids))
+
+            return super(ProjectTask, self)._search(domain, offset=offset, limit=limit, order=order,
+                                                   count=count, access_rights_uid=access_rights_uid)
+
+        return super(ProjectTask, self)._search(args, offset=offset, limit=limit, order=order,
+                                                count=count, access_rights_uid=access_rights_uid)
+
+    """@api.one
     @api.depends('timesheet_ids', 'timesheet_ids.write_date', 'child_ids', 'child_ids.timesheet_ids',
                  'child_ids.timesheet_ids.write_date')
     def get_last_updated_timesheet_date(self):
         timesheets = self.timesheet_ids | self.child_ids.mapped('timesheet_ids')
         if timesheets:
             self.last_updated_timesheet_date = timesheets.sorted(key=lambda wd: wd.write_date, reverse=True)[0]\
-                .write_date
+                .write_date"""
 
-    @api.model
+    """@api.model
     def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
         if self._context.get('desc_order_display'):
             domain = list(args)
@@ -393,7 +408,7 @@ class ProjectTask(models.Model):
                                                    count=count, access_rights_uid=access_rights_uid)
             return las_res + res
         return super(ProjectTask, self)._search(args, offset=offset, limit=limit, order=order,
-                                                count=count, access_rights_uid=access_rights_uid)
+                                                count=count, access_rights_uid=access_rights_uid)"""
 
     @api.multi
     def action_view_forecast(self):
