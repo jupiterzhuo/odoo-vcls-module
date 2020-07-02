@@ -43,9 +43,12 @@
                         <t t-elif="o.project_name" name="project_name" class="mt-1">
                             <span t-field="o.project_name"/>
                         </t>
+                        <t t-elif="o.origin" name="origin" class="mt-1">
+                            <span t-field="o.origin"/>
+                        </t>
                     </div>
 
-                    <div t-if="o.project_name" name="project_name" class="mt-1">
+                    <div t-if="o.origin" name="origin" class="mt-1">
                         <t t-if="o.period_start and o.timesheet_limit_date">
                         <span> for the period from </span>
                         <span t-field="o.period_start"/>
