@@ -11,6 +11,9 @@
 				        <field name="opp_name" placeholder="(Automatic) AltName-XXX| Short description" attrs="{'invisible': [('name', '=', 'merge')], 'required': [('name', '!=', 'merge')]}"/>
 			        </h1>
                 </xpath>
+                <xpath expr="//group[@name='action']" position="replace">
+                 
+                </xpath>
             </field>
         </record>
     </data>

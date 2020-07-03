@@ -32,10 +32,26 @@ class Lead2OpportunityPartner(models.TransientModel):
         values = {
             'team_id': self.team_id.id,
         }
-
+        # removed wizard to choose, always link now
+        self.action = 'exist'
+        lead_obj = self.env['crm.lead'].browse(self._context.get('active_ids', []))
         if self.partner_id:
             values['partner_id'] = self.partner_id.id
-
+        if self.partner_id.is_company == True:
+            existing_contact = self.env['res.partner'].search([('email', '=', lead_obj.email_from)], limit=1)
+            if existing_contact and not existing_contact.is_company:
+                if existing_contact.parent_id == self.partner_id:
+                    values['partner_id']= existing_contact.id
+                else:
+                    UserError("contact: {} has a differnt company({}) than in lead ({})".format(existing_contact.name,existing_contact.parent_id.name,self.partner_id.name))
+                existing_contact.origin_lead_id = lead_obj.id
+            else:
+                new_contact = self.env['res.partner']
+                new_contact = new_contact.create(lead_obj._create_lead_partner_data(lead_obj.contact_name, False, lead_obj.partner_id.id))
+                values['partner_id']= new_contact.id
+                new_contact.gdpr_status = lead_obj.gdpr_status
+                new_contact.opted_in = lead_obj.opted_in
+                new_contact.opted_out = lead_obj.opted_out
         if self.name == 'merge':
             leads = self.with_context(active_test=False).opportunity_ids.merge_opportunity()
             if not leads.active:

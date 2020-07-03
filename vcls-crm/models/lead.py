@@ -149,6 +149,10 @@ class Leads(models.Model):
         compute = '_compute_sig_opp',
     )
 
+    is_company = fields.Boolean(
+        related = 'partner_id.is_company',
+    )
+
     ### CUSTOM FIELDS RELATED TO MARKETING PURPOSES ###
     
     company_id = fields.Many2one(default = '')
@@ -305,7 +309,8 @@ class Leads(models.Model):
     )
 
     age = fields.Char(
-        compute = '_compute_lead_age'
+        compute = '_compute_lead_age',
+        string='Lead Age'
     )
 
     conversion_date = fields.Date(string = 'Lead to Opp date')
@@ -360,6 +365,9 @@ class Leads(models.Model):
     def create(self, vals):
        
         if vals.get('type', '') == 'lead':
+            if vals.get('partner_id',False):
+                partner = self.env['res.partner'].browse(vals.get('partner_id'))
+                vals['altname'] = partner.altname if partner.altname else partner.parent_id.altname if partner.parent_id.altname else False
             temp = self.build_lead_name(vals)
             if temp:
                 vals['name'] = temp
@@ -441,6 +449,7 @@ class Leads(models.Model):
 
     def build_lead_name(self,vals):
         # self.ensure_one()
+
         if vals.get('contact_name', self.contact_name) and vals.get('contact_lastname', self.contact_lastname):
                 if vals.get('contact_middlename', self.contact_middlename):
                     return vals.get('contact_name', self.contact_name) + " " + vals.get('contact_middlename', self.contact_middlename) + " " + vals.get('contact_lastname', self.contact_lastname)
@@ -731,13 +740,40 @@ class Leads(models.Model):
         }"""
     
     def create_contact_pop_up(self):
-        result = self.env['crm.lead'].browse(self.id).handle_partner_assignation('create', False)
-        self.partner_id = result.get(self.id)
-        partner_object = self.env['res.partner'].browse(self.partner_id.id)
-        partner_object.gdpr_status = self.gdpr_status
-        partner_object.opted_in = self.opted_in
-        partner_object.opted_out = self.opted_out
-        return result.get(self.id)
+        #if you create a company check for exisiting name
+        if self.partner_name and not self.partner_id:
+            if self.env['res.partner'].search([('name', '=', self.partner_name)]):
+                raise UserError('{} company already exists, please link to existing company or make new name'.format(self.partner_name))
+        # if you try to create indv., parent_id must be a company to link to
+        if self.partner_id and not self.partner_id.is_company:
+            raise UserError('{} is an individual, please create by leaving the Client blank or with desired company to link'.format(self.parnter_id.name))
+        if self.partner_id:
+            # company exists, just make indv contact
+            indiv_contact = self.env['res.partner']
+            indiv_contact , result = indiv_contact.create(self._create_lead_partner_data(self.contact_name, False, self.partner_id.id))
+            partner_object = self.env['res.partner'].browse(self.partner_id.id)
+        # making a company and contact
+        else:
+            if self.altname and self.env['res.partner'].search([('altname', '=', self.altname)]):
+                raise UserError('{} altname already exists, please choose different'.format(self.altname))
+            # this creats both company and ind. contacts and links them
+            result = self.env['crm.lead'].browse(self.id).handle_partner_assignation('create', False)
+            indiv_contact = self.env['res.partner'].browse(result.get(self.id))
+            partner_object = indiv_contact.parent_id
+            partner_object.email = False
+            # if we make new company set GDPR info to match leads
+            partner_object.gdpr_status = self.gdpr_status
+            partner_object.opted_in = self.opted_in
+            partner_object.opted_out = self.opted_out
+        # self.partner_id = result.get(self.id)
+        # partner_object = self.env['res.partner'].browse(self.partner_id.id)
+        self.partner_id = indiv_contact
+        self.altname = partner_object.altname
+        #set new ind. contact GDPR status to match leads
+        indiv_contact.gdpr_status = self.gdpr_status
+        indiv_contact.opted_in = self.opted_in
+        indiv_contact.opted_out = self.opted_out
+        return result
     
     # Copy/Paste in order to redirect to right view (overriden)
     @api.multi
