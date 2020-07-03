@@ -226,7 +226,7 @@ class Project(models.Model):
     def _compute_risk_ids(self):
         for project in self:
             project.risk_ids = self.env['risk'].search([
-                ('resource', '=', 'project.project,{}'.format(project.id)),
+                ('resource', '=', 'project.project,{}'.format(project.id)),('risk_level', '>', 0)
             ])
 
     @api.depends('risk_ids', 'risk_ids.score')
