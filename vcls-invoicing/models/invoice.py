@@ -77,6 +77,8 @@ class Invoice(models.Model):
         'account.analytic.account',
     )
 
+    project_name = fields.Char()
+
     @api.multi
     def get_last_report(self):
         self.ensure_one()
@@ -148,6 +150,7 @@ class Invoice(models.Model):
         #we initiate variables
         laius = ""
         sow = ""
+        project_name = []
 
         #loop in projects
         for project in self.project_ids:
@@ -161,6 +164,12 @@ class Invoice(models.Model):
                         laius += "Project Status on {}:\n{}\n\n".format(last_summary.create_date.date(), external_summary)
             else:
                 laius = vals.get('lc_laius',self.lc_laius)
+            
+            #extend project name if the project is a parent
+            if not project.parent_id:
+                project_name.append(project.name)
+            else:
+                project_name.append(project.parent_id.name)
 
             # get sow if non exists
             if not vals.get('scope_of_work',self.scope_of_work):
@@ -168,6 +177,7 @@ class Invoice(models.Model):
                     vals['scope_of_work'] = self.html_to_string(project.scope_of_work)
             else:
                 sow = vals.get('scope_of_work', self.scope_of_work)
+        vals['project_name'] = ', '.join(list(set(project_name)))
         return vals
 
     @api.multi
@@ -336,8 +346,11 @@ class Invoice(models.Model):
             
             if rate_sale_line_id.product_uom == self.env.ref('uom.product_uom_day'):
                 unit_of_measure = 'Day(s)'
+                factor = 8
             else:
                 unit_of_measure = 'Hour(s)'
+                factor = 1
+
             rates_dict = data.setdefault(service_section_line_id, OrderedDict())
             values = rates_dict.setdefault(
                 rate_sale_line_id, {
@@ -347,15 +360,17 @@ class Invoice(models.Model):
                     'uom_id': rate_sale_line_id.product_uom,
                     'unit_of_measure': unit_of_measure,
                 })
-            timesheet_uom_id = timesheet_id.product_uom_id
+            """timesheet_uom_id = timesheet_id.product_uom_id
             qty = timesheet_uom_id._compute_quantity(
                 timesheet_id.unit_amount_rounded,
                 rate_sale_line_id.product_uom
-            )
+            )"""
+            qty = timesheet_id.unit_amount_rounded/factor
             values['qty'] += qty
-            values['qty'] = round(values['qty'], 2)
+            #values['qty'] = round(values['qty'], 2)
             total_not_taxed += qty * values['price']
         # assert abs(total_not_taxed - self.amount_untaxed) < 0.001, _('Something went wrong')
+
         return data, total_not_taxed
 
     @api.multi
@@ -386,8 +401,10 @@ class Invoice(models.Model):
                 task_id = timesheet_id.task_id
             if rate_sale_line_id.product_uom == self.env.ref('uom.product_uom_day'):
                 unit_of_measure = 'Day(s)'
+                factor = 8
             else:
                 unit_of_measure = 'Hour(s)'
+                factor = 1
 
             rates_dict = data.setdefault(task_id, OrderedDict())
             values = rates_dict.setdefault(
@@ -398,15 +415,17 @@ class Invoice(models.Model):
                     'uom_id': rate_sale_line_id.product_uom,
                     'unit_of_measure': unit_of_measure,
                 })
-            timesheet_uom_id = timesheet_id.product_uom_id
+            """timesheet_uom_id = timesheet_id.product_uom_id
             qty = timesheet_uom_id._compute_quantity(
                 timesheet_id.unit_amount_rounded,
                 rate_sale_line_id.product_uom
-            )
+            )"""
+            qty = timesheet_id.unit_amount_rounded/factor
             values['qty'] += qty
-            values['qty'] = round(values['qty'], 2)
+            #values['qty'] = round(values['qty'], 2)
             total_not_taxed += qty * values['price']
         # assert abs(total_not_taxed - self.amount_untaxed) < 0.001, _('Something went wrong')
+        
         return data, total_not_taxed
 
     @api.multi
@@ -553,9 +572,10 @@ class Invoice(models.Model):
         invoice._onchange_partner_id()
         _logger.info("INVOICE CREATE ID {} VALS {}".format(invoice.id, vals))
         invoice._message_subscribe_account_payable()
-        bank_with_currency = self.env['res.partner.bank'].search([('company_id', '=', invoice.company_id.id),('currency_id', '=', invoice.currency_id.id)],limit=1)
-        if bank_with_currency:
-            invoice.partner_bank_id = bank_with_currency
+        if vals.get("type", False) in ['out_invoice', 'in_refund']:
+            bank_with_currency = self.env['res.partner.bank'].search([('company_id', '=', invoice.company_id.id),('currency_id', '=', invoice.currency_id.id)],limit=1)
+            if bank_with_currency:
+                invoice.partner_bank_id = bank_with_currency
         return invoice
 
     def _message_subscribe_account_payable(self):

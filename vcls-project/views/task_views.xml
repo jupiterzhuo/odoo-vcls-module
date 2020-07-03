@@ -84,6 +84,26 @@
                     </group>
                 </xpath>
 
+                <xpath expr="//field[@name='parent_id']" position="replace">
+                </xpath>
+
+                <xpath expr="//form[1]/sheet[1]/group[1]/group[1]/field[@name='user_id']" position="after">
+                    <field name="parent_id" domain="['project_id','=', project_id]" readonly="0" />
+                </xpath>
+                <xpath expr="//field[@name='project_id']" position="attributes">
+                    <attribute name="readonly">1</attribute>
+                </xpath>
+                <xpath expr="//field[@name='sale_line_id']" position="attributes">
+                    <attribute name="readonly">1</attribute>
+                </xpath>
+                <xpath expr="//field[@name='company_id']" position="attributes">
+                    <attribute name="readonly">1</attribute>
+                </xpath>
+                <xpath expr="//field[@name='date_end']" position="after">
+                    <field name="planned_hours" widget="float_time"/>
+                    <field name="remaining_hours" widget="float_time"/>
+                </xpath>
+
                 <xpath expr="//page[last()]" position="before">
                     <page string="Description Evolutions">
                     <field name="description_evolutions" type="html"/>
@@ -154,6 +174,17 @@
                 'default_project_id': active_id,
             }</field>
             <field name="domain">[('project_id', 'child_of', [active_id])]</field>
+        </record>
+
+        <record id="action_bad_task" model="ir.actions.act_window">
+            <field name="name">Bad Tasks</field>
+            <field name="res_model">project.task</field>
+			<field name="view_type">form</field>
+			<field name="view_mode">tree,form</field>
+            <field name="domain" eval="[('tag_ids','=',ref('vcls-project.proj_tag_bad_task'))]"/>
+            <field name="context">{
+                'default_search_project': 1,
+            }</field>
         </record>
 
     </data>

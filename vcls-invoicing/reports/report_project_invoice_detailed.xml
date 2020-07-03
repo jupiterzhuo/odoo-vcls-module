@@ -40,6 +40,9 @@
                                 <p class="m-0" t-field="o.program_description"/>
                             </div>                                
                         </t>
+                        <t t-elif="o.project_name" name="project_name" class="mt-1">
+                            <span t-field="o.project_name"/>
+                        </t>
                         <t t-elif="o.origin" name="origin" class="mt-1">
                             <span t-field="o.origin"/>
                         </t>

@@ -112,6 +112,14 @@
                 action="vcls-timesheet.action_timesheet_recode"
         />
 
+                <menuitem
+                id="menu_pc_helper_bad_task"
+                name="Bad Tasks"
+                parent="menu_pc_timesheets_tools"
+                sequence="2"
+                action="vcls-project.action_bad_task"
+        />
+
         <menuitem
                 id="menu_pc_project_follow_up"
                 name="Project Follow-Up"
