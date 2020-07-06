@@ -19,6 +19,8 @@ class Project(models.Model):
     valued_hours = fields.Float(string="Valued Hours",readonly=True)
     invoiced_hours = fields.Float(string="Invoiced Hours",readonly=True)
     valuation_ratio = fields.Float(string="Valuation Ratio",readonly=True)
+    remaining_budget = fields.Float(string="Remain Budget",readonly=True, 
+        help='Remaing Budget provides whatever is left to be consumed, based on coded hours in our systems, please note, for fixed prices scopes, hours are evaluated against rates set in the quotation')
 
     pc_budget = fields.Float(string="PC Review Budget",readonly=True)
     cf_budget = fields.Float(string="Carry Forward Budget",readonly=True)
@@ -72,6 +74,7 @@ class Project(models.Model):
             project.cf_budget = sum(project.task_ids.mapped('cf_budget'))
             project.pc_hours = sum(project.task_ids.mapped('pc_hours'))
             project.cf_hours = sum(project.task_ids.mapped('cf_hours'))
+            project.remaining_budget = sum(project.task_ids.mapped('remaining_budget'))
 
             project.valuation_ratio = 100.0*(project.valued_hours / project.realized_hours) if project.realized_hours else False
 
