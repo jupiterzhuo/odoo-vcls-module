@@ -619,6 +619,13 @@ class AnalyticLine(models.Model):
             project = self.env['project.project'].browse(vals['project_id'])
             vals['main_project_id'] = project.parent_id.id or project.id  
         return vals
+    
+    @api.model
+    def _get_task_domain(self):
+        return "[" \
+               #"('project_id', '=', project_id)," \
+               "('stage_id.allow_timesheet', '=', True)," \
+               "]"
 
     @api.multi
     def unlink(self):
