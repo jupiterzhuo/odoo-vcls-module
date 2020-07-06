@@ -372,7 +372,7 @@ class ProjectTask(models.Model):
     
     @api.model
     def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
-        _logger.info("T SEARCH {}".format(self._context))
+        #_logger.info("T SEARCH {}".format(self._context))
         if self._context.get('parent_project_id'):
             parent = self.env['project.project'].browse(self._context.get('parent_project_id'))
             projects = parent | parent.child_id
@@ -380,7 +380,7 @@ class ProjectTask(models.Model):
             domain = list(args)
             domain.append(('project_id','in',projects.ids))
             domain.append(('stage_allow_ts','=',True))
-            _logger.info("T SEARCH {}".format(domain))
+            #_logger.info("T SEARCH {}".format(domain))
 
             return super(ProjectTask, self)._search(domain, offset=offset, limit=limit, order=order,
                                                    count=count, access_rights_uid=access_rights_uid)
