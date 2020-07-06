@@ -287,7 +287,7 @@ class AnalyticLine(models.Model):
         # we automatically update the stage if the ts is validated and stage = draft
         so_update = False
         orders = self.env['sale.order']
-        #_logger.info("ANALYTIC WRITE {}".format(vals))
+        _logger.info("ANALYTIC WRITE {}".format(vals))
 
         # we loop the lines to manage specific usecases
         for line in self:
