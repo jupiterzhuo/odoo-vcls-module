@@ -675,7 +675,7 @@ class AnalyticLine(models.Model):
         projects = self.env['project.project'].search([('project_type','=','client'),('parent_id','!=',False)])
         for project  in projects:
             main_project  = project.parent_id
-            timesheets = project.timesheet_ids.filtered(lambda t: t.main_project_id != main_project.id and (t.stage_id not in ['invoiced']))
+            timesheets = project.timesheet_ids.filtered(lambda t: t.main_project_id != main_project and (t.stage_id not in ['invoiced']))
             if timesheets:
                 timesheets.write({'main_project_id':main_project.id})
                 _logger.info("Updating {} TS with main project {} for {}".format(len(timesheets),main_project.name,project.name))
