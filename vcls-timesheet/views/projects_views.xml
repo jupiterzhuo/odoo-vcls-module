@@ -159,7 +159,6 @@
                                 <field name="realized_budget" widget="integer"/>
                                 <field name="valued_budget" widget="integer"/>
                                 <field name="invoiced_budget" widget="integer"/>
-                                <field name="remaining_budget" widget="integer" />
                                 <field name="invoicing_mode" invisible="1"/>
                                 <field name="pc_budget" widget="integer" attrs="{'invisible': [('invoicing_mode', '=', 'fixed_price')]}"/>
                                 <field name="cf_budget" widget="integer" attrs="{'invisible': [('invoicing_mode', '=', 'fixed_price')]}"/>
@@ -170,6 +169,7 @@
                     <xpath expr="//group[@name='project_kpis']" position="inside">
                         <br/>
                         <field name="budget_consumed" widget="percentpie" nolabel="1"/>
+                        <field name="remaining_budget" widget="monetary" />
                     </xpath>
                     <field name="consummed_completed_ratio" position="after">
                         <br/>
