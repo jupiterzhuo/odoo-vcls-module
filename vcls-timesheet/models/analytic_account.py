@@ -287,7 +287,7 @@ class AnalyticLine(models.Model):
         # we automatically update the stage if the ts is validated and stage = draft
         so_update = False
         orders = self.env['sale.order']
-        _logger.info("ANALYTIC WRITE {}".format(vals))
+        #_logger.info("ANALYTIC WRITE {}".format(vals))
 
         # we loop the lines to manage specific usecases
         for line in self:
@@ -617,7 +617,7 @@ class AnalyticLine(models.Model):
         vals = super(AnalyticLine, self)._timesheet_preprocess(vals)
         if vals.get('project_id'):
             project = self.env['project.project'].browse(vals['project_id'])
-            vals['main_project_id'] = project.id or project.parent_id.id
+            vals['main_project_id'] = project.parent_id.id or project.id  
         return vals
 
     @api.multi
