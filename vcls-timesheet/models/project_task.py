@@ -41,6 +41,8 @@ class ProjectTask(models.Model):
     realized_budget = fields.Float(string="Realized Budget",readonly=True)
     valued_budget = fields.Float(string="Valued Budget",readonly=True)
     invoiced_budget = fields.Float(string="Invoiced Budget",readonly=True)
+    remaining_budget = fields.Float(string="Remain Budget",readonly=True, 
+        help='Remaing Budget provides whatever is left to be consumed, based on coded hours in our systems, please note, for fixed prices scopes, hours are evaluated against rates set in the quotation')
 
     forecasted_hours = fields.Float(string="Forecasted Hours",readonly=True)
     realized_hours = fields.Float(string="Realized Hours",readonly=True)
@@ -287,6 +289,8 @@ class ProjectTask(models.Model):
                 lambda t: t.stage_id in ('invoiced','historical')).mapped('unit_amount_rounded'))
 
             task.valuation_ratio = 100.0*(task.valued_hours / task.realized_hours) if task.realized_hours else False
+
+            task.remaining_budget = task.contractual_budget - task.valued_budget
 
             if  not task.allow_budget_modification:
                 task.contractual_budget = False
