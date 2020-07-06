@@ -750,7 +750,7 @@ class Leads(models.Model):
         if self.partner_id:
             # company exists, just make indv contact
             indiv_contact = self.env['res.partner']
-            indiv_contact , result = indiv_contact.create(self._create_lead_partner_data(self.contact_name, False, self.partner_id.id))
+            indiv_contact = result = indiv_contact.create(self._create_lead_partner_data(self.contact_name, False, self.partner_id.id))
             partner_object = self.env['res.partner'].browse(self.partner_id.id)
         # making a company and contact
         else:
