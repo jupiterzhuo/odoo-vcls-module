@@ -226,7 +226,7 @@ class Project(models.Model):
     def _compute_risk_ids(self):
         for project in self:
             project.risk_ids = self.env['risk'].search([
-                ('resource', '=', 'project.project,{}'.format(project.id)),
+                ('resource', '=', 'project.project,{}'.format(project.id)),('risk_level', '>', 0)
             ])
 
     @api.depends('risk_ids', 'risk_ids.score')
@@ -543,7 +543,7 @@ class Project(models.Model):
         project_ids = self.browse(self._context.get('active_ids'))
         all_projects = project_ids.filtered(lambda p: p.project_type=='client')
         for project in project_ids:
-            all_projects += project.child_id
+            all_projects |= project.child_id
 
         #we update the timesheet limit date to the end of the previous month
         today = fields.Date.today()

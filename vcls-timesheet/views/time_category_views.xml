@@ -49,7 +49,7 @@
             <field name="inherit_id" ref="timesheet_grid.timesheet_view_form"/>
             <field name="arch" type="xml">
                 <field name="task_id" position="replace">
-                    <field name="task_id" context="{'parent_project_id': main_project_id}" domain="[('allow_timesheet','=',True)]" required="1" class="o_timesheet_tour_task_name" options="{'no_create':True,'no_create_edit':True}"/>
+                    <field name="task_id" context="{'parent_project_id': main_project_id}" domain="[('allow_timesheet','=',True)]" required="1" class="o_timesheet_tour_task_name" options="{'no_create':True,'no_create_edit':True,'no_open':True}"/>
                 </field>
                 <field name="unit_amount" position="replace">
                     <field name="unit_amount" string="Hours Spent" required="1"/>
@@ -57,8 +57,11 @@
                 <field name="unit_amount" position="after">
                     <field name="lc_comment" string="Internal Comment" required="0"/>
                 </field>
+                <field name="employee_id" position="attributes">
+                    <attribute name="options">{'no_create':True,'no_create_edit':True,'no_open':True}</attribute>
+                </field>
                 <xpath expr="//field[@name='employee_id']" position="after">
-                    <field name="time_category_id" context="{'task_filter':True,'task_id':task_id}" options="{'no_create':True,'no_create_edit':True}"/>
+                    <field name="time_category_id" context="{'task_filter':True,'task_id':task_id}" options="{'no_create':True,'no_create_edit':True,'no_open':True}"/>
                 </xpath>
                 <field name="project_id" position="attributes">
                     <attribute name="invisible">1</attribute>
@@ -69,7 +72,7 @@
                     <attribute name="options"></attribute>
                 </field>-->
                 <field name="task_id" position="before">
-                    <field name="main_project_id" required="1" options="{'no_create':True,'no_create_edit':True}" domain="[('timesheet_open','=',True),('allow_timesheets','=',True),('parent_id','=',False)]"/>
+                    <field name="main_project_id" required="1" options="{'no_create':True,'no_create_edit':True,'no_open':True}" domain="[('timesheet_open','=',True),('allow_timesheets','=',True),('parent_id','=',False)]"/>
                     <!--<field name="main_project_id" context="{'related_core_team_projects':True}" required="1"/>-->
                 </field>
             </field>
