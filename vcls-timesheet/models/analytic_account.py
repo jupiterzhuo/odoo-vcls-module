@@ -622,8 +622,11 @@ class AnalyticLine(models.Model):
     
     @api.model
     def _get_task_domain(self):
+        #return "[" \
+        #       "('project_id', '=', project_id)," \
+        #      "('stage_id.allow_timesheet', '=', True)," \
+        #       "]"
         return "[" \
-               #"('project_id', '=', project_id)," \
                "('stage_id.allow_timesheet', '=', True)," \
                "]"
 
