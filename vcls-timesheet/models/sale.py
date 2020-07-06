@@ -321,8 +321,8 @@ class SaleOrderLine(models.Model):
 
     @api.depends('state', 'price_reduce', 'product_id', 'untaxed_amount_invoiced', 'qty_delivered')
     def _compute_untaxed_amount_to_invoice(self):
-        self = self.sudo()
-        _logger.info("vcls-timesheet | _compute_untaxed_amount_to_invoice {} {}".format(self.mapped('order_id.name'),self.mapped('name')))
+        #self = self.sudo()
+        #_logger.info("vcls-timesheet | _compute_untaxed_amount_to_invoice {} {}".format(self.mapped('order_id.name'),self.mapped('name')))
         super()._compute_untaxed_amount_to_invoice()
 
         for line in self.filtered(lambda l: l.vcls_type=='rate' and l.order_id.invoicing_mode == 'tm'):
