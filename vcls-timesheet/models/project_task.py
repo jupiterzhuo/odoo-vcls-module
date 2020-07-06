@@ -379,7 +379,7 @@ class ProjectTask(models.Model):
 
             domain = list(args)
             domain.append(('project_id','in',projects.ids))
-            domain.append(('stage_id.allow_timesheets','=',True))
+            domain.append(('stage_allow_ts','=',True))
             _logger.info("T SEARCH {}".format(domain))
 
             return super(ProjectTask, self)._search(domain, offset=offset, limit=limit, order=order,
