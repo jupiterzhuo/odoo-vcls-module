@@ -151,7 +151,7 @@ class Project(models.Model):
 
     show_folder_path = fields.Boolean()
 
-    @api.depends('sale_order_id', 'project_type', 'parent_id','partner_id')
+    @api.depends('sale_order_id', 'project_type', 'parent_id','partner_id','sale_order_id.internal_ref')
     def _compute_sharepoint_folder(self):
         pre = self.env.ref('vcls-contact.SP_client_root_prefix').value
         post = self.env.ref('vcls-contact.SP_client_root_postfix').value
