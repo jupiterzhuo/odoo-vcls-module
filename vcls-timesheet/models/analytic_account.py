@@ -170,8 +170,8 @@ class AnalyticLine(models.Model):
                 ], limit=1, order='date desc')
                 if direct_previous_line:
                     task_id = direct_previous_line.task_id
-                    main_project_id = task_id.project_id
-                    main_project_id = main_project_id or main_project_id.parent_id
+                    main_project_id = task_id.main_project_id
+                    #main_project_id = main_project_id or main_project_id.parent_id
                     values = {
                         'unit_amount': 0,
                         'date': date,
