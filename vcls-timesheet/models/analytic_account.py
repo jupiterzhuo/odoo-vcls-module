@@ -502,7 +502,8 @@ class AnalyticLine(models.Model):
 
     @api.onchange('task_id')
     def onchange_task_id(self):
-        if self._context.get('desc_order_display'):
+        #if self._context.get('desc_order_display'):
+        if self.task_id.project_id != self.project_id:
             self.project_id = self.task_id.project_id
         if not self.main_project_id and self.task_id:
             main_project_id = self.task_id.project_id
