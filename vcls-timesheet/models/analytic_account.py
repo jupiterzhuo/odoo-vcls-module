@@ -505,6 +505,7 @@ class AnalyticLine(models.Model):
         #if self._context.get('desc_order_display'):
         if self.task_id.project_id != self.project_id:
             self.project_id = self.task_id.project_id
+            self.so_line_unit_price = 0 #in case the price of the mapped line is not the same
         if not self.main_project_id and self.task_id:
             main_project_id = self.task_id.project_id
             self.main_project_id = main_project_id.parent_id or main_project_id

@@ -76,8 +76,8 @@
                     </group>
                     <group>
                         <group string="Consultant Entries">
-                            <field name="task_id" options="{'no_open':True,'no_create_edit' : True}" readonly="context.get('set_fields_readonly')" context="{'parent_project_id': main_project_id}"/>
-                            <field name="time_category_id" context="{'task_filter':True,'task_id':task_id}" options="{'no_create_edit':True}"/>
+                            <field name="task_id" options="{'no_open':True,'no_create_edit' : True,'no_create':True}" readonly="context.get('set_fields_readonly')" context="{'parent_project_id': main_project_id}"/>
+                            <field name="time_category_id" context="{'task_filter':True,'task_id':task_id}" options="{'no_open':True,'no_create_edit' : True,'no_create':True}"/>
                             <field name="name" readonly="context.get('set_fields_readonly')"/>
                             <field name="internal_comment" readonly="1" invisible="1" />
                             <field name="unit_amount" readonly="1" string="Duration (hours)" />
