@@ -32,10 +32,12 @@ class Lead2OpportunityPartner(models.TransientModel):
         values = {
             'team_id': self.team_id.id,
         }
-
+        # removed wizard to choose, always link now
+        self.action = 'exist'
+        lead_obj = self.env['crm.lead'].browse(self._context.get('active_ids', []))
         if self.partner_id:
             values['partner_id'] = self.partner_id.id
-
+        
         if self.name == 'merge':
             leads = self.with_context(active_test=False).opportunity_ids.merge_opportunity()
             if not leads.active:

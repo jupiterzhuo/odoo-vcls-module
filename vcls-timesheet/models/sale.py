@@ -252,10 +252,10 @@ class SaleOrderLine(models.Model):
                 timesheets = line.order_id.timesheet_ids.filtered(lambda ts: ts.stage_id=='historical' and ts.so_line == line)
                 
                 if timesheets:
-                    _logger.info("Historical QTY for {} : {}".format(line.name,len(timesheets)))
+                    #_logger.info("Historical QTY for {} : {} | {}".format(line.name,len(timesheets),line.order_id.name))
                     if line.product_uom == self.env.ref('uom.product_uom_day'): #if we are in daily
                         line.qty_invoiced += sum(timesheets.mapped('unit_amount_rounded'))/8
-                        _logger.info("Historical QTY for {} ".format(line.qty_invoiced))
+                        #_logger.info("Historical QTY for {} ".format(line.qty_invoiced))
                     else:
                         line.qty_invoiced += sum(timesheets.mapped('unit_amount_rounded'))
                     
@@ -304,10 +304,11 @@ class SaleOrderLine(models.Model):
         super()._compute_untaxed_amount_invoiced()
 
         for line in self:
-            _logger.info("{}".format(line.vcls_type))
+            #_logger.info("{}".format(line.vcls_type))
+            pass
 
         for line in self.filtered(lambda l: l.historical_invoiced_amount>0):
-            _logger.info("Historical amount invoiced {}".format(line.historical_invoiced_amount))
+            #_logger.info("Historical amount invoiced {} | {}".format(line.historical_invoiced_amount,line.order_id.name))
             line.untaxed_amount_invoiced += line.historical_invoiced_amount
 
         for line in self.filtered(lambda l: l.vcls_type=='rate' and l.order_id.invoicing_mode == 'tm'):
@@ -320,6 +321,8 @@ class SaleOrderLine(models.Model):
 
     @api.depends('state', 'price_reduce', 'product_id', 'untaxed_amount_invoiced', 'qty_delivered')
     def _compute_untaxed_amount_to_invoice(self):
+        #self = self.sudo()
+        #_logger.info("vcls-timesheet | _compute_untaxed_amount_to_invoice {} {}".format(self.mapped('order_id.name'),self.mapped('name')))
         super()._compute_untaxed_amount_to_invoice()
 
         for line in self.filtered(lambda l: l.vcls_type=='rate' and l.order_id.invoicing_mode == 'tm'):

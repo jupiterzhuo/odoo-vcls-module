@@ -170,8 +170,8 @@ class AnalyticLine(models.Model):
                 ], limit=1, order='date desc')
                 if direct_previous_line:
                     task_id = direct_previous_line.task_id
-                    main_project_id = task_id.project_id
-                    main_project_id = main_project_id or main_project_id.parent_id
+                    main_project_id = task_id.main_project_id
+                    #main_project_id = main_project_id or main_project_id.parent_id
                     values = {
                         'unit_amount': 0,
                         'date': date,
@@ -502,8 +502,10 @@ class AnalyticLine(models.Model):
 
     @api.onchange('task_id')
     def onchange_task_id(self):
-        if self._context.get('desc_order_display'):
+        #if self._context.get('desc_order_display'):
+        if self.task_id.project_id != self.project_id:
             self.project_id = self.task_id.project_id
+            self.so_line_unit_price = 0 #in case the price of the mapped line is not the same
         if not self.main_project_id and self.task_id:
             main_project_id = self.task_id.project_id
             self.main_project_id = main_project_id.parent_id or main_project_id
@@ -617,8 +619,18 @@ class AnalyticLine(models.Model):
         vals = super(AnalyticLine, self)._timesheet_preprocess(vals)
         if vals.get('project_id'):
             project = self.env['project.project'].browse(vals['project_id'])
-            vals['main_project_id'] = project.id or project.parent_id.id
+            vals['main_project_id'] = project.parent_id.id or project.id  
         return vals
+    
+    @api.model
+    def _get_task_domain(self):
+        #return "[" \
+        #       "('project_id', '=', project_id)," \
+        #      "('stage_id.allow_timesheet', '=', True)," \
+        #       "]"
+        return "[" \
+               "('stage_id.allow_timesheet', '=', True)," \
+               "]"
 
     @api.multi
     def unlink(self):
@@ -658,6 +670,17 @@ class AnalyticLine(models.Model):
         if fp_ts:
             fp_ts.write({'stage_id': 'fixed_price'})
             _logger.info("Found {} invoiceable timesheets set as fixed_price status.".format(len(fp_ts)))
+    
+    @api.model
+    def _force_main_project(self):
+        #we look for child projects
+        projects = self.env['project.project'].search([('project_type','=','client'),('parent_id','!=',False)])
+        for project  in projects:
+            main_project  = project.parent_id
+            timesheets = project.timesheet_ids.filtered(lambda t: t.main_project_id != main_project and (t.stage_id not in ['invoiced']))
+            if timesheets:
+                timesheets.write({'main_project_id':main_project.id})
+                _logger.info("Updating {} TS with main project {} for {}".format(len(timesheets),main_project.name,project.name))
 
     @api.model
     def merge_negative_ts(self):
