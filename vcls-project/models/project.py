@@ -33,8 +33,8 @@ class Project(models.Model):
         ('dev', 'Developement'),
         ('client', 'Client'),
         ('internal','Internal')],
-        string = 'Project Type',
-        default = 'client',
+        string='Project Type',
+        default='client',
     )
 
     # Maximum parent level here is meant to be 1 at max for now
