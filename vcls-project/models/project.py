@@ -151,7 +151,7 @@ class Project(models.Model):
 
     show_folder_path = fields.Boolean()
 
-    @api.depends('sale_order_id', 'project_type', 'parent_id','partner_id')
+    @api.depends('sale_order_id', 'project_type', 'parent_id','partner_id','sale_order_id.internal_ref')
     def _compute_sharepoint_folder(self):
         pre = self.env.ref('vcls-contact.SP_client_root_prefix').value
         post = self.env.ref('vcls-contact.SP_client_root_postfix').value
@@ -226,7 +226,7 @@ class Project(models.Model):
     def _compute_risk_ids(self):
         for project in self:
             project.risk_ids = self.env['risk'].search([
-                ('resource', '=', 'project.project,{}'.format(project.id)),
+                ('resource', '=', 'project.project,{}'.format(project.id)),('risk_level', '>', 0)
             ])
 
     @api.depends('risk_ids', 'risk_ids.score')
@@ -543,7 +543,7 @@ class Project(models.Model):
         project_ids = self.browse(self._context.get('active_ids'))
         all_projects = project_ids.filtered(lambda p: p.project_type=='client')
         for project in project_ids:
-            all_projects += project.child_id
+            all_projects |= project.child_id
 
         #we update the timesheet limit date to the end of the previous month
         today = fields.Date.today()

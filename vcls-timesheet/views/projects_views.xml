@@ -70,6 +70,9 @@
                 </button>
                 <xpath expr="//field[@name='progress']" position="replace">
                     <field name="budget_consumed" widget="progressbar" string="Budget Consumed"/>
+                    <group>
+                        <field name="remaining_budget" widget="monetary" /> 
+                    </group>
                 </xpath>
 
                 <field name="consummed_completed_ratio" position="after">
@@ -166,6 +169,7 @@
                     <xpath expr="//group[@name='project_kpis']" position="inside">
                         <br/>
                         <field name="budget_consumed" widget="percentpie" nolabel="1"/>
+                        <field name="remaining_budget" widget="monetary" />
                     </xpath>
                     <field name="consummed_completed_ratio" position="after">
                         <br/>

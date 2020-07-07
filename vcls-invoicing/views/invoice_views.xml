@@ -55,6 +55,7 @@
                         <group string="Project">
                             <field name='scope_of_work'/>
                             <field name='lc_laius'/>
+                            <field name='project_name'/>
                         </group>
                     </group>
 

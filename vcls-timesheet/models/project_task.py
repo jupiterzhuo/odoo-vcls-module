@@ -26,11 +26,11 @@ class ProjectTask(models.Model):
         compute = '_compute_deadline',
     )
 
-    last_updated_timesheet_date = fields.Datetime(
+    """last_updated_timesheet_date = fields.Datetime(
         compute='get_last_updated_timesheet_date',
         compute_sudo=True,
         store=True
-    )
+    )"""
     forecast_ids = fields.One2many(
         'project.forecast',
         'task_id'
@@ -41,6 +41,8 @@ class ProjectTask(models.Model):
     realized_budget = fields.Float(string="Realized Budget",readonly=True)
     valued_budget = fields.Float(string="Valued Budget",readonly=True)
     invoiced_budget = fields.Float(string="Invoiced Budget",readonly=True)
+    remaining_budget = fields.Float(string="Remain Budget",readonly=True, 
+        help='Remaing Budget provides whatever is left to be consumed, based on coded hours in our systems, please note, for fixed prices scopes, hours are evaluated against rates set in the quotation')
 
     forecasted_hours = fields.Float(string="Forecasted Hours",readonly=True)
     realized_hours = fields.Float(string="Realized Hours",readonly=True)
@@ -288,6 +290,8 @@ class ProjectTask(models.Model):
 
             task.valuation_ratio = 100.0*(task.valued_hours / task.realized_hours) if task.realized_hours else False
 
+            task.remaining_budget = task.contractual_budget - task.valued_budget
+
             if  not task.allow_budget_modification:
                 task.contractual_budget = False
                 task.forecasted_budget = False
@@ -369,17 +373,39 @@ class ProjectTask(models.Model):
             task.allow_budget_modification = True
         task.invoicing_mode = task.project_id.invoicing_mode
         return task
+    
+    @api.model
+    def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
+        _logger.info("T SEARCH {}".format(self._context))
+        if 'parent_project_id' in self._context:
+            domain = []
+            if self._context.get('parent_project_id'):
+                parent = self.env['project.project'].browse(self._context.get('parent_project_id'))
+                projects = parent | parent.child_id
+                #domain = list(args)
+                domain.append(('allow_timesheets','=',True))
+                domain.append(('project_id','in',projects.ids))
+                domain.append(('stage_allow_ts','=',True))
+            else:
+                domain.append(('id','=',0)) #we don't want any task here
 
-    @api.one
+            #_logger.info("T SEARCH {}".format(domain))
+            return super(ProjectTask, self)._search(domain, offset=offset, limit=limit, order=order,
+                                                   count=count, access_rights_uid=access_rights_uid)
+
+        return super(ProjectTask, self)._search(args, offset=offset, limit=limit, order=order,
+                                                count=count, access_rights_uid=access_rights_uid)
+
+    """@api.one
     @api.depends('timesheet_ids', 'timesheet_ids.write_date', 'child_ids', 'child_ids.timesheet_ids',
                  'child_ids.timesheet_ids.write_date')
     def get_last_updated_timesheet_date(self):
         timesheets = self.timesheet_ids | self.child_ids.mapped('timesheet_ids')
         if timesheets:
             self.last_updated_timesheet_date = timesheets.sorted(key=lambda wd: wd.write_date, reverse=True)[0]\
-                .write_date
+                .write_date"""
 
-    @api.model
+    """@api.model
     def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
         if self._context.get('desc_order_display'):
             domain = list(args)
@@ -393,7 +419,7 @@ class ProjectTask(models.Model):
                                                    count=count, access_rights_uid=access_rights_uid)
             return las_res + res
         return super(ProjectTask, self)._search(args, offset=offset, limit=limit, order=order,
-                                                count=count, access_rights_uid=access_rights_uid)
+                                                count=count, access_rights_uid=access_rights_uid)"""
 
     @api.multi
     def action_view_forecast(self):
@@ -413,38 +439,42 @@ class ProjectTask(models.Model):
 class Project(models.Model):
     _inherit = 'project.project'
 
-    # to be used to order projects according to time coding
+    """# to be used to order projects according to time coding
     last_updated_timesheet_date = fields.Datetime(compute='get_last_updated_timesheet_date', compute_sudo=True,
-                                                  store=True)
+                                                  store=True)"""
     timesheet_ids = fields.One2many('account.analytic.line', 'project_id')
 
-    @api.one
+    """@api.one
     @api.depends('timesheet_ids', 'timesheet_ids.write_date', 'child_id', 'child_id.timesheet_ids',
                  'child_id.timesheet_ids.write_date')
     def get_last_updated_timesheet_date(self):
         timesheets = self.timesheet_ids | self.child_id.mapped('timesheet_ids')
         if timesheets:
             self.last_updated_timesheet_date = timesheets.sorted(key=lambda wd: wd.write_date, reverse=True)[
-                0].write_date
+                0].write_date"""
 
     @api.model
     def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
         if self._context.get('related_core_team_projects'):
             user_related_core_teams = self.env['core.team'].search([('user_ids', '=', self.env.uid)])
-            last_user_updated_timesheets = self.env['account.analytic.line'].search([('user_id', '=', self.env.uid)])
+            #last_user_updated_timesheets = self.env['account.analytic.line'].search([('user_id', '=', self.env.uid)])
             if user_related_core_teams:
-                args += [('core_team_id', 'in', user_related_core_teams.ids),
-                         ('timesheet_ids', 'in', last_user_updated_timesheets.ids)]
+                """args += [('core_team_id', 'in', user_related_core_teams.ids),
+                         ('timesheet_ids', 'in', last_user_updated_timesheets.ids)]"""
+
+                args += [('core_team_id', 'in', user_related_core_teams.ids)]
+
             domain = list(args)
-            domain.append(('last_updated_timesheet_date', '!=', False))
+            """domain.append(('last_updated_timesheet_date', '!=', False))
             new_order = 'last_updated_timesheet_date desc'
             las_res = super(Project, self)._search(domain, offset=offset, limit=limit, order=new_order,
                                                    count=count, access_rights_uid=access_rights_uid)
             domain = list(args)
-            domain.append(('last_updated_timesheet_date', '=', False))
+            domain.append(('last_updated_timesheet_date', '=', False))"""
             res = super(Project, self)._search(domain, offset=offset, limit=limit, order=order,
                                                count=count, access_rights_uid=access_rights_uid)
-            return las_res + res
+            #return las_res + res
+            return res
         return super(Project, self)._search(args, offset=offset, limit=limit, order=order,
                                             count=count, access_rights_uid=access_rights_uid)
 

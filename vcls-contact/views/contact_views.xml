@@ -51,7 +51,7 @@
 
                                 <group attrs="{'invisible': [('is_company', '=', True)]}">
                                     <group>
-                                        <field name="title" attrs="{'required': [('is_company', '=', False)]}"/>
+                                        <field name="title"/>
                                         <field name="email" widget="email" attrs="{'required': [('is_company', '=', False)],'invisible': [('is_company', '=', True)]}"/>
                                         <field name="hidden" string="Is Private?" groups="vcls-contact.vcls_group_ceo"/>
                                     </group>

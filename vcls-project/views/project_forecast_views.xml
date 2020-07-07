@@ -107,8 +107,8 @@
                 <button name="button_form_from_list" string="Details" type="object" icon="fa-align-justify" />
             </field>
             <xpath expr="//tree[1]" position="attributes">
-                <attribute name="create">true</attribute>
-                <attribute name="edit">true</attribute>
+                <attribute name="create">false</attribute>
+                <attribute name="edit">false</attribute>
             </xpath>
         </field>
         </record>
