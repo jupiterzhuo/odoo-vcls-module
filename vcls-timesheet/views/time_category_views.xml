@@ -49,7 +49,7 @@
             <field name="inherit_id" ref="timesheet_grid.timesheet_view_form"/>
             <field name="arch" type="xml">
                 <field name="task_id" position="replace">
-                    <field name="task_id" context="{'parent_project_id': main_project_id}" domain="[('allow_timesheet','=',True)]" required="1" class="o_timesheet_tour_task_name" options="{'no_create':True,'no_create_edit':True,'no_open':True}"/>
+                    <field name="task_id" context="{'parent_project_id': main_project_id}" domain="[('allow_timesheets','=',True)]" required="1" class="o_timesheet_tour_task_name" options="{'no_create':True,'no_create_edit':True,'no_open':True}"/>
                 </field>
                 <field name="unit_amount" position="replace">
                     <field name="unit_amount" string="Hours Spent" required="1"/>
