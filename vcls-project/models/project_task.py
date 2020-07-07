@@ -149,3 +149,16 @@ class ProjectTask(models.Model):
     def onchange_sale_line_id(self):
         if self.sale_line_id:
             self.completion_elligible = self.sale_line_id.product_id.completion_elligible
+
+    @api.onchange('stage_id')
+    def onchange_risk_stage(self):
+        for rec in self:
+            risk_hold = self.env.ref('vcls-crm.risk_auto_WAR' )
+            if not rec.sale_order_id:
+                continue
+            if rec.stage_allow_ts:
+                if rec.sale_order_id.state not in ['sale','done'] :
+                    existing = self.env['risk'].search([('resource', '=', resource),('risk_type_id', '=', risk_hold.id)])
+                    if not existing:
+                        rec.sale_order_id.risk_ids |= self.env['risk']._raise_risk(risk_hold, resource )
+                        rec.sale_order_id.write({'new_risk':True})
