@@ -372,6 +372,10 @@ class Leads(models.Model):
     def create(self, vals):
        
         if vals.get('type', '') == 'lead':
+            if vals.get('email_from',False) and not vals.get('partner_id',False):
+                existing = self.env['res.partner'].search([('email','=ilike',vals['email_from'])],limit=1)
+                if existing:
+                    vals['partner_id'] = existing.id
             if vals.get('partner_id',False):
                 partner = self.env['res.partner'].browse(vals.get('partner_id'))
                 vals['altname'] = partner.altname if partner.altname else partner.parent_id.altname if partner.parent_id.altname else False
