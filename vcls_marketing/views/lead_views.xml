@@ -8,10 +8,13 @@
             <field name="model">crm.lead</field>
             <field name="inherit_id" ref="vcls-crm.crm_case_form_view_leads_inherit"/>
             <field name="arch" type="xml">
-                <field name="referent_id" position="after">
+                <field name="source_id" position="after">
+                    <field name="marketing_project_id" string="Source" options="{'no_create': True, 'no_create_edit' : True}" attrs="{'readonly':False}"/>
+                    <field name="marketing_task_id" string="Source Campaign" domain="[('stage_id','in',['Planned','In Progress']),('task_type','=','marketing')]" options="{'no_create': True, 'no_create_edit' : True}" attrs="{'readonly':[('partner_id','!=',False)]}"/>
+                </field>
+                <field name="referent_id" position="replace">
                     <group>
-                        <field name="marketing_project_id" options="{'no_create': True, 'no_create_edit' : True}" attrs="{'readonly':False}"/>
-                        <field name="marketing_task_id" domain="[('stage_id','in',['Planned','In Progress']),('task_type','=','marketing')]" options="{'no_create': True, 'no_create_edit' : True}" attrs="{'readonly':[('partner_id','!=',False)]}"/>
+                        <field name="referent_id" options="{'no_create': True, 'no_create_edit' : True, 'no_open':True}"/>
                         <field name="opted_in_date" widget="date" attrs="{'invisible':[('marketing_task_id','=',False)],'readonly':[('partner_id','!=',False)]}"/>
                         <field name="marketing_task_out_id" domain="[('stage_id','in',['Planned','In Progress']),('task_type','=','marketing')]" options="{'no_create': True, 'no_create_edit' : True}" attrs="{'readonly':[('partner_id','!=',False)]}"/>
                         <field name="opted_out_date" widget="date" attrs="{'readonly':[('partner_id','!=',False)]}"/>
