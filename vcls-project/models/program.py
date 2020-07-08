@@ -40,7 +40,7 @@ class ProjectProgram(models.Model):
     )
 
    
-    app_country_group_id = fields.Many2many(
+    app_country_group_id = fields.Many2one(
         'res.country.group',
         string = "Application Geographic Area",
     )
