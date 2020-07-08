@@ -102,3 +102,15 @@ class Leads(models.Model):
             'domain': "[('model_id','=', {}),('res_id','=',{})]".format(model_id.id, self.id)
         }
 
+    @api.model
+    def campaigns_lead_to_partner(self):
+        #we search leads and opp with a partner_id, with at least one campaign documented
+        leads = self.search([('partner_id','!=',False),'|','|',('marketing_task_id','!=',False),('marketing_task_ids','!=',False),('marketing_task_out_id','!=',False)])
+        for lead in leads.filtered(lambda l: not l.partner_id.is_company):
+            lead_campaigns = lead.marketing_task_id | lead.marketing_task_ids | lead.marketing_task_out_id
+            partner_campaigns = lead.partner_id.marketing_task_id | lead.partner_id.marketing_task_ids | lead.partner_id.marketing_task_out_id
+            missing = lead_campaigns - partner_campaigns
+            if missing:
+                _logger.info("Adding Campains to {} | {}".format(lead.partner_id.name,missing.mapped('name')))
+                lead.partner_id.marketing_task_ids |= missing
+
