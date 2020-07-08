@@ -10,7 +10,7 @@
             <field name="arch" type="xml">
                 <field name="source_id" position="after">
                     <field name="marketing_project_id" string="Source" options="{'no_create': True, 'no_create_edit' : True}" attrs="{'readonly':False}"/>
-                    <field name="marketing_task_id" string="Source Campaign" domain="[('stage_id','in',['Planned','In Progress']),('task_type','=','marketing')]" options="{'no_create': True, 'no_create_edit' : True}" attrs="{'readonly':[('partner_id','!=',False)]}"/>
+                    <field name="marketing_task_id" string="Source Campaign" domain="[('stage_id','in',['Planned','In Progress']),('task_type','=','marketing')]" options="{'no_create': True, 'no_create_edit' : True}" attrs="{'readonly':False}"/>
                 </field>
                 <field name="referent_id" position="replace">
                     <group>
@@ -33,7 +33,7 @@
                         />
                     </group>-->
                 </field>
-                <xpath expr="//page[@name='extra']/group" position="before">
+                <xpath expr="//page[@name='extra']/group" position="after">
                     <group string = 'Other Campaigns'>
                         <field name="marketing_task_ids">
                             <tree>
