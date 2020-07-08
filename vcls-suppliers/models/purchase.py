@@ -112,12 +112,6 @@ class Invoice(models.Model):
                     })
 
 
-"""project = self.env['project.project'].search([('analytic_account_id', '=', invoice_line.account_analytic_id.id)], limit=1)
-                        if project and project.user_id:
-                            users_to_notify |= project.user_id
-                    if invoice_line.account_id.approver_id:
-                        users_to_notify |= invoice_line.account_id.approver_id"""
-
 class PurchaseOrder(models.Model):
 
     _inherit = 'purchase.order'
