@@ -58,8 +58,9 @@ class Leads(models.Model):
     def _onchange_marketing_task_id(self):
         if self.marketing_task_id:
             self.marketing_project_id=self.marketing_task_id.project_id
-            
-    @api.onchange('partner_id')
+    
+    #we don't want anymore this info to be laoded from contact, it is now the invert, lead is pushing on contact using a cron
+    """@api.onchange('partner_id')
     def _get_marketing_info(self):
         for lead in self:
             lead.marketing_project_id = lead.partner_id.marketing_project_id
@@ -67,7 +68,7 @@ class Leads(models.Model):
             lead.marketing_task_ids = lead.partner_id.marketing_task_ids
             lead.marketing_task_out_id = lead.partner_id.marketing_task_out_id
             lead.opted_in_date = lead.partner_id.opted_in_date
-            lead.opted_out_date = lead.partner_id.opted_out_date
+            lead.opted_out_date = lead.partner_id.opted_out_date"""
     
     @api.multi
     def _create_lead_partner_data(self, name, is_company, parent_id=False):

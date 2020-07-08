@@ -22,16 +22,7 @@
                             <field name="opted_in"/>
                             <field name="content_name"/>
                         </group>
-                        <group string = 'Other Campaigns'>
-                            <field name="marketing_task_ids">
-                                <tree>
-                                    <field name="project_id"/>
-                                    <field name="name"/>
-                                    <field name="user_id"/>
-                                    <field name="date_start" widget="date"/>
-                                    <field name="date_end" widget="date"/>
-                                </tree>
-                            </field>
+                        <group>
                         </group>
                         <!--
                         <group string = 'All Participated Events' attrs="{'invisible':[('company_type','=','company')]}">
@@ -42,6 +33,17 @@
                                 class = 'btn btn-primary'
                             />
                         </group>-->
+                    </group>
+                    <group string = 'Other Campaigns'>
+                        <field name="marketing_task_ids">
+                            <tree>
+                                <field name="project_id"/>
+                                <field name="name"/>
+                                <field name="user_id"/>
+                                <field name="date_start" widget="date"/>
+                                <field name="date_end" widget="date"/>
+                            </tree>
+                        </field>
                     </group>
                     </page>
                 </xpath>
