@@ -89,7 +89,7 @@ class Invoice(models.Model):
                 users_to_notify = self.env['res.users']
 
                 for invoice_line in invoice.invoice_line_ids:
-                    if invoice_line.account_analytic_id.project_ids.user_id:
+                    if invoice_line.account_analytic_id.project_ids and invoice_line.account_analytic_id.project_ids.user_id:
                         users_to_notify |= invoice_line.account_analytic_id.project_ids.mapped('user_id')
                     elif invoice_line.company_id.supplier_approver_id:
                         users_to_notify |= invoice_line.company_id.mapped('supplier_approver_id')
@@ -110,13 +110,6 @@ class Invoice(models.Model):
                         'summary': ('Please review the invoice PDF for {}.').format(
                             invoice.name),
                     })
-
-
-"""project = self.env['project.project'].search([('analytic_account_id', '=', invoice_line.account_analytic_id.id)], limit=1)
-                        if project and project.user_id:
-                            users_to_notify |= project.user_id
-                    if invoice_line.account_id.approver_id:
-                        users_to_notify |= invoice_line.account_id.approver_id"""
 
 class PurchaseOrder(models.Model):
 
