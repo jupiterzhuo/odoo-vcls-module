@@ -278,12 +278,12 @@ class Leads(models.Model):
     )
 
     #is_support_user = fields.Boolean(compute='_compute_is_support_user', store=False)
-    
+
     app_country_group_id = fields.Many2one(
         'res.country.group',
         string = "Application Geographic Area",
     )
-    
+
     therapeutic_area_ids = fields.Many2many(
         'therapeutic.area',
         string ='Therapeutic Area',
