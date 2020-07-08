@@ -57,7 +57,10 @@
                 <xpath expr="//field[@name='phone']" position="before">
                     <field name="expertise_area_ids" string="Supplier Expertise" filter_domain="[('expertise_area_ids','ilike', self)]"/>
                     <field name="project_supplier_type_id" string="Supplier Type" filter_domain="[('project_supplier_type_id','ilike', self)]"/>
-                </xpath>    
+                </xpath>   
+                <xpath expr="//field[@name='name']" position="before">
+                    <field name="custom_search" string="Contact"/>
+                </xpath>   
             </field>
         </record>
 

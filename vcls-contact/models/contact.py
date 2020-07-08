@@ -26,6 +26,8 @@ class ResPartner(models.Model):
     
     ### CUSTOM FIELDS FOR EVERY KIND OF CONTACTS ###
 
+    custom_search = fields.Char(index=True, compute='_compute_custom_search', store=True)
+
     description = fields.Text()
 
     hidden = fields.Boolean(
@@ -339,6 +341,16 @@ class ResPartner(models.Model):
                     'title': _("Warning"),
                     'message': _("A contact with this email already exists."),
                 }}
+
+    @api.depends('display_name','altname','email')
+    def _compute_custom_search(self):
+        for rec in self:
+            string = ""
+            string += rec.display_name if rec.display_name else ""
+            string += rec.altname if rec.altname else ""
+            string += rec.email if rec.email else ""
+            strip_str = ''.join(c for c in string if c.isalnum())
+            rec.custom_search = strip_str
 
     ##################
     # ACTION METHODS #
