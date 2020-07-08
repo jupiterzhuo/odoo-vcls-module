@@ -52,9 +52,11 @@
             <field name="model">crm.lead</field>
             <field name="inherit_id" ref="vcls-crm.crm_case_form_view_oppor_inherit"/>
             <field name="arch" type="xml">
+                <field name="internal_ref" position="after">
+                    <field name="marketing_project_id" string="Source" options="{'no_create': True, 'no_create_edit' : True}" readonly="0"/>
+                    <field name="marketing_task_id" string="Source Campaign" domain="[('stage_id','in',['Planned','In Progress']),('task_type','=','marketing')]" options="{'no_create': True, 'no_create_edit' : True}"/>
+                </field>
                 <field name="source_id" position="after">
-                    <field name="marketing_project_id" options="{'no_create': True, 'no_create_edit' : True}" readonly="0"/>
-                    <field name="marketing_task_id" string="Marketing Campaign" domain="[('stage_id','in',['Planned','In Progress']),('task_type','=','marketing')]" options="{'no_create': True, 'no_create_edit' : True}"/>
                     <field name="opted_in_date" widget="date" attrs="{'invisible':[('marketing_task_id','=',False)]}" readonly="1" invisible="1"/>
                     <field name="marketing_task_out_id" domain="[('stage_id','in',['Planned','In Progress']),('task_type','=','marketing')]" options="{'no_create': True, 'no_create_edit' : True}" readonly="1" invisible="1"/>
                     <field name="opted_out_date" widget="date" attrs="{'invisible':[('marketing_task_out_id','=',False)]}" readonly="1" invisible="1"/>
