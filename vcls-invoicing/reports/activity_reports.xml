@@ -30,7 +30,7 @@
             <div class="pt-4 pl-2 pb-3">
             <h4>
                 <t t-set="invoice_name"
-                   t-value="o.number or o.temp_name or 'invoice'"/>
+                   t-value="o.project_name or o.number or 'invoice'"/>
                 <span>Activity report for</span>
                 <span t-esc="invoice_name"/>
             </h4>
