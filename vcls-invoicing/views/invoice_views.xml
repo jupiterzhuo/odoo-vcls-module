@@ -21,6 +21,9 @@
                     <attribute name="domain">[('sale_ok','=',True), ('vcls_type', '!=', 'other')]</attribute>
                     <attribute name="options">{'no_create': True, "no_open": True}</attribute>
                 </xpath>
+                <xpath expr="//field[@name='payment_term_id']" position="before">
+                    <field name='invoice_template'/>
+                </xpath>
             </field>
         </record>
 

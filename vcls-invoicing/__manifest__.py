@@ -52,6 +52,7 @@
         'reports/report_project_invoice_aggregated.xml',
         'reports/activity_reports.xml',
         'reports/invoice_template.xml',
+        'reports/report_credit_note.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
