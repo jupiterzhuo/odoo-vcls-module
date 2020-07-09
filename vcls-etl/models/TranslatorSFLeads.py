@@ -63,7 +63,6 @@ class TranslatorSFLeads(TranslatorSFGeneral.TranslatorSFGeneral):
             result['description'] += 'Initial Interest : \n' + str(SF_Leads['Initial_Product_Interest__c']) + '\n'
 
         if SF_Leads['LeadSource']:
-            #_logger.info("Lead Source | {}".format(SF_Leads['LeadSource']))
             result['marketing_project_id'] = mapOdoo.convertRef(SF_Leads['LeadSource'],odoo,'project.project',False)
 
         result = TranslatorSFLeads.partner_finder(result,SF_Leads,odoo)

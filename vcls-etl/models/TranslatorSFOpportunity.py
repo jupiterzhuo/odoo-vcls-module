@@ -14,7 +14,15 @@ class TranslatorSFOpportunity(TranslatorSFGeneral.TranslatorSFGeneral):
         mapOdoo = odoo.env['map.odoo']
         result = {}
 
+        context = odoo.env.context
+
         #_logger.info("{}".format(SF_Opportunity))
+        if SF_Opportunity['LeadSource']:
+            result['marketing_project_id'] = mapOdoo.convertRef(SF_Opportunity['LeadSource'],odoo,'project.project',False)
+        
+        if context.get('custom_context')=='small_update':
+            result['log_info'] = 'small_update {}'.format(SF_Opportunity['LeadSource'])
+            return result
 
         ### DEFAULT VALUES
         result['type'] = 'opportunity'
