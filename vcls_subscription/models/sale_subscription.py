@@ -31,6 +31,16 @@ class SaleSubscription(models.Model):
         help="Standard | Use the Odoo way of managing subscriptions.\nDeliver | No invoice is generated, but the quantity is delivered after each period.",
         )
 
+    services = fields.Text(compute='_compute_services', store=True, readonly=True)
+
+    @api.depends('recurring_invoice_line_ids')
+    def _compute_services(self):
+        for rec in self:
+            tmp_str = ""
+            for ids in rec.recurring_invoice_line_ids:
+                tmp_str += ids.name + '\n'
+            rec.services = tmp_str.rstrip()
+
     @api.depends('recurring_invoice_line_ids')
     def _compute_management_mode(self):
         for sub in self:
