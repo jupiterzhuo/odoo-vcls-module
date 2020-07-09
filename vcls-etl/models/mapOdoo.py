@@ -24,6 +24,7 @@ class mapOdoo(models.Model):
         results = []
         to_find = SF.split(';')
         for item in to_find:
+            _logger.info("ETL odoo map search for model {} item {}".format(model,item))
             found = self.search([('externalName','=ilike',item),('odModelName','=',model)],limit=1)
             if found: #a map exist
                 #_logger.info("Found ETL map: {} - {} - {} - {}".format(model,item, found.externalName, found.odooId))
