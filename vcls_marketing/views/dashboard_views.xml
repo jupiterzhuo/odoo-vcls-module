@@ -8,8 +8,10 @@
             <field name="inherit_id" ref="crm_enterprise.crm_lead_dashboard_view"/>
 
             <field name="arch" type="xml">
-                <xpath expr="//group/group[1]/widget[1]" position="replace">
-                    <widget name="pie_chart" title="Source" attrs="{'groupby': 'marketing_project_id'}"/>
+                <xpath expr="//group/group[1]/" position="replace">
+                    <group>
+                        <widget name="pie_chart" title="Source" attrs="{'groupby': 'marketing_project_id'}"/>
+                    </group>
                 </xpath>
 
             </field>
