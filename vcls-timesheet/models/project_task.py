@@ -378,10 +378,9 @@ class ProjectTask(models.Model):
     def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
         #_logger.info("T SEARCH {}".format(self._context))
         if 'parent_project_id' in self._context:
-            domain = list(args)
-            _logger.info("T SEARCH DOMAIN {}".format(domain))
+            #we remove the part of the domains which originally fixes the project
             domain = list(filter(lambda d: d[0]!='project_id',list(args)))
-            _logger.info("T SEARCH DOMAIN F {}".format(domain))
+            #_logger.info("T SEARCH DOMAIN F {}".format(domain))
             if self._context.get('parent_project_id'):
                 parent = self.env['project.project'].browse(self._context.get('parent_project_id'))
                 projects = parent | parent.child_id
@@ -390,9 +389,11 @@ class ProjectTask(models.Model):
                 domain.append(('project_id','in',projects.ids))
                 domain.append(('stage_allow_ts','=',True))
             else:
-                domain.append(('id','=',0)) #we don't want any task here
+                domain.append(('allow_timesheets','=',True))
+                domain.append(('stage_allow_ts','=',True))
+                #domain.append(('id','=',0)) #we don't want any task here
 
-            _logger.info("T SEARCH {}".format(domain))
+            #_logger.info("T SEARCH {}".format(domain))
             return super(ProjectTask, self)._search(domain, offset=offset, limit=limit, order=order,
                                                    count=count, access_rights_uid=access_rights_uid)
 
