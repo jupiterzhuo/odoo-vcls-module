@@ -389,9 +389,7 @@ class ProjectTask(models.Model):
                 domain.append(('project_id','in',projects.ids))
                 domain.append(('stage_allow_ts','=',True))
             else:
-                domain.append(('allow_timesheets','=',True))
-                domain.append(('stage_allow_ts','=',True))
-                #domain.append(('id','=',0)) #we don't want any task here
+                domain.append(('id','=',0)) #we don't want any task here
 
             #_logger.info("T SEARCH {}".format(domain))
             return super(ProjectTask, self)._search(domain, offset=offset, limit=limit, order=order,
