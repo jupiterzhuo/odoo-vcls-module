@@ -378,8 +378,9 @@ class ProjectTask(models.Model):
     def _search(self, args, offset=0, limit=None, order=None, count=False, access_rights_uid=None):
         #_logger.info("T SEARCH {}".format(self._context))
         if 'parent_project_id' in self._context:
-            _logger.info("T SEARCH old {}".format(args))
-            domain = []
+            domain = list(args)
+            for item in domain:
+                _logger.info("T SEARCH DOMAIN PART {}".format(item[0]))
             if self._context.get('parent_project_id'):
                 parent = self.env['project.project'].browse(self._context.get('parent_project_id'))
                 projects = parent | parent.child_id
