@@ -22,6 +22,11 @@ class Project(models.Model):
         string = 'Project Type',
     )
 
+    is_marketing_related = fields.Boolean(
+        default = False,
+        help= "Wen True, the related Source will be consolidated as 'Marketing' source in leads/opps analysis."
+    )
+
     ###############
     # ORM METHODS #
     ###############

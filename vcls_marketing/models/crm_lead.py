@@ -54,6 +54,16 @@ class Leads(models.Model):
 
     content_name = fields.Char()
 
+    is_marketing_related = fields.Boolean(
+        compute = '_compute_is_marketing_related',
+        store = True,
+    )
+
+    @api.depends('marketing_project_id.is_marketing_related')
+    def _compute_is_marketing_related(self):
+        for lead in self.filtered(lambda l: l.marketing_project_id):
+            lead.is_marketing_related = lead.marketing_project_id.is_marketing_related
+
     @api.onchange('marketing_task_id')
     def _onchange_marketing_task_id(self):
         if self.marketing_task_id:
