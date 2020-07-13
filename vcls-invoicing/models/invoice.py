@@ -47,7 +47,7 @@ class Invoice(models.Model):
 
     ready_for_approval = fields.Boolean(default=False)
 
-    invoice_template = fields.Many2one('ir.actions.report', domain=[('model', '=', 'account.invoice'),('name', 'ilike', 'invoice')])
+    invoice_template = fields.Many2one('ir.actions.report', domain=['&',('model', '=', 'account.invoice'),'|',('name', 'ilike', 'invoice'),('name', 'ilike', 'credit')])
     activity_report_template = fields.Many2one('ir.actions.report', domain=[('model', '=', 'account.invoice'),('name', 'ilike', 'activity')])
 
     report_count = fields.Integer(
@@ -576,6 +576,9 @@ class Invoice(models.Model):
             bank_with_currency = self.env['res.partner.bank'].search([('company_id', '=', invoice.company_id.id),('currency_id', '=', invoice.currency_id.id)],limit=1)
             if bank_with_currency:
                 invoice.partner_bank_id = bank_with_currency
+        if vals.get("type", False) in ['out_refund']:
+            invoice.invoice_template = self.env.ref('vcls-invoicing.invoice_credit_note')
+        
         return invoice
 
     def _message_subscribe_account_payable(self):
