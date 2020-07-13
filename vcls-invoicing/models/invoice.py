@@ -747,7 +747,13 @@ class Invoice(models.Model):
             'res_id': self.id,
             'mimetype': 'application/pdf'
         }
-        attachment_id = attachment_obj.create(values)
+        context = dict(self.env.context)
+            # Within the context of an invoice,
+            # this default value is for the type of the invoice, not the type of the ir.attachment.
+            # This has to be cleaned from the context before creating the attachemnt,
+            # otherwise it tries to create the ir.attachment with the type of the invoice.
+        context.pop('default_type', None)
+        attachment_id = attachment_obj.with_context(context).create(values)
         if self._context.get('_get_attachment_id'):
             return attachment_id
         return {
