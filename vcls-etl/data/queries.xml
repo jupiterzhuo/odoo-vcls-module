@@ -59,7 +59,7 @@
             <field name="key">etl_sf_opportunity_query</field>
             <field name="value">
                 SELECT 
-                Id, Name, StageName, CampaignId, LeadSource,
+                Id, Name, StageName, CampaignId, LeadSource, Repeat_Business__c,
                 Description, Client_Product_Description__c, Reasons_lost__c, Reasons_Lost_Comments__c, Significant_Opportunity_Notes__c, Probability,
                 AccountId, OwnerId, Technical_Advisor__c, Proposal_Writer__c,
                 CurrencyIsoCode, Amount, ContractId,
