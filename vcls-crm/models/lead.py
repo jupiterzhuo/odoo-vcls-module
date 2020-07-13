@@ -109,7 +109,7 @@ class Leads(models.Model):
 
     company_id = fields.Many2one(string = 'Trading Entity', default = lambda self: self.env.ref('vcls-hr.company_VCFR'))
 
-    source_id = fields.Many2one('utm.source', "Initial Lead Source")
+    source_id = fields.Many2one('utm.source', "Unused Field")
 
     user_id = fields.Many2one(
         'res.users', 
