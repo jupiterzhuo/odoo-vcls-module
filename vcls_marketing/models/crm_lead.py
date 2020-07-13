@@ -17,7 +17,7 @@ class Leads(models.Model):
 
     marketing_task_id = fields.Many2one(
         comodel_name = 'project.task',
-        string = "Opted-In Campaign",
+        string = "Lead Source Campaign",
         domain = [('task_type','=','marketing')]
     )
 
