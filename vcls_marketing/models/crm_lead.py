@@ -77,11 +77,11 @@ class Leads(models.Model):
         for lead in self.filtered(lambda l: l.marketing_project_id):
             lead.is_marketing_related = lead.marketing_project_id.is_marketing_related
     
-    @api.depends('partner_id.project_marketing_id')
+    @api.depends('partner_id.marketing_project_id')
     def _compute_initial_marketing_project(self):
         for lead in self.filtered(lambda l: l.partner_id):
-            if lead.partner_id.project_marketing_id:
-                lead.initial_marketing_project_id = lead.partner_id.project_marketing_id
+            if lead.partner_id.marketing_project_id:
+                lead.initial_marketing_project_id = lead.partner_id.marketing_project_id
     
     @api.depends('initial_marketing_project_id.is_marketing_related')
     def _compute_initial_is_marketing_related(self):
