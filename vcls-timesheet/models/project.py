@@ -74,7 +74,7 @@ class Project(models.Model):
             project.cf_budget = sum(project.task_ids.mapped('cf_budget'))
             project.pc_hours = sum(project.task_ids.mapped('pc_hours'))
             project.cf_hours = sum(project.task_ids.mapped('cf_hours'))
-            project.remaining_budget = sum(project.task_ids.mapped('remaining_budget'))
+            project.remaining_budget = project.contractual_budget - project.valued_budget
 
             project.valuation_ratio = 100.0*(project.valued_hours / project.realized_hours) if project.realized_hours else False
 
