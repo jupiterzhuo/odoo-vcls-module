@@ -154,6 +154,7 @@ class Leads(models.Model):
     @api.model
     def populate_initial_marketing_info(self):
         to_update = self.search([('partner_id.marketing_project_id','!=',False)])
+        _logger.info("Found {} leads to update!".format(len(to_update)))
         to_update._compute_initial_marketing_project()
         to_update._compute_initial_is_marketing_related()
 
