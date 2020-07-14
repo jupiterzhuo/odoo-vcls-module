@@ -253,10 +253,18 @@
 
         <menuitem
             id="menu_bd_rep_marketing_opps"
-            name="Marketing Sourced Opps"
+            name="Marketing Source Opps"
             parent="menu_bd_rep_leads"
             action="vcls_marketing.opp_marketing_source_action_dashboard"
             sequence="6"
+        />
+
+        <menuitem
+            id="menu_bd_rep_marketing_initial_opps"
+            name="Marketing Initial Source Opps"
+            parent="menu_bd_rep_leads"
+            action="vcls_marketing.opp_initial_marketing_source_action_dashboard"
+            sequence="9"
         />
 
         <menuitem

@@ -76,7 +76,7 @@
             <field name="domain">['|', ('active','=',True), ('active','=',False)]</field>
             <field name="search_view_id" ref="crm.view_crm_case_leads_filter"/>
             <field name="view_id" ref="vcls_marketing.dashboard_lead_flow"/>
-            <field name="context" eval="{'search_default_lead2opp': 1,'search_default_marketing_lead': 1}"/>
+            <field name="context" eval="{'search_default_lead2opp': 1,'search_default_marketing_source': 1}"/>
             <!-- <field name="context" eval="{'time_ranges': {'field':'create_date', 'range':'last_30_days'}}"/> -->
         </record>
 
@@ -139,13 +139,25 @@
 
         <!-- Dedicated action -->
         <record id="opp_marketing_source_action_dashboard" model="ir.actions.act_window">
-            <field name="name">Opportunities Sourced by Marketing</field>
+            <field name="name">Marketing Source Opps</field>
             <field name="res_model">crm.lead</field>
             <field name="view_mode">dashboard</field>
             <field name="domain">['|', ('active','=',True), ('active','=',False)]</field>
             <field name="search_view_id" ref="crm.view_crm_case_leads_filter"/>
             <field name="view_id" ref="vcls_marketing.dashboard_opp_marketing_source"/>
-            <field name="context" eval="{'search_default_opportunities': 1,'search_default_marketing_lead': 1}"/>
+            <field name="context" eval="{'search_default_opportunities': 1,'search_default_marketing_source': 1}"/>
+            <!-- <field name="context" eval="{'time_ranges': {'field':'create_date', 'range':'last_30_days'}}"/> -->
+        </record>
+
+        <!-- Dedicated action -->
+        <record id="opp_initial_marketing_source_action_dashboard" model="ir.actions.act_window">
+            <field name="name">Marketing Initial Source Opps</field>
+            <field name="res_model">crm.lead</field>
+            <field name="view_mode">dashboard</field>
+            <field name="domain">['|', ('active','=',True), ('active','=',False)]</field>
+            <field name="search_view_id" ref="crm.view_crm_case_leads_filter"/>
+            <field name="view_id" ref="vcls_marketing.dashboard_opp_marketing_source"/>
+            <field name="context" eval="{'search_default_opportunities': 1,'search_default_marketing_initial_source': 1}"/>
             <!-- <field name="context" eval="{'time_ranges': {'field':'create_date', 'range':'last_30_days'}}"/> -->
         </record>
 
