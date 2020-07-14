@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- We create a lead graph to represent the number of created leads per month-->
+        <record id="graph_bar_lead_per_month_count" model="ir.ui.view">
+            <field name="name">crm.lead.per.month.count</field>
+            <field name="model">crm.lead</field>
+            <field name="arch" type="xml">
+                <graph string="Created Leads per Month" type="bar" stacked="True">
+                    
+                    <field name="type" type="row"/>
+                </graph>
+            </field>
+        </record>
+
+    </data>
+</odoo>
