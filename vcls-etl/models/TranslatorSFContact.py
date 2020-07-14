@@ -15,7 +15,7 @@ class TranslatorSFContact(TranslatorSFGeneral.TranslatorSFGeneral):
         if SF_Contact['Opt_in_Campaign__c']:
             task_id = TranslatorSFGeneral.TranslatorSFGeneral.toOdooId(SF_Contact['Opt_in_Campaign__c'],"project.task","Campaign",odoo)
             if task_id:
-                project = self.env['project.task'].browse(task_id).project_id
+                project = odoo.env['project.task'].browse(task_id).project_id
                 result['marketing_task_id'] = task_id
                 result['marketing_project_id'] = project.id
             else:
