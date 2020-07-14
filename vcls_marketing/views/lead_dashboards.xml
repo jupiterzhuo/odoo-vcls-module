@@ -31,8 +31,8 @@
             <field name="arch" type="xml">
                 <dashboard>
                     <group>
-                        <view type="graph" ref="vcls_marketing.graph_bar_lead_per_month_count" string="Created Leads per Month" name="lead_per_month"/>
-                        <view type="graph" ref="vcls_marketing.graph_lead_source_distribution" string="Leads Distribution per Source" name="lead_distribution"/>
+                        <view type="graph" ref="vcls_marketing.graph_bar_lead_per_month_count" name="lead_per_month"/>
+                        <view type="graph" ref="vcls_marketing.graph_lead_source_distribution" name="lead_distribution"/>
                     </group>
                    
                     <group>
