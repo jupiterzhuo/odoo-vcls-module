@@ -37,7 +37,7 @@
             </field>
         </record>
 
-        <!-- We create a new dashboard -->
+        <!-- We create a new dashboard for the lead flow-->
         <record id="dashboard_lead_flow" model="ir.ui.view">
             <field name="name">dashboard.lead.flow</field>
             <field name="model">crm.lead</field>
@@ -75,9 +75,81 @@
             <field name="view_mode">dashboard</field>
             <field name="domain">['|', ('active','=',True), ('active','=',False)]</field>
             <field name="search_view_id" ref="crm.view_crm_case_leads_filter"/>
+            <field name="view_id" ref="vcls_marketing.dashboard_lead_flow"/>
             <field name="context" eval="{'search_default_lead2opp': 1,'search_default_marketing_lead': 1}"/>
             <!-- <field name="context" eval="{'time_ranges': {'field':'create_date', 'range':'last_30_days'}}"/> -->
         </record>
+
+        <record id="graph_bar_marketing_opp" model="ir.ui.view">
+            <field name="name">marketing.opp.prorated</field>
+            <field name="model">crm.lead</field>
+            <field name="arch" type="xml">
+                <graph string="Prorated Revenue" type="bar" stacked="True">
+                    <field name="stage_id" type="row"/>
+                    <field name="expected_revenue" type="measure"/>
+                </graph>
+            </field>
+        </record>
+
+        <record id="pivot_marketing_opp_analysis" model="ir.ui.view">
+            <field name="name">marketing.opp.analysis</field>
+            <field name="model">crm.lead</field>
+            <field name="arch" type="xml">
+                <pivot string="Marketing Sourced Opportunities" display_quantity="true">
+                    <field name="marketing_project_id" type="row"/>
+                    <field name="won_status" type="col"/>
+                    <field name="planned_revenue" type="measure"/>
+                    <field name="expected_revenue" type="measure"/>
+                </pivot>
+            </field>
+        </record>
+
+        <!-- We create a new dashboard for marketing sourced opps-->
+        <record id="dashboard_opp_marketing_source" model="ir.ui.view">
+            <field name="name">dashboard.opp.marketing.source</field>
+            <field name="model">crm.lead</field>
+            <field name="arch" type="xml">
+                <dashboard>
+                    
+                    <view type="graph" ref="vcls_marketing.graph_bar_marketing_opp" name="lead_per_month"/>
+
+                    <group>
+                        <group>
+                            <aggregate name="opportunities" string="Opportunities" field="id" domain="[('type','=','opportunity'), '|', ('active','=',True), ('active','=',False)]" group_operator="count"/> 
+                            <aggregate name="open" string="Open" field="id" domain="[('type','=','opportunity'),('active', '=', True),('stage_id.probability','not in',[0,100])]" group_operator="count"/>
+                            <aggregate name="won" string="Won" field="id" domain="['&amp;', ('active', '=', True), ('stage_id.probability', '=', 100)]" group_operator="count"/>
+                            <aggregate name="lost" string="Lost" field="id" domain="['&amp;', ('active', '=', False), ('probability', '=', 0)]" group_operator="count"/> 
+                            <formula name="won_loss_ratio" string="Won/Loss Ratio %" value="record.won / record.lost" widget="percentage"/>
+                            <aggregate name="expected_revenue_aggregate" field="planned_revenue" string="Expected Revenue" widget="integer"/>
+                            <aggregate name="prorated_revenue_aggregate" field="expected_revenue" invisible="1"/>
+                            <formula name="prorated_revenue" string="Prorated Revenue" value="record.prorated_revenue_aggregate" widget="integer"/>
+                            <formula name="deal_size" string="Average Deal Size" value="record.expected_revenue_aggregate / record.opportunities" widget="integer"/>
+                        </group>
+                        <group>
+                            <widget name="pie_chart" title="Status" attrs="{'groupby': 'won_status'}"/>
+                            <widget name="pie_chart" title="Source Distribution" attrs="{'groupby': 'marketing_project_id'}"/>
+                        </group>
+                    </group>
+
+                    <view type="pivot" ref="vcls_marketing.pivot_marketing_opp_analysis" name="pivot_marketing_opp_analysis"/>
+                    
+                </dashboard>
+            </field>
+        </record>
+
+        <!-- Dedicated action -->
+        <record id="opp_marketing_source_action_dashboard" model="ir.actions.act_window">
+            <field name="name">Opportunities Sourced by Marketing</field>
+            <field name="res_model">crm.lead</field>
+            <field name="view_mode">dashboard</field>
+            <field name="domain">['|', ('active','=',True), ('active','=',False)]</field>
+            <field name="search_view_id" ref="crm.view_crm_case_leads_filter"/>
+            <field name="view_id" ref="vcls_marketing.dashboard_opp_marketing_source"/>
+            <field name="context" eval="{'search_default_opportunities': 1,'search_default_marketing_lead': 1}"/>
+            <!-- <field name="context" eval="{'time_ranges': {'field':'create_date', 'range':'last_30_days'}}"/> -->
+        </record>
+
+        
         
     </data>
 </odoo>

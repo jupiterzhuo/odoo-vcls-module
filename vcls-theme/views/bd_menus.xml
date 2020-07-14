@@ -252,6 +252,14 @@
         />
 
         <menuitem
+            id="menu_bd_rep_marketing_opps"
+            name="Marketing Sourced Opps"
+            parent="menu_bd_rep_leads"
+            action="vcls_marketing.opp_marketing_source_action_dashboard"
+            sequence="6"
+        />
+
+        <menuitem
             id="menu_bd_rep_sales"
             name="Quotations"
             parent="menu_bd_rep_main"

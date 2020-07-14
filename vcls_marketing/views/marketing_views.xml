@@ -428,7 +428,9 @@
                     <separator/>
                     <filter string="Marketing Leads" name="marketing_lead" domain="[('is_marketing_related','=',True)]"/>
                 </xpath>
-
+                <xpath expr="//filter[@name='won']" position="before">
+                    <filter string="Open" name="open" domain="['&amp;', ('active', '=', True), ('stage_id.probability','not in',[0,100])]"/>
+                </xpath>
             </field>
         </record>
 
@@ -440,7 +442,9 @@
                 <xpath expr="//filter[@name='open_opportunities']" position="after">
                     <separator/>
                     <filter string="Marketing Opps" name="marketing_opp" domain="[('is_marketing_related','=',True)]"/>
+                    <filter string="Marketing Initial Opps" name="marketing_initial_opp" domain="[('initial_is_marketing_related','=',True)]"/>
                 </xpath>
+                
 
             </field>
         </record>
