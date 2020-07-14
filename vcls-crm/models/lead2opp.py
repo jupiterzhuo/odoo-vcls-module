@@ -31,6 +31,7 @@ class Lead2OpportunityPartner(models.TransientModel):
         self.ensure_one()
         values = {
             'team_id': self.team_id.id,
+            'lead_stage_id': self.env.ref('vcls-crm.lead_close_converted').id
         }
         # removed wizard to choose, always link now
         self.action = 'exist'
