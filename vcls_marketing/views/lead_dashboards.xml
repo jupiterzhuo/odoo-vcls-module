@@ -30,11 +30,11 @@
             <field name="model">crm.lead</field>
             <field name="arch" type="xml">
                 <dashboard>
-                    
-                    <view type="graph" ref="vcls_marketing.graph_bar_lead_per_month_count" title="Created Leads per Month"/>
-                    <view type="graph" ref="vcls_marketing.graph_lead_source_distribution" title="Leads Distribution per Source"/>
+                    <group>
+                        <view type="graph" ref="vcls_marketing.graph_bar_lead_per_month_count" string="Created Leads per Month" name="lead_per_month"/>
+                        <view type="graph" ref="vcls_marketing.graph_lead_source_distribution" string="Leads Distribution per Source" name="lead_distribution"/>
+                    </group>
                    
-                    
                     <group>
                         <group>
                                 <aggregate name="leads" string="Leads" group_operator="count_distinct" field="id" measure="__count__"/>
