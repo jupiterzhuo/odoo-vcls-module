@@ -12,6 +12,11 @@ class TranslatorSFContact(TranslatorSFGeneral.TranslatorSFGeneral):
         result = {}
         context = odoo.env.context
         #_logger.info("ETL Contact | {}".format(SF_Contact))
+        if SF_Contact['Opt_in_Campaign__c']:
+            result['marketing_task_id'] = TranslatorSFGeneral.TranslatorSFGeneral.toOdooId(SF_Contact['Opt_in_Campaign__c'],"project.task","Campaign",odoo)
+
+        if SF_Contact['LeadSource']:
+            result['marketing_project_id'] = mapOdoo.convertRef(SF_Contact['LeadSource'],odoo,'project.project',False)
 
         ### DEFAULT VALUES
         result['is_company'] = False
@@ -90,8 +95,7 @@ class TranslatorSFContact(TranslatorSFGeneral.TranslatorSFGeneral):
 
         #if SF_Contact['VCLS_Initial_Contact__c']:
             #result['vcls_contact_id'] = TranslatorSFGeneral.TranslatorSFGeneral.convertUserId(SF_Contact['VCLS_Initial_Contact__c'],odoo, SF)
-        if SF_Contact['Opt_in_Campaign__c']:
-            result['marketing_task_id'] = TranslatorSFGeneral.TranslatorSFGeneral.toOdooId(SF_Contact['Opt_in_Campaign__c'],"project.task","Campaign",odoo)
+        
         if SF_Contact['Unsubscribe_Campaign__c']:
             result['marketing_task_out_id'] = TranslatorSFGeneral.TranslatorSFGeneral.toOdooId(SF_Contact['Unsubscribe_Campaign__c'],"project.task","Campaign",odoo)
 
