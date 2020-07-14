@@ -153,7 +153,7 @@ class Leads(models.Model):
     
     @api.model
     def populate_initial_marketing_info(self):
-        to_update = self.env.search([('partner_id.marketing_project_id','!=',False)])
+        to_update = self.search([('partner_id.marketing_project_id','!=',False)])
         to_update._compute_initial_marketing_project()
         to_update._compute_initial_is_marketing_related()
 
