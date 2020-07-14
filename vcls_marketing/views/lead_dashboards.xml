@@ -51,7 +51,7 @@
                             <aggregate name="total_records" string="Total Records" group_operator="count_distinct" field="id" measure="__count__"/>
                             <aggregate name="leads" string="Leads" domain="[('type','=','lead')]" group_operator="count_distinct" field="id" measure="__count__"/>
                             <aggregate name="opportunities" string="Converted to Opps" field="id" domain="[('type','=','opportunity')]" group_operator="count"/>
-                            <formula name="opportunity_percent" string="Conversion Ratio %" value="record.opportunities / record.leads" widget="percentage"/>
+                            <formula name="opportunity_percent" string="Conversion Ratio %" value="record.opportunities / (record.leads + record.opportunities)" widget="percentage"/>
                             <aggregate name="unassigned" string="Unassigned Leads" field="id" domain="[('type','=','lead'),('user_id','=',False)]" group_operator="count"/>
                             <aggregate name="days_to_assign" string="Days to Assign" field="day_open" group_operator="avg" value_label="day(s)"/>
                             <aggregate name="days_to_convert" string="Days To Convert" group_operator="avg" field="days_to_convert"/>    
@@ -66,6 +66,17 @@
                     
                 </dashboard>
             </field>
+        </record>
+
+        <!-- Dedicated action -->
+        <record id="lead_flow_action_dashboard" model="ir.actions.act_window">
+            <field name="name">Leads Flow</field>
+            <field name="res_model">crm.lead</field>
+            <field name="view_mode">dashboard</field>
+            <field name="domain">['|', ('active','=',True), ('active','=',False)]</field>
+            <field name="search_view_id" ref="crm.view_crm_case_leads_filter"/>
+            <field name="context" eval="{'search_default_lead2opp': 1,'search_default_marketing_lead': 1}"/>
+            <!-- <field name="context" eval="{'time_ranges': {'field':'create_date', 'range':'last_30_days'}}"/> -->
         </record>
         
     </data>

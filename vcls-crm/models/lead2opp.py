@@ -1,6 +1,10 @@
 from odoo import models, fields, tools, api
 from odoo.exceptions import UserError, ValidationError, Warning
 
+
+import logging
+_logger = logging.getLogger(__name__)
+
 class Lead2OpportunityPartner(models.TransientModel):
 
     # Replace only label for name
@@ -31,8 +35,9 @@ class Lead2OpportunityPartner(models.TransientModel):
         self.ensure_one()
         values = {
             'team_id': self.team_id.id,
-            'lead_stage_id': self.env.ref('vcls-crm.lead_close_converted').id
+            'lead_stage_id': self.env.ref('vcls-crm.lead_close_converted').id,
         }
+        _logger.info("Lead Convert Values {}".format(values))
         # removed wizard to choose, always link now
         self.action = 'exist'
         lead_obj = self.env['crm.lead'].browse(self._context.get('active_ids', []))
