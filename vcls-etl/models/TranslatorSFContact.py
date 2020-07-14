@@ -15,7 +15,7 @@ class TranslatorSFContact(TranslatorSFGeneral.TranslatorSFGeneral):
         if SF_Contact['Opt_in_Campaign__c']:
             result['marketing_task_id'] = TranslatorSFGeneral.TranslatorSFGeneral.toOdooId(SF_Contact['Opt_in_Campaign__c'],"project.task","Campaign",odoo)
 
-        if SF_Contact['LeadSource']:
+        if SF_Contact['LeadSource'] != '':
             result['marketing_project_id'] = mapOdoo.convertRef(SF_Contact['LeadSource'],odoo,'project.project',False)
 
         ### DEFAULT VALUES
