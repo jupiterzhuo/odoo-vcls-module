@@ -8,8 +8,18 @@
             <field name="model">crm.lead</field>
             <field name="arch" type="xml">
                 <graph string="Created Leads per Month" type="bar" stacked="True">
-                    <field name="type" type="row"/>
-                    <field name="create_date" type="col" interval="month"/>
+                    <field name="create_date" type="row" interval="month"/>
+                </graph>
+            </field>
+        </record>
+
+        <!-- We create a lead graph to represent the number of created leads per month-->
+        <record id="graph_lead_source_distribution" model="ir.ui.view">
+            <field name="name">crm.lead.source.distribution</field>
+            <field name="model">crm.lead</field>
+            <field name="arch" type="xml">
+                <graph string="Leads per Source" type="pie">
+                    <field name="marketing_project_id" type="row"/>
                 </graph>
             </field>
         </record>
@@ -20,7 +30,11 @@
             <field name="model">crm.lead</field>
             <field name="arch" type="xml">
                 <dashboard>
-                    <view type="graph" ref="vcls_marketing.graph_bar_lead_per_month_count"/>
+                    <group>
+                        <view type="graph" ref="vcls_marketing.graph_bar_lead_per_month_count" title="Created Leads per Month"/>
+                        <view type="graph" ref="vcls_marketing.graph_lead_source_distribution" title="Leads Distribution per Source"/>
+                    </group>
+                    
                     <group>
                         <group>
                                 <aggregate name="leads" string="Leads" group_operator="count_distinct" field="id" measure="__count__"/>
@@ -32,10 +46,7 @@
                                 <aggregate name="day_close" string="Days to Close" field="day_close" group_operator="avg" value_label="day(s)"/>
                                 <aggregate name="opportunities" string="Opportunities" field="id" domain="[('type','=','opportunity')]" group_operator="count" invisible="1"/>
                         </group>
-                        <group>
-                            <widget name="pie_chart" title="Sales Teams" attrs="{'groupby': 'team_id'}"/>
-                            <widget name="pie_chart" title="Medium" attrs="{'groupby': 'medium_id'}"/>
-                        </group>
+                        
                     </group>
                     
                 </dashboard>
