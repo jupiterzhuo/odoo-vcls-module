@@ -11,7 +11,7 @@
     'website': "http://www.voisinconsulting.com",
     'category': 'Uncategorized',
 
-    'version': '0.1.32',
+    'version': '0.1.33',
   
     'depends': [
         'crm',
@@ -32,5 +32,6 @@
         'views/partner_views.xml',
         'views/marketing_campaign_views.xml',
         'views/dashboard_views.xml',
+        'views/lead_dashboards.xml',
     ],
 }

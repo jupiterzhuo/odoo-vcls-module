@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+
+        <!-- We create a lead graph to represent the number of created leads per month-->
+        <record id="graph_bar_lead_per_month_count" model="ir.ui.view">
+            <field name="name">crm.lead.per.month.count</field>
+            <field name="model">crm.lead</field>
+            <field name="arch" type="xml">
+                <graph string="Created Leads per Month" type="bar" stacked="True">
+                    <field name="type" type="row"/>
+                    <field name="create_date" type="col" interval="month"/>
+                </graph>
+            </field>
+        </record>
+
+        <!-- We create a new dashboard -->
+        <record id="dashboard_lead_flow" model="ir.ui.view">
+            <field name="name">dashboard.lead.flow</field>
+            <field name="model">crm.lead</field>
+            <field name="arch" type="xml">
+                <dashboard>
+                    <view type="graph" ref="vcls_marketing.graph_bar_lead_per_month_count"/>
+                    <group>
+                        <group>
+                                <aggregate name="leads" string="Leads" group_operator="count_distinct" field="id" measure="__count__"/>
+                                <aggregate name="days_to_convert" string="Days To Opportunity" group_operator="avg" field="days_to_convert"/>
+                                <aggregate name="days_to_assign" string="Days to Assign" field="day_open" group_operator="avg" value_label="day(s)"/>
+                                <formula name="opportunity_percent" string="% Opportunities" value="record.opportunities / record.leads" widget="percentage"/>
+                                <aggregate name="planned_revenue" string="Expected Revenue" field="planned_revenue" group_operator="sum" widget="monetary"/>
+                                <aggregate name="expected_revenue" string="Prorated Revenue" field="expected_revenue" group_operator="sum" widget="monetary"/>
+                                <aggregate name="day_close" string="Days to Close" field="day_close" group_operator="avg" value_label="day(s)"/>
+                                <aggregate name="opportunities" string="Opportunities" field="id" domain="[('type','=','opportunity')]" group_operator="count" invisible="1"/>
+                        </group>
+                        <group>
+                            <widget name="pie_chart" title="Sales Teams" attrs="{'groupby': 'team_id'}"/>
+                            <widget name="pie_chart" title="Medium" attrs="{'groupby': 'medium_id'}"/>
+                        </group>
+                    </group>
+                    
+                </dashboard>
+            </field>
+        </record>
+        
+
+    </data>
+</odoo>

@@ -69,7 +69,6 @@
         'views/purchase_views.xml',
         'views/lead2opp.xml',
         'views/core_team_views.xml',
-        'views/lead_dashboards.xml',
         'wizard/lead_quotation_views.xml',
         'reports/report_order.xml',
         #'views/sale_order_template_views.xml',
