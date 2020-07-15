@@ -21,6 +21,9 @@
                     <attribute name="domain">[('sale_ok','=',True), ('vcls_type', '!=', 'other')]</attribute>
                     <attribute name="options">{'no_create': True, "no_open": True}</attribute>
                 </xpath>
+                <xpath expr="//field[@name='payment_term_id']" position="before">
+                    <field name='invoice_template'/>
+                </xpath>
             </field>
         </record>
 
@@ -92,7 +95,7 @@
                     <button string="GENERATE DRAFT INVOICE" type="object" class="btn-primary" name="action_generate_draft_invoice" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
                 </xpath>
                 <xpath expr="//button[@name='action_invoice_open']" position="before">
-                    <button string="GENERATE ACTIVITY REPORT" type="object" class="btn-primary" name="action_generate_activity_report"/>
+                    <button string="GENERATE ACTIVITY REPORT" type="object" class="btn-primary" name="action_generate_activity_report" attrs="{'invisible': [('type','=', 'out_refund')]}"/>
                 </xpath>
                 <xpath expr="//button[@name='action_invoice_open']" position="before">
                     <button string="Ready for Approval" type="object" class="btn-primary" name="action_ready_for_approval" attrs="{'invisible': [('ready_for_approval', '=', True)]}"/>
@@ -172,6 +175,29 @@
                     <field name="activity_ids"/>
                     <field name="activity_state"/>
                 </tree>
+            </field>
+        </record>
+
+        <record id="account.action_invoice_out_refund" model="ir.actions.act_window">
+            <field name="name">Credit Notes</field>
+            <field name="res_model">account.invoice</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field eval="False" name="view_id"/>
+            <field name="domain">[('type','=','out_refund')]</field>
+            <field name="context">{'default_type': 'out_refund', 'type': 'out_refund', 'journal_type': 'sale'}</field>
+            <field name="search_view_id" ref="account.view_account_invoice_filter"/>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('vcls-invoicing.ia_invoices_view_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('vcls-invoicing.view_invoice_form')}),
+            ]"/>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                Create a credit note
+              </p><p>
+                Note that the easiest way to create a credit note is to do it directly
+                from the customer invoice.
+              </p>
             </field>
         </record>
 
