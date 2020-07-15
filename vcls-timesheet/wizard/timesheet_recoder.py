@@ -7,7 +7,7 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-class LeadQuotation(models.TransientModel):
+class LeadQuotation(models.Model):
     _name = 'tool.timesheet.recode'
     _description = 'Timesheet Recoder'
 

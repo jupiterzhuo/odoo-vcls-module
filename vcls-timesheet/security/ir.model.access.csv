@@ -9,3 +9,5 @@ access_time_category_portal,access_time_category_portal,vcls-timesheet.model_pro
 
 access_ts_report_user,access_ts_report_user,vcls-timesheet.model_timesheet_report,project.group_project_user,1,0,1,0
 access_ts_report_manager,access_ts_report_manager,vcls-timesheet.model_timesheet_report,project.group_project_manager,1,1,1,1
+
+access_ts_recoder_pc, access_ts_recoder_pc, vcls-timesheet.model_tool_timesheet_recode,vcls_security.group_project_controller,1,1,1,0
