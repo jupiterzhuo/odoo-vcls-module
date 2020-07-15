@@ -24,7 +24,6 @@ class AccountInvoiceRefund(models.TransientModel):
     def compute_refund(self, mode='refund'):
         to_process = self.env['account.invoice'].browse(self._context.get('active_ids',False))
         ret = super().compute_refund(mode)
-        to_process.mapped('refund_invoice_ids').write({'period_start':to_process.period_start,'timesheet_limit_date':to_process.timesheet_limit_date})
         if mode in ('cancel', 'modify'):
             #if cancel or modify, we release the potential timesheets and add the invoice ref to the so_line for a proper invoiced_qty calculation
             sale_lines = self.env['sale.order.line']
@@ -34,6 +33,7 @@ class AccountInvoiceRefund(models.TransientModel):
                 rinv = self.env['account.invoice'].search([('type','=','out_refund'),('origin','=',inv.number)],limit=1)
                 if rinv:
                     _logger.info("Found Credit note {} for invoice {}".format(rinv.number,inv.number))
+                    rinv.write({'period_start':inv.period_start,'timesheet_limit_date':inv.timesheet_limit_date})
                     for inv_line in inv.invoice_line_ids.filtered(lambda l: l.sale_line_ids and l.product_id):
                         rinv_line = rinv.invoice_line_ids.filtered(lambda r: r.product_id == inv_line.product_id)
                         if rinv_line:
