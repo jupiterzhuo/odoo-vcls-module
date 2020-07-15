@@ -83,7 +83,7 @@ class LeadQuotation(models.Model):
 
     target_task_id = fields.Many2one(
         comodel_name='project.task',
-        string= 'Source Task',
+        string= 'Target Task',
     )
 
     target_rate_id = fields.Many2one(

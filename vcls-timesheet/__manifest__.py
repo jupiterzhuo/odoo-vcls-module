@@ -16,7 +16,7 @@
     # for the full list
     'category': 'Uncategorized',
 
-    'version': '0.8.46',
+    'version': '0.8.47',
   
     # any module necessary for this one to work correctly
     'depends': [
