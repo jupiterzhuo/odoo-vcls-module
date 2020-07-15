@@ -16,13 +16,15 @@
                         <group string="Source">
                             <field name="source_project_id" attrs="{'required':[('mode','in',['replace_rate','update_status'])]}" options="{'no_create': True, 'no_create_edit' : True}"/>
                             <field name="source_rate_id" attrs="{'required':[('mode','in',['replace_rate'])],'invisible':[('mode','in',['update_status'])]}" domain="[('id','in',rate_ids)]" options="{'no_create': True, 'no_create_edit' : True}"/>
-                            <field name="source_task_id" options="{'no_create': True, 'no_create_edit' : True}"/>
+                            <field name="source_task_id" options="{'no_create': True, 'no_create_edit' : True}" domain="[('project_id','=',source_project_id)]"/>
                             <field name="source_employee_id" options="{'no_create': True, 'no_create_edit' : True}"/>
                             <field name="date_range_start"/>
                             <field name="date_range_end"/> 
                             <field name="source_status" attrs="{'invisible':[('mode','in',['replace_rate'])],'required':[('mode','in',['update_status'])]}"/>
                         </group>
                         <group string="Target">
+                            <field name="target_project_id" attrs="{'invisible':[('mode','in',['replace_rate','update_status'])],'required':[('mode','in',['move'])]}"/>
+                            <field name="target_task_id" attrs="{'invisible':[('mode','in',['replace_rate','update_status'])],'required':[('mode','in',['move'])]}" domain="[('project_id','=',target_project_id)]"/>
                             <field name="target_rate_id" attrs="{'invisible':[('mode','in',['update_status'])],'required':[('mode','in',['replace_rate'])]}" domain="[('id','in',rate_ids)]" options="{'no_create': True, 'no_create_edit' : True}"/>
                             <field name="target_status" attrs="{'invisible':[('mode','in',['replace_rate'])],'required':[('mode','in',['update_status'])]}"/>
                         </group>

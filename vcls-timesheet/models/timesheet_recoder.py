@@ -13,12 +13,18 @@ class LeadQuotation(models.Model):
 
     mode = fields.Selection([
         ('replace_rate', 'Replace Rate'),
-        ('update_status', 'Update Status')
+        ('update_status', 'Update Status'),
+        ('move','Move Timesheets'),
     ], string='Recompute Mode', required=True, default='replace_rate',
     help="""
     Replace Rate:
     - Update all non-invoiced timesheets from Source Rate to Target Rate, single employee if documented
     - Update the mapping table accordingly
+    Update Status:
+    - Force the new status (except invoiced) of all the related timesheets
+    Move Timesheets:
+    - Verify if a mapping exists in the target project. If not, a mapping is created for the relevant employee.
+    - Move the timesheets to the new tasks.
     """
     )
 
@@ -70,6 +76,16 @@ class LeadQuotation(models.Model):
 
 
     ### TARGET FIELDS
+    target_project_id = fields.Many2one(
+        comodel_name='project.project',
+        string= 'Target Project',
+    )
+
+    target_task_id = fields.Many2one(
+        comodel_name='project.task',
+        string= 'Source Task',
+    )
+
     target_rate_id = fields.Many2one(
         comodel_name='sale.order.line',
         string= 'Target Rate',
@@ -160,6 +176,13 @@ class LeadQuotation(models.Model):
 
         domain = self.get_ts_source_domain(projects)
         timesheets = self.env['account.analytic.line'].search(domain)
+
+        if self.mode == 'move':
+            if timesheets:
+                #we need to loop the employees to process them by batch
+                for employee in timesheets.mapped('employee_id'):
+                    pass
+
 
         if self.mode == 'update_status':
             if timesheets:
