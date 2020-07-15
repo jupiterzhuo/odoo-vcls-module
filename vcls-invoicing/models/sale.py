@@ -271,7 +271,7 @@ class SaleOrder(models.Model):
             for invoice in invoice_ids:
                 invoice._message_subscribe(partner_ids=orders_follower_ids.ids)
         return invoices
-    
+
     @api.multi
     def action_view_invoice(self):
         invoices = self.mapped('invoice_ids')
@@ -288,3 +288,37 @@ class SaleOrder(models.Model):
         else:
             action = {'type': 'ir.actions.act_window_close'}
         return action
+
+# from odoo.addons. import SaleOrderLine as SaleOrderLineWithoutEntreprise
+
+class SaleOrderLine(models.Model):
+    _inherit = 'sale.order.line'
+
+    def _prepare_invoice_line(self, qty):
+        """
+        Override to add subscription-specific behaviours.
+
+        Display the invoicing period in the invoice line description, link the invoice line to the
+        correct subscription and to the subscription's analytic account if present.
+        """
+        res = super(SaleOrderLine, self)._prepare_invoice_line(qty)
+        temp_name = res['name'].split('\nInvoicing period: ')[0]
+        res.update(name=temp_name)
+        if self.subscription_id:
+            res.update(subscription_id=self.subscription_id.id)
+            # In VCLS we invoice the previous period
+            if self.order_id.subscription_management != 'upsell':
+                periods = {'daily': 'days', 'weekly': 'weeks', 'monthly': 'months', 'yearly': 'years'}
+                next_date = fields.Date.from_string(self.subscription_id.recurring_next_date) - relativedelta(**{periods[self.subscription_id.recurring_rule_type]: self.subscription_id.recurring_interval}) + relativedelta(months=+1)
+                previous_date = next_date - relativedelta(**{periods[self.subscription_id.recurring_rule_type]: self.subscription_id.recurring_interval})
+                lang = self.order_id.partner_invoice_id.lang
+                format_date = self.env['ir.qweb.field.date'].with_context(lang=lang).value_to_html
+
+                # Ugly workaround to display the description in the correct language
+                if lang:
+                    self = self.with_context(lang=lang)
+                period_msg = _("Invoicing period: %s - %s") % (format_date(fields.Date.to_string(previous_date), {}), format_date(fields.Date.to_string(next_date - relativedelta(days=1)), {}))
+                res.update(name=res['name'] + '\n' + period_msg)
+            if self.subscription_id.analytic_account_id:
+                res['account_analytic_id'] = self.subscription_id.analytic_account_id.id
+        return res
