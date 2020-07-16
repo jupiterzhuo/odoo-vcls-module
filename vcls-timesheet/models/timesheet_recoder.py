@@ -179,9 +179,22 @@ class LeadQuotation(models.Model):
 
         if self.mode == 'move':
             if timesheets:
-                #we need to loop the employees to process them by batch
-                for employee in timesheets.mapped('employee_id'):
-                    pass
+                if self.source_project_id == self.target_project_id:
+                    # this is the simple case, no need to check mapping
+                    if mode == 'real':
+                        timesheets.write({
+                            'task_id':self.target_task_id.id,
+                        })
+                    _logger.info("INFO | {} timesheets moved within the same project.".format(len(timesheets)))
+
+                #we need to loop the employees to process them by batch, because we need to verify the mapping
+                else:
+                    for employee in timesheets.mapped('employee_id'):
+                        #we check if we find a mapping line for this employee
+                        map_found = self.target_project_id.sale_line_employee_ids.filtere(lambda p: p.employee_id == employee)
+                        if not map_found:
+                            _logger.info("No map found for employee {} in {}".format(employee.name,self.target_project_id.name))
+                        #self.env['project.sale.line.employee.map']
 
 
         if self.mode == 'update_status':
