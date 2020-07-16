@@ -35,7 +35,7 @@
                     </group>
                     <footer>
                         <button string="Test"
-                            name="run_test" type="object" class="btn-primary"/>
+                            name="run_test" type="object" class="btn-primary" attrs="{'invisible':[('run_date','!=',False)]}"/>
                         
                         <button string="Run"
                             name="run_real" type="object" class="btn-secondary o_mail_send" attrs="{'invisible':[('run_date','!=',False)]}"/>
