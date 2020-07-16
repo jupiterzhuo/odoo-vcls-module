@@ -179,7 +179,14 @@ class LeadQuotation(models.Model):
 
         if self.mode == 'move':
             if timesheets:
-                if self.source_project_id == self.target_project_id:
+                if mode == 'real':
+                        timesheets.write({
+                            'paroject_id':self.target_project_id.id,
+                            'task_id':self.target_task_id.id,
+                        })
+                _logger.info("INFO | {} timesheets moved within the same project.".format(len(timesheets)))
+
+                """if self.source_project_id == self.target_project_id:
                     # this is the simple case, no need to check mapping
                     if mode == 'real':
                         timesheets.write({
@@ -194,7 +201,7 @@ class LeadQuotation(models.Model):
                         map_found = self.target_project_id.sale_line_employee_ids.filtere(lambda p: p.employee_id == employee)
                         if not map_found:
                             _logger.info("No map found for employee {} in {}".format(employee.name,self.target_project_id.name))
-                        #self.env['project.sale.line.employee.map']
+                        #self.env['project.sale.line.employee.map']"""
 
 
         if self.mode == 'update_status':
