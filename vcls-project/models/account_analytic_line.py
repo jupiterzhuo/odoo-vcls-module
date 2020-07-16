@@ -30,7 +30,6 @@ class AccountAnalyticLine(models.Model):
 
     @api.model
     def _update_project_soline_mapping(self, vals):
-        #_logger.info("_update_project_soline_mapping {} ".format(vals))
         employee = None
         if 'employee_id' in vals:
             employee = self.env['hr.employee'].browse(vals['employee_id'])
@@ -46,7 +45,7 @@ class AccountAnalyticLine(models.Model):
                 # products at all -> don't enforce seniority on employee
                 # use case : projects not related to a SO or totally fixed
                 # price projects
-                return
+                return False
             if not employee.seniority_level_id:
                 raise UserError(
                     _('''Employee with no seniority level can not timesheet
@@ -60,7 +59,7 @@ class AccountAnalyticLine(models.Model):
             )
             if employee_mapped_line:
                 # already mapped -> nothing to do
-                return
+                return employee_mapped_line[0].sale_line_id
 
             so_mapped_seniority = so.order_line.filtered(
                 lambda r: r.product_id.seniority_level_id != False
@@ -104,3 +103,7 @@ class AccountAnalyticLine(models.Model):
                     ]
                 }
             )
+            return so_line
+            
+        else:
+            return False
