@@ -279,10 +279,9 @@ class AnalyticLine(models.Model):
                 return task.sale_line_id
         return self.env['sale.order.line']
     
-    """@api.model
+    @api.model
     def _timesheet_preprocess(self, vals):
        
-
         #if we have task_id, we enforce project_id and main_project_id and related accounts
         if vals.get('task_id'):
             task = self.env['project.task'].sudo().browse(vals['task_id'])
@@ -291,14 +290,17 @@ class AnalyticLine(models.Model):
                 'main_project_id': task.project_id.parent_id.id or task.project_id.id,
                 'account_id': task.project_id.analytic_account_id.id,
                 'company_id': task.project_id.analytic_account_id.company_id.id,
+                'so_line_unit_price': 0.0, #we force it to zero to trigger the recompute in post process
             })
         
-        #we round the unit amounts to 15mins
-        for field in ['unit_amount','unit_amount_rounded']:
-            if vals.get(field):
-                if vals[field] % 0.25 != 0:
-                    old = vals[field]
-                    vals[field] = math.ceil(old * 4) / 4
+        if vals.get('project_id') or self.mapped('project_id'): #if we have a project ID, we are in the context of a timesheet
+            #we round values if modified
+            for field in ['unit_amount','unit_amount_rounded']:
+                if vals.get(field):
+                    if vals[field] % 0.25 != 0:
+                        old = vals[field]
+                        vals[field] = math.ceil(old * 4) / 4
+
         
         vals = super(AnalyticLine, self)._timesheet_preprocess(vals)
    
@@ -312,22 +314,33 @@ class AnalyticLine(models.Model):
         #        {'field_name': field_value, ...}
         #    :return: a dictionary mapping each record id to its corresponding
         #        dictionnary values to write (may be empty).
-    """
+        """
         result = super(AnalyticLine, self)._timesheet_postprocess_values(values)
         sudo_self = self.sudo()  # this creates only one env for all operation that required sudo()
-        # (re)compute the amount (depending on unit_amount, employee_id for the cost, and account_id for currency)
-        if any([field_name in values for field_name in ['unit_amount', 'employee_id', 'account_id']]):
-            for timesheet in sudo_self:
-                cost = timesheet.employee_id.timesheet_cost or 0.0
-                amount = -timesheet.unit_amount * cost
-                amount_converted = timesheet.employee_id.currency_id._convert(
-                    amount, timesheet.account_id.currency_id, self.env.user.company_id, timesheet.date)
-                result[timesheet.id].update({
-                    'amount': amount_converted,
-                })
-        return result"""
 
-    @api.model
+        #we check if the timesheet is 'At Risk'
+        if any([field_name in values for field_name in ['employee_id','project_id']]):
+            for timesheet in sudo_self:
+                result[timesheet.id].update({
+                    'at_risk': sudo_self._get_at_risk_values(values.get('project_id',timesheet.project_id.id),values.get('employee_id',timesheet.employee_id.id)),
+                })
+        
+        #below fields need a kpi recompute of the related task
+        if any([field_name in values for field_name in ['task_id','unit_amount','unit_amount_rounded','stage_id']]):
+            tasks = sudo_self.env['project.task']
+            if values.get('task_id'):
+                tasks = sudo_self.env['project.task'].browse(values['task_id'])
+            else:
+                tasks |= sudo_self.mapped('task_id')
+
+            tasks.write({'recompute_kpi':True})
+        
+        #TODO travel time category to take in account
+
+        
+        return result
+
+    """@api.model
     def create(self, vals):
         if not self._context.get('migration_mode',False):
             if vals.get('employee_id', False) and vals.get('project_id', False):
@@ -357,7 +370,7 @@ class AnalyticLine(models.Model):
         if line.task_id:
             line.task_id.recompute_kpi=True
 
-        return line
+        return line"""
 
     @api.multi
     def write(self, vals):
