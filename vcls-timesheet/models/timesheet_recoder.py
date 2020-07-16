@@ -184,7 +184,7 @@ class LeadQuotation(models.Model):
                             'paroject_id':self.target_project_id.id,
                             'task_id':self.target_task_id.id,
                         })
-                _logger.info("INFO | {} timesheets moved within the same project.".format(len(timesheets)))
+                info += "INFO | {} timesheets moved.".format(len(timesheets))
 
                 """if self.source_project_id == self.target_project_id:
                     # this is the simple case, no need to check mapping
