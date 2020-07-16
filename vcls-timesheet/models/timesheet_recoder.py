@@ -179,12 +179,14 @@ class LeadQuotation(models.Model):
 
         if self.mode == 'move':
             if timesheets:
-                if mode == 'real':
-                        timesheets.write({
-                            'paroject_id':self.target_project_id.id,
-                            'task_id':self.target_task_id.id,
-                        })
-                info += "INFO | {} timesheets moved.".format(len(timesheets))
+                for employee in timesheets.mapped('employee_id'):
+                    batch = timesheets.filtered(lambda p: p.employee_id == employee)
+                    if mode == 'real':
+                            batch.write({
+                                'paroject_id':self.target_project_id.id,
+                                'task_id':self.target_task_id.id,
+                            })
+                    info += "INFO | {} timesheets moved for {}.".format(len(batch),employee.name)
 
                 """if self.source_project_id == self.target_project_id:
                     # this is the simple case, no need to check mapping
