@@ -34,6 +34,7 @@ class AccountInvoiceRefund(models.TransientModel):
                 rinv.write({'period_start':inv.period_start,'timesheet_limit_date':inv.timesheet_limit_date})
                 if rinv:
                     _logger.info("Found Credit note {} for invoice {}".format(rinv.number,inv.number))
+                    rinv.write({'period_start':inv.period_start,'timesheet_limit_date':inv.timesheet_limit_date})
                     for inv_line in inv.invoice_line_ids.filtered(lambda l: l.sale_line_ids and l.product_id):
                         rinv_line = rinv.invoice_line_ids.filtered(lambda r: r.product_id == inv_line.product_id)
                         if rinv_line:

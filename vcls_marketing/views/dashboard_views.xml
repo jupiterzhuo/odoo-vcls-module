@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>   
+
+        <record id="crm_lead_dashboard_view" model="ir.ui.view">
+            <field name="name">crm_lead_dashboard_view</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm_enterprise.crm_lead_dashboard_view"/>
+
+            <field name="arch" type="xml">
+                <xpath expr="//group/group[2]" position="replace">
+                    
+                    <group>
+                        <widget name="pie_chart" title="Marketing Source" attrs="{'groupby': 'is_marketing_related'}"/>
+                        <widget name="pie_chart" title="Detailed Source" attrs="{'groupby': 'marketing_project_id'}"/>
+                    </group>
+                    
+                </xpath>
+
+            </field>
+        </record>  
+    
+    </data>
+</odoo>

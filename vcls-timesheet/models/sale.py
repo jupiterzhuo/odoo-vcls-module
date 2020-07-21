@@ -73,7 +73,7 @@ class SaleOrder(models.Model):
     @api.multi
     @api.depends('timesheet_limit_date')
     def _compute_timesheet_ids(self):
-        #_logger.info("TS PATH | vcls-timesheet | sale.order | _compute_timesheet_ids")
+        _logger.info("TS PATH | vcls-timesheet | sale.order | _compute_timesheet_ids")
         # this method copy of base method, it injects date in domain
         for order in self:
             if order.analytic_account_id:

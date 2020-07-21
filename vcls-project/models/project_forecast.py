@@ -107,11 +107,6 @@ class ProjectForecast(models.Model):
     def create(self, vals):
         
         if vals.get('project_id',False) and vals.get('employee_id',False):
-            """#if we create a forecast, we update the project mapping accordingly
-            self.env['account.analytic.line']._update_project_soline_mapping({
-                        'employee_id':vals['employee_id'],
-                        'project_id':vals['project_id'],
-                    })"""
             
             if not vals.get('rate_id',False):
                 #if the rate_id is not provided we look for the related employee in the mapping table
