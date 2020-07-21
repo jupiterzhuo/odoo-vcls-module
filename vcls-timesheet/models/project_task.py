@@ -85,6 +85,8 @@ class ProjectTask(models.Model):
         ret = super().write(vals)
         for rec in self:
             if rec.stage_allow_ts:
+                if not rec.sale_order_id:
+                    continue
                 if rec.sale_order_id.state not in ['sale','done'] :
                     risk_hold = self.env.ref('vcls-crm.risk_auto_WAR')
                     resource = f'sale.order,{rec.sale_order_id.id}'

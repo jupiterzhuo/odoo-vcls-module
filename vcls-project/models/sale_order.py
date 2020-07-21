@@ -38,7 +38,7 @@ class SaleOrder(models.Model):
     
     def project_status_update(self):
         for rec in self:
-            if rec.state in ['done','sale']:
+            if rec.state in ['done','sale'] and rec.project_id:
                 rec.project_id.project_status = 'ongoing'
                 rec.project_id.child_id._onchange_project_status()
 
