@@ -185,6 +185,7 @@ class LeadQuotation(models.Model):
                             batch.write({
                                 'project_id':self.target_project_id.id,
                                 'task_id':self.target_task_id.id,
+                                'stage_id':'lc_review',
                             })
                     info += "INFO | {} timesheets moved for {}.\n".format(len(batch),employee.name)
 
