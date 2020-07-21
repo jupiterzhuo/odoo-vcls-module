@@ -119,7 +119,7 @@
                             <aggregate name="open" string="Open" field="id" domain="[('type','=','opportunity'),('active', '=', True),('stage_id.probability','not in',[0,100])]" group_operator="count"/>
                             <aggregate name="won" string="Won" field="id" domain="['&amp;', ('active', '=', True), ('stage_id.probability', '=', 100)]" group_operator="count"/>
                             <aggregate name="lost" string="Lost" field="id" domain="['&amp;', ('active', '=', False), ('probability', '=', 0)]" group_operator="count"/> 
-                            <formula name="won_loss_ratio" string="Won/Loss Ratio %" value="record.won / record.lost" widget="percentage"/>
+                            <formula name="won_loss_ratio" string="Won/Loss Ratio %" value="record.won / (record.won + record.lost)" widget="percentage"/>
                             <aggregate name="expected_revenue_aggregate" field="planned_revenue" string="Expected Revenue" widget="integer"/>
                             <aggregate name="prorated_revenue_aggregate" field="expected_revenue" invisible="1"/>
                             <formula name="prorated_revenue" string="Prorated Revenue" value="record.prorated_revenue_aggregate" widget="integer"/>
