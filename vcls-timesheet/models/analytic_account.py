@@ -249,8 +249,153 @@ class AnalyticLine(models.Model):
             if employee_id[0] not in project_employee:
                 return True
         return False
-
+    
+    #we override this to force the creation of a map line when not found rather than taking the one of the task
     @api.model
+    def _timesheet_determine_sale_line(self, task, employee):
+        """ Deduce the SO line associated to the timesheet line:
+            1/ timesheet on task rate: the so line will be the one from the task
+            2/ timesheet on employee rate task: find the SO line in the map of the project (even for subtask), or fallback on the SO line of the task, or fallback
+                on the one on the project
+            NOTE: this have to be consistent with `_compute_billable_type` on project.task.
+        """
+        if task.billable_type != 'no':
+            if task.billable_type == 'employee_rate':
+                map_entry = self.env['project.sale.line.employee.map'].search([('project_id', '=', task.project_id.id), ('employee_id', '=', employee.id)])
+                if map_entry:
+                    return map_entry.sale_line_id
+                #VCLS custom
+                else:
+                    so_line = self._update_project_soline_mapping({
+                        'employee_id':employee.id,
+                        'project_id':task.project_id.id,
+                    })
+                    if so_line:
+                        return so_line
+                if task.sale_line_id:
+                    return task.sale_line_id
+                return task.project_id.sale_line_id
+            elif task.billable_type == 'task_rate':
+                return task.sale_line_id
+        return self.env['sale.order.line']
+    
+    @api.model
+    def _timesheet_preprocess(self, vals):
+       
+        #_logger.info("TS PRE pre | {}".format(vals))
+        #if we have task_id, we enforce project_id and main_project_id and related accounts
+        if vals.get('task_id'):
+            task = self.env['project.task'].sudo().browse(vals['task_id'])
+            vals.update({
+                'project_id': task.project_id.id,
+                'main_project_id': task.project_id.parent_id.id or task.project_id.id,
+                'account_id': task.project_id.analytic_account_id.id,
+                'company_id': task.project_id.analytic_account_id.company_id.id,
+                'so_line_unit_price': 0.0, #we force it to zero to trigger the recompute in post process
+            })
+        
+        if vals.get('project_id') or self.mapped('project_id'): #if we have a project ID, we are in the context of a timesheet
+            #we round values if modified
+            for field in ['unit_amount','unit_amount_rounded']:
+                if vals.get(field):
+                    if vals[field] % 0.25 != 0:
+                        old = vals[field]
+                        vals[field] = math.ceil(old * 4) / 4
+            
+            # when attached to an invoice, a TS turns in 'invoiced'
+            if vals.get('timesheet_invoice_id'):
+                vals['stage_id'] = 'invoiced'
+
+        #_logger.info("TS PRE post | {}".format(vals))
+        vals = super(AnalyticLine, self)._timesheet_preprocess(vals)
+   
+        return vals
+    
+    @api.multi
+    def _timesheet_postprocess_values(self, values):
+        """
+        # Get the addionnal values to write on record
+        #    :param dict values: values for the model's fields, as a dictionary::
+        #        {'field_name': field_value, ...}
+        #    :return: a dictionary mapping each record id to its corresponding
+        #        dictionnary values to write (may be empty).
+        """
+        result = super(AnalyticLine, self)._timesheet_postprocess_values(values)
+        sudo_self = self.sudo()  # this creates only one env for all operation that required sudo()
+        orders = self.env['sale.order'] 
+
+        #_logger.info("TS POST pre | {}".format(values))
+
+        #we check if the timesheet is 'At Risk'
+        if any([field_name in values for field_name in ['employee_id','project_id']]):
+            #_logger.info("TS POST | at risk test")
+            for timesheet in sudo_self:
+                result[timesheet.id].update({
+                    'at_risk': sudo_self._get_at_risk_values(values.get('project_id',timesheet.project_id.id),values.get('employee_id',timesheet.employee_id.id)),
+                })
+        
+        #below fields need a kpi recompute of the related task
+        if any([field_name in values for field_name in ['task_id','unit_amount','unit_amount_rounded','stage_id']]):
+            tasks = sudo_self.env['project.task']
+            if values.get('task_id'):
+                tasks = sudo_self.env['project.task'].browse(values['task_id'])
+            else:
+                tasks |= sudo_self.mapped('task_id')
+            #_logger.info("TS POST | task recompute {}".format(tasks.mapped('name')))
+            tasks.write({'recompute_kpi':True})
+        
+        #if we move a ts to draft, it's automatically set to lc_review if already approved
+        if values.get('stage_id','/') == 'draft':
+            for timesheet in sudo_self.filtered(lambda t: t.validated):
+                #_logger.info("TS POST | direct lc_rev {}".format(timesheet.name))
+                result[timesheet.id].update({
+                    'stage_id': 'lc_review',
+                })
+        
+        #if some timesheets have no so_line_unit_price
+        for timesheet in sudo_self.filtered(lambda p: p.so_line_unit_price == 0.0 and p.so_line):
+            if timesheet.task_id.sale_line_id != timesheet.so_line:  # if we map to a rate based product
+                #we check if the line unit is hours or days to ensure the hourly price
+                if timesheet.so_line.product_uom == self.env.ref('uom.product_uom_day'): #if we are in daily
+                    price = round((timesheet.so_line.price_unit/8.0),2)
+                else:
+                    price = timesheet.so_line.price_unit
+                rate = timesheet.so_line.product_id.product_tmpl_id
+
+                up_vals = {
+                    'so_line_unit_price':price,
+                    'rate_id': rate.id,
+                }
+
+                result[timesheet.id].update(up_vals)
+
+                #_logger.info("TS POST | so_line update {} {}".format(timesheet.name,up_vals))
+
+        #trigger order update according to modified values in the timesheet
+        if any([field_name in values for field_name in ['task_id','unit_amount_rounded','stage_id','date']]):
+            for timesheet in sudo_self:
+                # test case where original stage is one of them
+                if values.get('stage_id') in ['invoiced','invoiceable','historical','fixed_price'] or timesheet.stage_id in ['invoiced','invoiceable','historical','fixed_price']:
+                    orders |= timesheet.so_line.order_id
+
+        #trigger some recompute
+        """
+        if orders:
+            orders._compute_timesheet_ids()
+            _logger.info("TS POST | order update {}".format(orders.mapped('name')))
+        """
+
+        for order in orders:
+            order.timesheet_limit_date = order.timesheet_limit_date
+            #_logger.info("TS POST | order update {}".format(order.name))
+        
+        
+        #TODO travel time category to take in account
+        #_logger.info("TS POST post | {}".format(result))
+        
+        return result
+
+    """@api.model
     def create(self, vals):
         if not self._context.get('migration_mode',False):
             if vals.get('employee_id', False) and vals.get('project_id', False):
@@ -280,21 +425,47 @@ class AnalyticLine(models.Model):
         if line.task_id:
             line.task_id.recompute_kpi=True
 
-        return line
+        return line"""
 
     @api.multi
     def write(self, vals):
-        # we automatically update the stage if the ts is validated and stage = draft
+        """# we automatically update the stage if the ts is validated and stage = draft
         so_update = False
         orders = self.env['sale.order']
-        #_logger.info("ANALYTIC WRITE {}".format(vals))
+        #_logger.info("ANALYTIC WRITE {}".format(vals))"""
 
-        # we loop the lines to manage specific usecases
-        for line in self:
+        temp_self = self
+        #if this is a modification authorized for lc during lc_review, we do it in sudo
+        if self.filtered(lambda p: p.stage_id == 'lc_review'):
+            #we test protected fields and filter based on LC
+            #all ts are in lc_review and the connected user is the lc
+            if (len(self) == len(self.filtered(lambda p: p.stage_id == 'lc_review' and p.project_id.user_id.id == self._uid))) \
+                and (not any([field_name in vals for field_name in ['unit_amount','employee_id']])): 
+                temp_self = self.sudo()
+                #_logger.info("TS CHECK WRITE | LC review case sudo")
 
+        # we check the case where we change the unit_amount only and not the rounded value.
+        #this case can't be done in post_process because we need the delta value before it's recomputed
+        if vals.get('unit_amount', False) and not vals.get('unit_amount_rounded', False):
+            for timesheet in self.filtered(lambda t: t.is_timesheet):
+                vals['unit_amount_rounded'] = vals['unit_amount'] + timesheet.calculated_delta_time
+                #_logger.info("TS CHECK WRITE | Delta Time {} + {} = {}".format(vals['unit_amount'],timesheet.calculated_delta_time,vals['unit_amount_rounded']))
+                ok = super(AnalyticLine, temp_self).write(vals)
+        
+        else:
+            #_logger.info("TS CHECK WRITE | Regular Case")
+            ok = super(AnalyticLine, temp_self).write(vals)
+
+        return ok
+
+        """
             # Timesheet cases
             if line.is_timesheet and line.project_id and line.employee_id:
 
+                if vals.get('unit_amount', False) and not vals.get('unit_amount_rounded', False):
+                    #if unit amount is changed, we preserve the delta
+                    delta = vals['unit_amount'] - line.unit_amount
+                    vals['unit_amount_rounded'] = line.unit_amount_rounded + delta
 
                 if vals.get('unit_amount', False):
                     #the coded amount is changed
@@ -364,6 +535,7 @@ class AnalyticLine(models.Model):
                 order.timesheet_limit_date = order.timesheet_limit_date
 
         return ok
+    """
 
     @api.multi
     def finalize_lc_review(self):
@@ -614,13 +786,6 @@ class AnalyticLine(models.Model):
                 #employee processed
                 emp.do_smart_timesheeting = False 
 
-
-    def _timesheet_preprocess(self, vals):
-        vals = super(AnalyticLine, self)._timesheet_preprocess(vals)
-        if vals.get('project_id'):
-            project = self.env['project.project'].browse(vals['project_id'])
-            vals['main_project_id'] = project.parent_id.id or project.id  
-        return vals
     
     @api.model
     def _get_task_domain(self):

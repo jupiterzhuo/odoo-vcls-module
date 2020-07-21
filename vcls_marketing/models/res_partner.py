@@ -14,13 +14,13 @@ class Contacts(models.Model):
 
     marketing_project_id = fields.Many2one(
         comodel_name = 'project.project',
-        string = "Lead Source",
+        string = "Initial Source",
         domain = [('project_type','=','marketing')]
     )
 
     marketing_task_id = fields.Many2one(
         comodel_name = 'project.task',
-        string = "Opted-In Campaign",
+        string = "Initial Source Campaign",
         domain = [('task_type','=','marketing')]
     )
 

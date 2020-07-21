@@ -7,18 +7,24 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-class LeadQuotation(models.TransientModel):
+class LeadQuotation(models.Model):
     _name = 'tool.timesheet.recode'
     _description = 'Timesheet Recoder'
 
     mode = fields.Selection([
         ('replace_rate', 'Replace Rate'),
-        ('update_status', 'Update Status')
+        ('update_status', 'Update Status'),
+        ('move','Move Timesheets'),
     ], string='Recompute Mode', required=True, default='replace_rate',
     help="""
     Replace Rate:
     - Update all non-invoiced timesheets from Source Rate to Target Rate, single employee if documented
     - Update the mapping table accordingly
+    Update Status:
+    - Force the new status (except invoiced) of all the related timesheets
+    Move Timesheets:
+    - Verify if a mapping exists in the target project. If not, a mapping is created for the relevant employee.
+    - Move the timesheets to the new tasks.
     """
     )
 
@@ -70,6 +76,16 @@ class LeadQuotation(models.TransientModel):
 
 
     ### TARGET FIELDS
+    target_project_id = fields.Many2one(
+        comodel_name='project.project',
+        string= 'Target Project',
+    )
+
+    target_task_id = fields.Many2one(
+        comodel_name='project.task',
+        string= 'Target Task',
+    )
+
     target_rate_id = fields.Many2one(
         comodel_name='sale.order.line',
         string= 'Target Rate',
@@ -160,6 +176,19 @@ class LeadQuotation(models.TransientModel):
 
         domain = self.get_ts_source_domain(projects)
         timesheets = self.env['account.analytic.line'].search(domain)
+
+        if self.mode == 'move':
+            if timesheets:
+                for employee in timesheets.mapped('employee_id'):
+                    batch = timesheets.filtered(lambda p: p.employee_id == employee)
+                    if mode == 'real':
+                            batch.write({
+                                'project_id':self.target_project_id.id,
+                                'task_id':self.target_task_id.id,
+                                'stage_id':'lc_review',
+                            })
+                    info += "INFO | {} timesheets moved for {}.\n".format(len(batch),employee.name)
+
 
         if self.mode == 'update_status':
             if timesheets:
