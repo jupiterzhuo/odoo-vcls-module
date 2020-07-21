@@ -373,7 +373,7 @@ class Leads(models.Model):
        
         if vals.get('type', '') == 'lead':
             if vals.get('marketing_task_id',False) and not vals.get('marketing_project_id',False):
-                vals['marketing_project_id'] = self.env['project.task'].browse(vals.get('marketing_task_id')).project_id
+                vals['marketing_project_id'] = self.env['project.task'].browse(vals.get('marketing_task_id')).project_id.id
             if vals.get('email_from',False) and not vals.get('partner_id',False):
                 existing = self.env['res.partner'].search([('email','=ilike',vals['email_from'])],limit=1)
                 if existing:
