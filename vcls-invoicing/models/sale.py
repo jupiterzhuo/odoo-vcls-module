@@ -23,7 +23,7 @@ class SaleOrder(models.Model):
             return order_id.partner_id.activity_report_template
         return False
 
-    risk_ids = fields.Many2many('risk', string='Risk')
+    risk_ids = fields.Many2many('risk', string='Risk', compute='_compute_risk_ids', store=True,)
 
     risk_score = fields.Integer(
         string='Risk Score',
@@ -105,13 +105,13 @@ class SaleOrder(models.Model):
 
     @api.depends('partner_id.risk_ids')
     def _compute_risk_ids(self):
-        resourceSo = "sale.order,{}".format(self.id)
-        risk_ids = self.env['risk'].search([('resource', '=', resourceSo)])
-        if self.partner_id:
-            resourcePrtn = "res.partner,{}".format(self.partner_id.id)
-            risk_ids |= self.env['risk'].search([('resource', '=', resourcePrtn)])
-        if risk_ids:
-            self.risk_ids |= risk_ids
+        for rec in self:
+            resourceSo = "sale.order,{}".format(rec.id)
+            risk_ids = rec.env['risk'].search([('resource', '=', resourceSo)])
+            if rec.partner_id:
+                resourcePrtn = "res.partner,{}".format(rec.partner_id.id)
+                risk_ids |= rec.env['risk'].search([('resource', '=', resourcePrtn)])
+            rec.risk_ids = risk_ids
 
     @api.one
     @api.depends('project_id.user_id','partner_id.invoice_admin_id', 'parent_id')

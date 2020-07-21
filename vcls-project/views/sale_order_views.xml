@@ -48,6 +48,9 @@
                 <xpath expr="//field[@name='origin']" position="after">
                     <field name="project_id" context="{'form_view_ref':'vcls-project.vcls_specific_project_form'}"/>
                 </xpath>
+                <xpath expr="//field[@name='scope_of_work']" position="after">
+                    <field name="project_status"/>
+                </xpath>
             </field>
         </record>
 

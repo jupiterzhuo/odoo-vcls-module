@@ -80,8 +80,21 @@ class ProjectTask(models.Model):
     @api.multi
     def write(self,vals):
         if vals.get('stage_id'):
-            vals['recompute_kpi'] = True
-        return super().write(vals)
+                vals['recompute_kpi'] = True
+        
+        ret = super().write(vals)
+        for rec in self:
+            if rec.stage_allow_ts:
+                if rec.sale_order_id.state not in ['sale','done'] :
+                    risk_hold = self.env.ref('vcls-crm.risk_auto_WAR')
+                    resource = f'sale.order,{rec.sale_order_id.id}'
+                    existing = self.env['risk'].search([('resource', '=', resource),('risk_type_id', '=', risk_hold.id)])
+                    if not existing:
+                        rec.sale_order_id.risk_ids |= self.env['risk']._raise_risk(risk_hold, resource)
+                        rec.project_id.project_status = 'risk'
+                        rec.project_id.child_id._onchange_project_status()
+
+        return ret
 
     @api.multi
     @api.depends("project_id.invoicing_mode")

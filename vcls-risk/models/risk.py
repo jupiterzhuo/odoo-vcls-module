@@ -64,7 +64,6 @@ class Risk(models.Model):
     @api.model
     def _raise_risk(self, risk_type, resource):
         risk = self.create({'risk_type_id': risk_type.id, 'resource': resource})
-        risk._populate_risk_ids()
         risk.send_notification()
         return risk
     

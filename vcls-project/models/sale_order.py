@@ -19,6 +19,28 @@ class SaleOrder(models.Model):
         store = True,
         default = 0.0,
     )
+    project_status = fields.Selection(
+        selection=[
+        ('preproject', 'Pre-Project'),
+        ('risk', 'At Risk'),
+        ('ongoing', 'Ongoing'),
+        ('service_delivered', 'Service Delivered'),
+        ('closed', 'Closed')
+        ],
+        compute='_compute_project_status',
+        store= True,
+    )
+
+    @api.depends('project_id.project_status')
+    def _compute_project_status(self):
+        for rec in self:
+            rec.project_status =  rec.project_id.project_status if rec.project_id else 'preproject'
+    
+    def project_status_update(self):
+        for rec in self:
+            if rec.state in ['done','sale']:
+                rec.project_id.project_status = 'ongoing'
+                rec.project_id.child_id._onchange_project_status()
 
     @api.multi
     def _get_parent_project_id(self):
@@ -96,8 +118,10 @@ class SaleOrder(models.Model):
     
     @api.multi
     def _action_confirm(self):
-        self.action_sync()
-        return super(SaleOrder, self)._action_confirm()
+        for rec in self:
+            rec.action_sync()
+            rec.project_status_update()
+            return super(SaleOrder, rec)._action_confirm()
 
     @api.multi
     def write(self, values):
