@@ -115,9 +115,9 @@ class SaleOrder(models.Model):
         'Family Quotation Count', compute='_get_family_order_count'
     )
 
-    ts_invoicing_mode = fields.Selection([('tm', 'T&M'),
+    """ts_invoicing_mode = fields.Selection([('tm', 'T&M'),
                                           ('fp', 'Fixed price')],
-                                         'Invoicing mode')
+                                         'Invoicing mode')"""
 
     report_details = fields.Selection([
         ('simple', 'simple'),
