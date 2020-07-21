@@ -374,10 +374,17 @@ class AnalyticLine(models.Model):
         #trigger order update according to modified values in the timesheet
         if any([field_name in values for field_name in ['task_id','unit_amount_rounded','stage_id','date']]):
             for timesheet in sudo_self:
-                if values.get('stage_id', timesheet.stage_id) in ['invoiced','invoiceable','historical','fixed_price']:
+                # test case where original stage is one of them
+                if values.get('stage_id') in ['invoiced','invoiceable','historical','fixed_price'] or timesheet.stage_id in ['invoiced','invoiceable','historical','fixed_price']:
                     orders |= timesheet.so_line.order_id
 
         #trigger some recompute
+        """
+        if orders:
+            orders._compute_timesheet_ids()
+            _logger.info("TS POST | order update {}".format(orders.mapped('name')))
+        """
+
         for order in orders:
             order.timesheet_limit_date = order.timesheet_limit_date
             _logger.info("TS POST | order update {}".format(order.name))
@@ -528,7 +535,7 @@ class AnalyticLine(models.Model):
                 order.timesheet_limit_date = order.timesheet_limit_date
 
         return ok
-        """
+    """
 
     @api.multi
     def finalize_lc_review(self):
