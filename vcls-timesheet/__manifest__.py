@@ -16,8 +16,8 @@
     # for the full list
     'category': 'Uncategorized',
 
-    'version': '0.8.44',
-  
+    'version': '0.8.53',
+
     # any module necessary for this one to work correctly
     'depends': [
         'base',
@@ -55,7 +55,7 @@
         'views/timesheet_report_views.xml',
         'views/contact_view.xml',
         'views/project_summary_views.xml',
-        'wizard/timesheet_recode_views.xml',
+        'views/timesheet_recode_views.xml',
 
 
         ### ACTIONS ###

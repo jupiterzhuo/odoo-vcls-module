@@ -137,9 +137,6 @@
                                         <field name="emergency_phone" widget="phone"/>
                                         <field name="ice_contact_relationship"/>
                                     </group>
-                                    <group string="Handbook">
-                                        <field name="handbook_link" widget="url" string="" text="Link to my Handbook" readonly="1" attrs="{'invisible':[('handbook_link', '=', 'False')]}"/>
-                                    </group>
                                 </group>
                                 <field name="notes" placeholder="Other Information ..." colspan="4"/>
                             </page>
@@ -264,6 +261,14 @@
                                         </tree>
                                     </field>
                                     </group> 
+                                </group>
+                            </page>
+
+                            <page name="HR_documentation" string="HR Documentation" attrs="{'invisible': [('access_level', 'not in', ['hr','me'])]}">
+                                <group>
+                                    <group string="Handbook">
+                                        <field name="handbook_link" widget="url" string="" text="Link to my Handbook" readonly="1" attrs="{'invisible':[('handbook_link', '=', 'False')]}"/>
+                                    </group>
                                 </group>
                             </page>
                             

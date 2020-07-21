@@ -17,7 +17,7 @@ class Leads(models.Model):
 
     marketing_task_id = fields.Many2one(
         comodel_name = 'project.task',
-        string = "Opted-In Campaign",
+        string = "Source Campaign",
         domain = [('task_type','=','marketing')]
     )
 
@@ -53,6 +53,40 @@ class Leads(models.Model):
     )
 
     content_name = fields.Char()
+
+    is_marketing_related = fields.Boolean(
+        compute = '_compute_is_marketing_related',
+        store = True,
+    )
+
+    initial_marketing_project_id = fields.Many2one(
+        comodel_name = 'project.project',
+        string = "Initial Lead Source",
+        domain = [('project_type','=','marketing')],
+        compute = '_compute_initial_marketing_project',
+        store = True
+    )
+
+    initial_is_marketing_related = fields.Boolean(
+        compute = '_compute_initial_is_marketing_related',
+        store = True,
+    )
+
+    @api.depends('marketing_project_id.is_marketing_related')
+    def _compute_is_marketing_related(self):
+        for lead in self.filtered(lambda l: l.marketing_project_id):
+            lead.is_marketing_related = lead.marketing_project_id.is_marketing_related
+    
+    @api.depends('partner_id.marketing_project_id')
+    def _compute_initial_marketing_project(self):
+        for lead in self.filtered(lambda l: l.partner_id):
+            if lead.partner_id.marketing_project_id:
+                lead.initial_marketing_project_id = lead.partner_id.marketing_project_id
+    
+    @api.depends('initial_marketing_project_id.is_marketing_related')
+    def _compute_initial_is_marketing_related(self):
+        for lead in self.filtered(lambda l: l.initial_marketing_project_id):
+            lead.initial_is_marketing_related = lead.initial_marketing_project_id.is_marketing_related
 
     @api.onchange('marketing_task_id')
     def _onchange_marketing_task_id(self):
@@ -116,4 +150,11 @@ class Leads(models.Model):
             if missing:
                 _logger.info("Adding Campains to {} | {}".format(lead.partner_id.name,missing.mapped('name')))
                 lead.partner_id.marketing_task_ids |= missing
+    
+    @api.model
+    def populate_initial_marketing_info(self):
+        to_update = self.search([('partner_id.marketing_project_id','!=',False)])
+        _logger.info("Found {} leads to update!".format(len(to_update)))
+        to_update._compute_initial_marketing_project()
+        to_update._compute_initial_is_marketing_related()
 
