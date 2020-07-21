@@ -22,7 +22,8 @@ class TranslatorSFLeads(TranslatorSFGeneral.TranslatorSFGeneral):
         if SF_Leads['Inactive_Lead__c']:
             result['active'] = False
         else:
-            result['active'] = True
+            #we don't want to reactivate archived leads
+            pass #result['active'] = True
 
         if SF_Leads['Opted_In__c']:
             result['opted_in'] = True
@@ -41,7 +42,7 @@ class TranslatorSFLeads(TranslatorSFGeneral.TranslatorSFGeneral):
             result['content_name'] = SF_Leads['Content_Name__c']
                 	
         if context.get('custom_context')=='small_update':
-            result['log_info'] = 'small_update {}'.format(result['active'])
+            result['log_info'] = 'small_update {}'.format(SF_Leads['LastName'] or False)
             return result
 
         ### IDENTIFICATION
