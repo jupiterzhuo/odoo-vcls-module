@@ -30,10 +30,6 @@ class SaleOrderLine(models.Model):
         store=False
     )
 
-    """ts_invoicing_mode = fields.Selection([('tm', 'T&M'),
-                                          ('fp', 'Fixed price')],
-                                         'Invoicing mode')"""
-
     @api.multi
     def _get_section_line_id(self):
         for line in self:
