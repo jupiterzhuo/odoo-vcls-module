@@ -126,7 +126,7 @@
                     <group>
                         <group>
                             <field name="name"/>
-                            <field name="client_id" domain="[('is_company','=',True)]"/>
+                            <field name="client_id" domain="[('is_company','=',True),('active','=',True)]" options='{"no_open": True,"no_create": 1, "no_create_edit": 1}'/>
                             <field name="client_product_ids" widget="many2many_tags" options='{"no_open": True,"no_create": 1, "no_create_edit": 1}'/>
                             <field name="product_name"/>
                             <field name="product_description"/>
