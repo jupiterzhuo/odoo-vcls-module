@@ -57,4 +57,22 @@ class Project(models.Model):
                 pass
         return action
 
+    @api.model
+    def _source_from_campaign(self):
+        #we 1st consolidate contacts
+        to_update = self.env['res.partner'].search([('marketing_task_id','!=',False),('marketing_project_id','=',False)])
+        for contact in to_update:
+            task = contact.marketing_task_id
+            contact.marketing_project_id = task.marketing_project_id
+            _logger.info("Contact {} updated with source {} from {}".format(contact.name,contact.marketing_project_id.name,contact.marketing_task_id.name))
+
+        #we do the same with leads
+        to_update = self.env['crm.lead'].search([('marketing_task_id','!=',False),('marketing_project_id','=',False)])
+        for lead in to_update:
+            task = lead.marketing_task_id
+            lead.marketing_project_id = task.marketing_project_id
+            _logger.info("lead {} updated with source {} from {}".format(lead.name,lead.marketing_project_id.name,lead.marketing_task_id.name))
+        
+
+
 
