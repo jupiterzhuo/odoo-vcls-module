@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api, http, _
+import logging
+_logger = logging.getLogger(__name__)
 
 
 class Leads(models.Model):
@@ -15,7 +17,7 @@ class Leads(models.Model):
 
     marketing_task_id = fields.Many2one(
         comodel_name = 'project.task',
-        string = "Opted-In Campaign",
+        string = "Source Campaign",
         domain = [('task_type','=','marketing')]
     )
 
@@ -52,12 +54,47 @@ class Leads(models.Model):
 
     content_name = fields.Char()
 
+    is_marketing_related = fields.Boolean(
+        compute = '_compute_is_marketing_related',
+        store = True,
+    )
+
+    initial_marketing_project_id = fields.Many2one(
+        comodel_name = 'project.project',
+        string = "Initial Lead Source",
+        domain = [('project_type','=','marketing')],
+        compute = '_compute_initial_marketing_project',
+        store = True
+    )
+
+    initial_is_marketing_related = fields.Boolean(
+        compute = '_compute_initial_is_marketing_related',
+        store = True,
+    )
+
+    @api.depends('marketing_project_id.is_marketing_related')
+    def _compute_is_marketing_related(self):
+        for lead in self.filtered(lambda l: l.marketing_project_id):
+            lead.is_marketing_related = lead.marketing_project_id.is_marketing_related
+    
+    @api.depends('partner_id.marketing_project_id')
+    def _compute_initial_marketing_project(self):
+        for lead in self.filtered(lambda l: l.partner_id):
+            if lead.partner_id.marketing_project_id:
+                lead.initial_marketing_project_id = lead.partner_id.marketing_project_id
+    
+    @api.depends('initial_marketing_project_id.is_marketing_related')
+    def _compute_initial_is_marketing_related(self):
+        for lead in self.filtered(lambda l: l.initial_marketing_project_id):
+            lead.initial_is_marketing_related = lead.initial_marketing_project_id.is_marketing_related
+
     @api.onchange('marketing_task_id')
     def _onchange_marketing_task_id(self):
         if self.marketing_task_id:
             self.marketing_project_id=self.marketing_task_id.project_id
-            
-    @api.onchange('partner_id')
+    
+    #we don't want anymore this info to be laoded from contact, it is now the invert, lead is pushing on contact using a cron
+    """@api.onchange('partner_id')
     def _get_marketing_info(self):
         for lead in self:
             lead.marketing_project_id = lead.partner_id.marketing_project_id
@@ -65,7 +102,7 @@ class Leads(models.Model):
             lead.marketing_task_ids = lead.partner_id.marketing_task_ids
             lead.marketing_task_out_id = lead.partner_id.marketing_task_out_id
             lead.opted_in_date = lead.partner_id.opted_in_date
-            lead.opted_out_date = lead.partner_id.opted_out_date
+            lead.opted_out_date = lead.partner_id.opted_out_date"""
     
     @api.multi
     def _create_lead_partner_data(self, name, is_company, parent_id=False):
@@ -101,4 +138,23 @@ class Leads(models.Model):
             'type': 'ir.actions.act_window',
             'domain': "[('model_id','=', {}),('res_id','=',{})]".format(model_id.id, self.id)
         }
+
+    @api.model
+    def campaigns_lead_to_partner(self):
+        #we search leads and opp with a partner_id, with at least one campaign documented
+        leads = self.search([('partner_id','!=',False),'|','|',('marketing_task_id','!=',False),('marketing_task_ids','!=',False),('marketing_task_out_id','!=',False)])
+        for lead in leads.filtered(lambda l: not l.partner_id.is_company):
+            lead_campaigns = lead.marketing_task_id | lead.marketing_task_ids | lead.marketing_task_out_id
+            partner_campaigns = lead.partner_id.marketing_task_id | lead.partner_id.marketing_task_ids | lead.partner_id.marketing_task_out_id
+            missing = lead_campaigns - partner_campaigns
+            if missing:
+                _logger.info("Adding Campains to {} | {}".format(lead.partner_id.name,missing.mapped('name')))
+                lead.partner_id.marketing_task_ids |= missing
+    
+    @api.model
+    def populate_initial_marketing_info(self):
+        to_update = self.search([('partner_id.marketing_project_id','!=',False)])
+        _logger.info("Found {} leads to update!".format(len(to_update)))
+        to_update._compute_initial_marketing_project()
+        to_update._compute_initial_is_marketing_related()
 

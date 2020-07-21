@@ -10,6 +10,7 @@
             <field name="arch" type="xml">
                 <tree>
                     <field name="name"/>
+                    <field name="is_marketing_related"/>
                 </tree>
             </field>
         </record>
@@ -56,6 +57,7 @@
                             <field name="event_type" string="Type of Events"/>
                             <field name="user_id" string="Project Manager" attrs="{'readonly':[('active','=',False)]}"/>
                             <field name="scope_of_work" string="Description"/>
+                            <field name="is_marketing_related"/>
                             <field name="label_tasks"/>
                         </group>
                         
@@ -415,6 +417,37 @@
             <field name="context">{
                 'default_task_type':'marketing',
             }</field>
+        </record>
+
+        <record model="ir.ui.view" id="view_crm_case_leads_filter_inherit">
+            <field name="name">crm.lead.search.inherit</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.view_crm_case_leads_filter" />
+            <field name="arch" type="xml">
+                <xpath expr="//filter[@name='opportunities']" position="after">
+                    <separator/>
+                    <filter string="Marketing Source" name="marketing_source" domain="[('is_marketing_related','=',True)]"/>
+                    <filter string="Marketing Initial Source" name="marketing_initial_source" domain="[('initial_is_marketing_related','=',True)]"/>
+                </xpath>
+                <xpath expr="//filter[@name='won']" position="before">
+                    <filter string="Open" name="open" domain="['&amp;', ('active', '=', True), ('stage_id.probability','not in',[0,100])]"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_crm_case_opportunities_filter">
+            <field name="name">crm.lead.search.opportunity</field>
+            <field name="model">crm.lead</field>
+            <field name="inherit_id" ref="crm.view_crm_case_opportunities_filter" />
+            <field name="arch" type="xml">
+                <xpath expr="//filter[@name='open_opportunities']" position="after">
+                    <separator/>
+                    <filter string="Marketing Source" name="marketing_source" domain="[('is_marketing_related','=',True)]"/>
+                    <filter string="Marketing Initial Source" name="marketing_initial_source" domain="[('initial_is_marketing_related','=',True)]"/>
+                </xpath>
+                
+
+            </field>
         </record>
 
     </data>

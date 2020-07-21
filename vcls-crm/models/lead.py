@@ -42,8 +42,15 @@ class Leads(models.Model):
 
     @api.onchange('email_from')
     def _onchange_email_from(self):
-        lead_id = self.id if not isinstance(self.id, models.NewId) else 0
-        if self.email_from and self.sudo().search([
+        #lead_id = self.id if not isinstance(self.id, models.NewId) else 0
+        if self.email_from and self.type=='lead':
+            #we look for existing partner
+            existing = self.env['res.partner'].search([('email','=ilike',self.email_from)],limit=1)
+            if existing:
+                self.partner_id=existing
+                self.onchange_partner_id()
+
+        """if self.email_from and self.sudo().search([
             ('type', '=', 'lead'), ('id', '!=', lead_id),
             ('email_from', '=', self.email_from)], limit=1
         ):
@@ -53,7 +60,7 @@ class Leads(models.Model):
                     'title': _('Warning'),
                     'message': _('A lead with this email already exists.'),
                 }
-            }
+            }"""
 
     @api.onchange('partner_id', 'partner_name')
     def onchange_info(self):
@@ -102,7 +109,7 @@ class Leads(models.Model):
 
     company_id = fields.Many2one(string = 'Trading Entity', default = lambda self: self.env.ref('vcls-hr.company_VCFR'))
 
-    source_id = fields.Many2one('utm.source', "Initial Lead Source")
+    source_id = fields.Many2one('utm.source', "Unused Field")
 
     user_id = fields.Many2one(
         'res.users', 
@@ -365,6 +372,12 @@ class Leads(models.Model):
     def create(self, vals):
        
         if vals.get('type', '') == 'lead':
+            if vals.get('marketing_task_id',False) and not vals.get('marketing_project_id',False):
+                vals['marketing_project_id'] = self.env['project.task'].browse(vals.get('marketing_task_id')).project_id.id
+            if vals.get('email_from',False) and not vals.get('partner_id',False):
+                existing = self.env['res.partner'].search([('email','=ilike',vals['email_from'])],limit=1)
+                if existing:
+                    vals['partner_id'] = existing.id
             if vals.get('partner_id',False):
                 partner = self.env['res.partner'].browse(vals.get('partner_id'))
                 vals['altname'] = partner.altname if partner.altname else partner.parent_id.altname if partner.parent_id.altname else False
@@ -527,20 +540,20 @@ class Leads(models.Model):
     #if we change the partner_id, then we clean the ref to trigger a new creation at save
     @api.onchange('partner_id')
     def _clear_ref(self):
-        for lead in self:
+        for lead in self.filtered(lambda l: l.type=='opportunity'):
             lead.internal_ref = False
             
     
     @api.onchange('name')
     def _onchange_name(self):
-        for lead in self:
-            if lead.type == 'opportunity' and lead.internal_ref:
+        for lead in self.filtered(lambda l: l.type=='opportunity'):
+            if lead.internal_ref:
                 lead.name = lead.build_opp_name(lead.internal_ref,lead.name)
 
     
     @api.onchange('partner_id')
     def _change_am(self):
-        for lead in self:
+        for lead in self.filtered(lambda l: l.type=='opportunity'):
             lead.user_id = lead.guess_am()
     
     @api.one

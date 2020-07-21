@@ -15,7 +15,8 @@
     # Check https://github.com/odoo/odoo/blob/12.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
     'category': 'Uncategorized',
-    'version': '1.7.58',
+
+    'version': '1.7.62',
 
 
     # any module necessary for this one to work correctly
@@ -52,6 +53,7 @@
         'reports/report_project_invoice_aggregated.xml',
         'reports/activity_reports.xml',
         'reports/invoice_template.xml',
+        'reports/report_credit_note.xml',
     ],
     # only loaded in demonstration mode
     'demo': [

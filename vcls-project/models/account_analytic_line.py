@@ -30,7 +30,6 @@ class AccountAnalyticLine(models.Model):
 
     @api.model
     def _update_project_soline_mapping(self, vals):
-        #_logger.info("_update_project_soline_mapping {} ".format(vals))
         employee = None
         if 'employee_id' in vals:
             employee = self.env['hr.employee'].browse(vals['employee_id'])
@@ -46,7 +45,7 @@ class AccountAnalyticLine(models.Model):
                 # products at all -> don't enforce seniority on employee
                 # use case : projects not related to a SO or totally fixed
                 # price projects
-                return
+                return False
             if not employee.seniority_level_id:
                 raise UserError(
                     _('''Employee with no seniority level can not timesheet
@@ -60,7 +59,7 @@ class AccountAnalyticLine(models.Model):
             )
             if employee_mapped_line:
                 # already mapped -> nothing to do
-                return
+                return employee_mapped_line[0].sale_line_id
 
             so_mapped_seniority = so.order_line.filtered(
                 lambda r: r.product_id.seniority_level_id != False
@@ -70,10 +69,10 @@ class AccountAnalyticLine(models.Model):
             for so_line in so_mapped_seniority:
                 so_product = so_line.product_id
                 for default_rate in list_default_rate:
-                    _logger.info("Product {} {} | Rate {} {}".format(so_product.product_tmpl_id.id,so_product.product_tmpl_id.name,default_rate.id,default_rate.name))
+                    #_logger.info("Product {} {} | Rate {} {}".format(so_product.product_tmpl_id.id,so_product.product_tmpl_id.name,default_rate.id,default_rate.name))
                     if so_product.product_tmpl_id.name == default_rate.name or so_product.seniority_level_id.code == '00': #we match on names to cover the case of multiproducts with the same name
                         matched = True 
-                        _logger.info("FOUND Product {} {} | Rate {} {}".format(so_product.product_tmpl_id.id,so_product.product_tmpl_id.name,default_rate.id,default_rate.name))
+                        #_logger.info("FOUND Product {} {} | Rate {} {}".format(so_product.product_tmpl_id.id,so_product.product_tmpl_id.name,default_rate.id,default_rate.name))
                         break
                 if matched:
                     break
@@ -82,7 +81,7 @@ class AccountAnalyticLine(models.Model):
                 # no line found, Find a line on the sale order with the same seniority level
                 for so_line in so_mapped_seniority:
                     line_seniority = so_line.product_id.seniority_level_id
-                    _logger.info("SO LINE seniority {} for employee {}".format(line_seniority.name,employee.seniority_level_id.name))                    #we add the code 00 condition to cover the uniformized rate usecase (i.e. everyone to code with the same rate)
+                    #_logger.info("SO LINE seniority {} for employee {}".format(line_seniority.name,employee.seniority_level_id.name))                    #we add the code 00 condition to cover the uniformized rate usecase (i.e. everyone to code with the same rate)
                     if line_seniority == employee.seniority_level_id:
                         break
                 else:
@@ -104,3 +103,7 @@ class AccountAnalyticLine(models.Model):
                     ]
                 }
             )
+            return so_line
+            
+        else:
+            return False

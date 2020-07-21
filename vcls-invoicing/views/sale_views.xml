@@ -33,6 +33,7 @@
                     <field name="invoice_template" attrs="{'readonly': [('financial_config_readonly', '!=', True)]}" force_save="1"/>  
                     <field name="activity_report_template" attrs="{'readonly': [('financial_config_readonly', '!=', True)]}" force_save="1"/>
                     -->
+                    <field name="family_invoice_status"/>
                     <field name="invoiceable_amount"/>
                     <field name="po_id" domain="[('partner_id','=',partner_id)]" options="{'no_open':True}"/>
                     <field name="risk_score" invisible="1"/>
