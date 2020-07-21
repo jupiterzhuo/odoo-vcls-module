@@ -31,6 +31,7 @@ class AccountInvoiceRefund(models.TransientModel):
                 _logger.info("INVOICE TO REFUND {}".format(inv.number))
                 inv.release_timesheets()
                 rinv = self.env['account.invoice'].search([('type','=','out_refund'),('origin','=',inv.number)],limit=1)
+                rinv.write({'period_start':inv.period_start,'timesheet_limit_date':inv.timesheet_limit_date})
                 if rinv:
                     _logger.info("Found Credit note {} for invoice {}".format(rinv.number,inv.number))
                     rinv.write({'period_start':inv.period_start,'timesheet_limit_date':inv.timesheet_limit_date})
