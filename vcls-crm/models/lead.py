@@ -12,6 +12,38 @@ _logger = logging.getLogger(__name__)
 
 URL_POWER_AUTOMATE = "https://prod-29.westeurope.logic.azure.com:443/workflows/9f6737616b7047498a61a053cd883fc2/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=W5bnOEb4gMnP_E9_VnzK7c8AuYb2zGovg5BHwIoi-U8"
 
+CRM_LEAD_FIELDS_TO_MERGE = [
+    'name',
+    'partner_id',
+    'campaign_id',
+    'company_id',
+    'country_id',
+    'team_id',
+    'state_id',
+    'stage_id',
+    'medium_id',
+    'source_id',
+    'user_id',
+    'title',
+    'city',
+    'contact_name',
+    'description',
+    'mobile',
+    'partner_name',
+    'phone',
+    'probability',
+    'planned_revenue',
+    'street',
+    'street2',
+    'zip',
+    'create_date',
+    'date_action_last',
+    'email_from',
+    'email_cc',
+    'website',
+    'partner_name']
+
+
 """class ResoucesLeads(models.Model):
 
     _name = 'crm.resource.lead'
@@ -751,13 +783,13 @@ class Leads(models.Model):
         }"""
     
     def create_contact_pop_up(self):
-        #if you create a company check for exisiting name
+        # if you create a company check for existing name
         if self.partner_name and not self.partner_id:
             if self.env['res.partner'].search([('name', '=', self.partner_name)]):
                 raise UserError('{} company already exists, please link to existing company or make new name'.format(self.partner_name))
         # if you try to create indv., parent_id must be a company to link to
         if self.partner_id and not self.partner_id.is_company:
-            raise UserError('{} is an individual, please create by leaving the Client blank or with desired company to link'.format(self.parnter_id.name))
+            raise UserError('{} is an individual, please create by leaving the Client blank or with desired company to link'.format(self.partner_id.name))
         if self.partner_id:
             # company exists, just make indv contact
             indiv_contact = self.env['res.partner']
@@ -767,7 +799,7 @@ class Leads(models.Model):
         else:
             if self.altname and self.env['res.partner'].search([('altname', '=', self.altname)]):
                 raise UserError('{} altname already exists, please choose different'.format(self.altname))
-            # this creats both company and ind. contacts and links them
+            # this creates both company and ind. contacts and links them
             result = self.env['crm.lead'].browse(self.id).handle_partner_assignation('create', False)
             indiv_contact = self.env['res.partner'].browse(result.get(self.id))
             partner_object = indiv_contact.parent_id
@@ -776,11 +808,14 @@ class Leads(models.Model):
             partner_object.gdpr_status = self.gdpr_status
             partner_object.opted_in = self.opted_in
             partner_object.opted_out = self.opted_out
-        # self.partner_id = result.get(self.id)
-        # partner_object = self.env['res.partner'].browse(self.partner_id.id)
+
+        # Updating leads with the same email address
+        list_leads = self.env['crm.lead'].search([('email_from', '=', self.email_from)])
+        if list_leads:
+            list_leads.write({'partner_id': indiv_contact.id,})
         self.partner_id = indiv_contact
         self.altname = partner_object.altname
-        #set new ind. contact GDPR status to match leads
+        # set new ind. contact GDPR status to match leads
         indiv_contact.gdpr_status = self.gdpr_status
         indiv_contact.opted_in = self.opted_in
         indiv_contact.opted_out = self.opted_out
@@ -888,3 +923,72 @@ class Leads(models.Model):
 
         _logger.warning("Call API: Power Automate message: {}, whith the client: {} and for the project: {}".format(message, client_name, project_name))
         raise Warning(_("Sharepoint didn't respond, Please try again"))
+
+# to rework this native functio of odoo to add the changes we want
+    @api.multi
+    def merge_opportunity(self, user_id=False, team_id=False):
+        """ Merge opportunities in one. Different cases of merge:
+                - merge leads together = 1 new lead
+                - merge at least 1 opp with anything else (lead or opp) = 1 new opp
+            The resulting lead/opportunity will be the most important one (based on its confidence level)
+            updated with values from other opportunities to merge.
+            :param user_id : the id of the saleperson. If not given, will be determined by `_merge_data`.
+            :param team : the id of the Sales Team. If not given, will be determined by `_merge_data`.
+            :return crm.lead record resulting of th merge
+        """
+        if len(self.ids) <= 1:
+            raise UserError(_('Please select more than one element (lead or opportunity) from the list view.'))
+
+        # Sorting the leads/opps according to the confidence level of its stage, which relates to the probability of winning it
+        # The confidence level increases with the stage sequence, except when the stage probability is 0.0 (Lost cases)
+        # An Opportunity always has higher confidence level than a lead, unless its stage probability is 0.0
+        def opps_key(opportunity):
+            sequence = -1
+            if opportunity.stage_id.on_change:
+                sequence = opportunity.stage_id.sequence
+            return (sequence != -1 and opportunity.type == 'opportunity'), sequence, -opportunity.id
+        opportunities = self.sorted(key=opps_key, reverse=True)        
+            
+        # get SORTED recordset of head and tail, and complete list
+        opportunities_head = opportunities[0]
+        opportunities_tail = opportunities[1:]
+
+        # merge all the sorted opportunity. This means the value of
+        # the first (head opp) will be a priority.
+        merged_data = opportunities._merge_data(list(CRM_LEAD_FIELDS_TO_MERGE))
+
+        # force value for saleperson and Sales Team
+        if user_id:
+            merged_data['user_id'] = user_id
+        if team_id:
+            merged_data['team_id'] = team_id
+
+        # merge other data (mail.message, attachments, ...) from tail into head
+        opportunities_head.merge_dependences(opportunities_tail)
+
+        # check if the stage is in the stages of the Sales Team. If not, assign the stage with the lowest sequence
+        if merged_data.get('team_id'):
+            team_stage_ids = self.env['crm.stage'].search(['|', ('team_id', '=', merged_data['team_id']), ('team_id', '=', False)], order='sequence')
+            if merged_data.get('stage_id') not in team_stage_ids.ids:
+                merged_data['stage_id'] = team_stage_ids[0].id if team_stage_ids else False
+
+        # Changing the native sort function to be based on time
+        lead_sorted = self.sorted(key=lambda x: x.create_date)
+
+        merged_data['marketing_task_id'] = lead_sorted[0].marketing_task_id.id
+        merged_data['marketing_project_id'] = lead_sorted[0].marketing_project_id.id
+
+        temp = lead_sorted[1:].mapped('marketing_task_id').mapped('id')
+        temp += lead_sorted[1:].mapped('marketing_task_ids').mapped('id')
+        merged_data['marketing_task_ids'] = temp
+        # merged_data['marketing_task_ids'] = lead_sorted[1:].mapped('marketing_task_id').mapped('id') | lead_sorted[1:].mapped('marketing_task_ids').mapped('id')
+
+
+        # write merged data into first opportunity
+        opportunities_head.write(merged_data)
+
+        # delete tail opportunities
+        # we use the SUPERUSER to avoid access rights issues because as the user had the rights to see the records it should be safe to do so
+        opportunities_tail.sudo().unlink()
+
+        return opportunities_head
