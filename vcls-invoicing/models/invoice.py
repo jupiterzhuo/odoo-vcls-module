@@ -125,7 +125,11 @@ class Invoice(models.Model):
             for project in invoice.project_ids:
                 if not project.parent_id and project.sale_order_id and project.sale_order_id.internal_ref:
                     project_string += project.sale_order_id.internal_ref + ' | ' 
-            invoice.temp_name = "{} from {} to {}".format(project_string,invoice.period_start,invoice.timesheet_limit_date)
+            if invoice.period_start or invoice.timesheet_limit_date:
+                invoice.temp_name = "{} from {} to {}".format(project_string, invoice.period_start, invoice.timesheet_limit_date)
+            else:
+                invoice.temp_name = "{}".format(project_string)
+
 
 
     @api.multi
