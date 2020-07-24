@@ -12,6 +12,7 @@
                         <field name="link_rates" attrs="{'invisible':[('quotation_type', '=', 'new')]}"/>
                     </group>
                     <group>
+                        <field name="partner_id" invisible="1"/>
                         <field name="existing_quotation_id"
                                options="{
                                     'no_show':True,'no_create':True,'no_open':True
@@ -21,8 +22,8 @@
                                     'required': [('quotation_type', '!=', 'new')],
                                }"
                                domain="[
-                                    ('opportunity_id', '=', active_id),
-                                    ('parent_id', '=', False)
+                                    ('parent_id', '=', False),
+                                    ('opportunity_id.partner_id', '=', partner_id),
                                ]"
                         />
                     </group>

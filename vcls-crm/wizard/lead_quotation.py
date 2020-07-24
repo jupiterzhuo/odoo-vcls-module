@@ -17,6 +17,10 @@ class LeadQuotation(models.TransientModel):
     ], string='Quotation type', required=True, default='new'
     )
 
+    partner_id = fields.Many2one(
+        'res.partner',
+    )
+
     existing_quotation_id = fields.Many2one(
         'sale.order', string="Existing quotation"
     )
