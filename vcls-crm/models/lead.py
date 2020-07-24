@@ -972,17 +972,16 @@ class Leads(models.Model):
             if merged_data.get('stage_id') not in team_stage_ids.ids:
                 merged_data['stage_id'] = team_stage_ids[0].id if team_stage_ids else False
 
-        # Changing the native sort function to be based on time
-        lead_sorted = self.sorted(key=lambda x: x.create_date)
+        if all(types == 'lead' for types in self.mapped('type')):
+            # Changing the native sort function to be based on time
+            lead_sorted = self.sorted(key=lambda x: x.create_date)
 
-        merged_data['marketing_task_id'] = lead_sorted[0].marketing_task_id.id
-        merged_data['marketing_project_id'] = lead_sorted[0].marketing_project_id.id
+            merged_data['marketing_task_id'] = lead_sorted[0].marketing_task_id.id
+            merged_data['marketing_project_id'] = lead_sorted[0].marketing_project_id.id
 
-        temp = lead_sorted[1:].mapped('marketing_task_id').mapped('id')
-        temp += lead_sorted[1:].mapped('marketing_task_ids').mapped('id')
-        merged_data['marketing_task_ids'] = temp
-        # merged_data['marketing_task_ids'] = lead_sorted[1:].mapped('marketing_task_id').mapped('id') | lead_sorted[1:].mapped('marketing_task_ids').mapped('id')
-
+            temp = lead_sorted[1:].mapped('marketing_task_id').mapped('id')
+            temp += lead_sorted.mapped('marketing_task_ids').mapped('id')
+            merged_data['marketing_task_ids'] = [(6, _, temp)]
 
         # write merged data into first opportunity
         opportunities_head.write(merged_data)
