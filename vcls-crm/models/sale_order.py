@@ -315,9 +315,9 @@ class SaleOrder(models.Model):
 
     @api.multi
     def _write(self, values):
-        """ We override to cancel the automated creation """
+        """ We override to cancel the automated creation 
         if 'invoice_status' in values:
-            rem = values.pop('invoice_status')
+            rem = values.pop('invoice_status') """
 
         return super(SaleOrder, self)._write(values)
     
