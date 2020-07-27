@@ -44,12 +44,6 @@
                 <xpath expr="//field[@name='partner_bank_id']" position="replace">
                 </xpath>
 
-                <xpath expr="//button[@name='%(sale_timesheet.action_timesheet_from_invoice)d']" position="replace">
-                    <button name="%(vcls-timesheet.action_vcls_timesheet_tree_invoice)d" type="action" class="oe_stat_button" icon="fa-calendar" attrs="{'invisible':[('timesheet_count','=', 0)]}">
-                        <field name="timesheet_count" widget="statinfo" string="Timesheets"/>
-                    </button>
-                </xpath>
-
                 <xpath expr="/form/sheet/group" position="replace">
                     <group>
                         <group string="Client">
