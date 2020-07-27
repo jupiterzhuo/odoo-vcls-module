@@ -315,9 +315,12 @@ class SaleOrder(models.Model):
 
     @api.multi
     def _write(self, values):
-        """ We override to cancel the automated creation 
-        if 'invoice_status' in values:
-            rem = values.pop('invoice_status') """
+        """ We override to cancel the automated creation of upselling messages"""
+        if values.get('invoice_status','') == 'upselling':
+            self = self.with_context(mail_activity_automation_skip = True)
+            _logger.info("UPSELLING {}".format(self.env.context))
+        """if 'invoice_status' in values:
+            rem = values.pop('invoice_status')""" 
 
         return super(SaleOrder, self)._write(values)
     
