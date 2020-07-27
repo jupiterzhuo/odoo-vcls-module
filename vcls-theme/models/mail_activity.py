@@ -65,17 +65,22 @@ class MailActivity(models.Model):
     @api.multi
     def open_record(self):
         for rec in self:
+            actions = {}
             rec.ensure_one()
             obj = self.env[rec.res_model].browse(rec.res_id)
             url = http.request.env['ir.config_parameter'].get_param('web.base.url')
+            actions['lead'] = self.env.ref('crm.crm_lead_all_leads')
+            actions['opportunity'] = self.env.ref('crm.crm_lead_opportunities_tree_view')
+            actions['in_invoice'] = self.env.ref('purchase.action_invoice_pending')
             link = "{}/web#id={}&model={}".format(url, rec.res_id, rec.res_model)
+
             if rec.res_model == 'account.invoice' and obj.type == "in_invoice":
-                link = "{}/web#id={}&action=1443&model={}&view_type=form".format(url, rec.res_id, rec.res_model)
+                link = f"{url}/web#id={rec.res_id}&action={actions['in_invoice'].id}&model={rec.res_model}&view_type=form"
             if rec.res_model == 'crm.lead':
                 if obj.type == 'opportunity':
-                    link = "{}/web#id={}&action=694&model={}&view_type=form".format(url, rec.res_id, rec.res_model)
+                    link = f"{url}/web#id={rec.res_id}&action={actions['opportunity'].id}&model={rec.res_model}&view_type=form"
                 else:
-                    link = "{}/web#id={}&action=691&model={}&view_type=form".format(url, rec.res_id, rec.res_model)
+                    link = f"{url}/web#id={rec.res_id}&action={actions['lead'].id}&model={rec.res_model}&view_type=form"
             return {
                 'type': 'ir.actions.act_url',
                 'url': link,
