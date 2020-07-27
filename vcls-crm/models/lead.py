@@ -109,7 +109,7 @@ class Leads(models.Model):
 
     company_id = fields.Many2one(string = 'Trading Entity', default = lambda self: self.env.ref('vcls-hr.company_VCFR'))
 
-    source_id = fields.Many2one('utm.source', "Initial Lead Source")
+    source_id = fields.Many2one('utm.source', "Unused Field")
 
     user_id = fields.Many2one(
         'res.users', 
@@ -372,6 +372,8 @@ class Leads(models.Model):
     def create(self, vals):
        
         if vals.get('type', '') == 'lead':
+            if vals.get('marketing_task_id',False) and not vals.get('marketing_project_id',False):
+                vals['marketing_project_id'] = self.env['project.task'].browse(vals.get('marketing_task_id')).project_id.id
             if vals.get('email_from',False) and not vals.get('partner_id',False):
                 existing = self.env['res.partner'].search([('email','=ilike',vals['email_from'])],limit=1)
                 if existing:

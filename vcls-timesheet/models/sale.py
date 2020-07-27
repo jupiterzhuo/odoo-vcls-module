@@ -73,7 +73,7 @@ class SaleOrder(models.Model):
     @api.multi
     @api.depends('timesheet_limit_date')
     def _compute_timesheet_ids(self):
-        #_logger.info("TS PATH | vcls-timesheet | sale.order | _compute_timesheet_ids")
+        _logger.info("TS PATH | vcls-timesheet | sale.order | _compute_timesheet_ids")
         # this method copy of base method, it injects date in domain
         for order in self:
             if order.analytic_account_id:
@@ -319,10 +319,10 @@ class SaleOrderLine(models.Model):
         
         
 
-    @api.depends('state', 'price_reduce', 'product_id', 'untaxed_amount_invoiced', 'qty_delivered')
+    @api.depends('state', 'price_reduce', 'product_id', 'untaxed_amount_invoiced', 'qty_delivered','order_id.invoicing_mode')
     def _compute_untaxed_amount_to_invoice(self):
         #self = self.sudo()
-        #_logger.info("vcls-timesheet | _compute_untaxed_amount_to_invoice {} {}".format(self.mapped('order_id.name'),self.mapped('name')))
+        _logger.info("vcls-timesheet | _compute_untaxed_amount_to_invoice {} {}".format(self.mapped('order_id.name'),self.mapped('name')))
         super()._compute_untaxed_amount_to_invoice()
 
         for line in self.filtered(lambda l: l.vcls_type=='rate' and l.order_id.invoicing_mode == 'tm'):
@@ -331,6 +331,13 @@ class SaleOrderLine(models.Model):
             #ts = self.env['account.analytic.line'].search([('stage_id','=','historical'),('so_line','=',line.id)])
             if ts:
                 line.untaxed_amount_to_invoice = sum(ts.mapped(lambda r: r.unit_amount_rounded*r.so_line_unit_price))
+            else:
+                line.untaxed_amount_to_invoice = 0.0
+        
+        #in fixed price, we force rate lines to 0
+        for line in self.filtered(lambda l: l.vcls_type=='rate' and l.order_id.invoicing_mode == 'fixed_price'):
+            line.untaxed_amount_to_invoice = 0.0
+
 
 class ProductTemplate(models.Model):
     _inherit = 'product.template'

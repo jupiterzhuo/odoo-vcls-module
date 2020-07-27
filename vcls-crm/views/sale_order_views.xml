@@ -163,7 +163,6 @@
                                 <field name="invoicing_mode" widget="radio"/>
                                 <field name="fiscal_position_id" options="{'no_create': True,'no_open':True}" domain="[('company_id','=',company_id)]"/>
                                 <field name="payment_term_id" options="{'no_create': True,'no_open':True}"/>
-                                <field name="ts_invoicing_mode" invisible="1"/>
                             </group>
                             <group name="inv_right">
                                 

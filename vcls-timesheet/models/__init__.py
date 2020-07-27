@@ -14,3 +14,4 @@ from . import project_timesheet_forecast_report
 from . import forecast
 from . import partner
 from . import project_summary
+from . import timesheet_recoder

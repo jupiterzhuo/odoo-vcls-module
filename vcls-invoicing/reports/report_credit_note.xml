@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <template id="report_credit_note_document">
+            <t t-call="web.external_layout">
+                <t t-set="o" t-value="o.with_context(lang=lang)"/>
+                <t t-set="data" t-value="o._get_detailed_invoice_report_data()"/>
+                <t t-set="_t" t-value="data['_t']"/>
+                <t t-set="rate_data" t-value="data['rate_data']"/>
+                <t t-set="rate_subtotal" t-value="data['rate_subtotal']"/>
+                <t t-set="fixed_price_data" t-value="data['fixed_price_data']"/>
+                <t t-set="expenses_and_communication_data" t-value="data['expenses_and_communication_data']"/>
+                <div t-set="address">
+                    <div>
+                    <br/>
+                        <strong>Invoice to:</strong>
+                        <address t-field="o.partner_id" t-options='{"widget": "contact", "fields": ["address", "name"], "no_marker": True}' />
+                    </div>
+                </div>
+                <div class="page">
+                <br/>
+                    <h2 class="mt0">
+                        <strong>Credit Note:</strong> <br/>
+                        <span t-field="o.number"/>
+                    </h2>
+
+                        <t t-if="o.origin" name="origin" class="mt-1">
+                        <br/>
+                        <br/>
+                            <strong>From the invoice:</strong>
+                            <span t-field="o.origin"/>
+                            <br/><br/>
+                        </t>
+
+                    <div t-if="o.origin" name="origin" class="mt-1">
+                        <t t-if="o.period_start and o.timesheet_limit_date">
+                        <span> for the period from </span>
+                        <span t-field="o.period_start"/>
+                        <span> to </span>
+                        <span t-field="o.timesheet_limit_date"/>
+                        </t>
+                    </div>
+
+
+                    <div class="clearfix">
+                    <div id="total" class="row">
+                    <br/>
+                        <div t-attf-class="#{'col-4' if report_type != 'html' else 'col-sm-7 col-md-5'} ml-auto">
+                            <table class="table table-sm">
+                                <tr class="border-black o_subtotal" style="">
+                                    <td><strong>Subtotal</strong></td>
+                                    <td class="text-right">
+                                        <span t-field="o.amount_untaxed"/>
+                                    </td>
+                                </tr>
+                                <t t-if="not o.amount_by_group and not o.amount_tax">
+                                    <tr>
+                                        <td><span>VAT 0.0%</span></td>
+                                        <td class="text-right o_price_total">
+                                            <span t-field="o.amount_tax"
+                                            t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                        </td>
+                                    </tr>
+                                </t>
+                                <t t-foreach="o.amount_by_group" t-as="amount_by_group">
+                                    <tr>
+                                        <t t-if="len(o.tax_line_ids) == 1 and o.amount_untaxed == amount_by_group[2]">
+                                            <td><span t-esc="amount_by_group[0]"/></td>
+                                            <td class="text-right o_price_total">
+                                                <span t-esc="amount_by_group[3]" />
+                                            </td>
+                                        </t>
+                                        <t t-else="">
+                                            <td>
+                                                <span t-esc="amount_by_group[0]"/>
+                                                <span>&amp;nbsp;<span>on</span>
+                                                    <t t-esc="amount_by_group[4]"/>
+                                                </span>
+                                            </td>
+                                            <td class="text-right o_price_total">
+                                                <span t-esc="amount_by_group[3]"/>
+                                            </td>
+                                        </t>
+                                    </tr>
+                                </t>
+                                <tr class="border-black o_total">
+                                    <td><strong>Total</strong></td>
+                                    <td class="text-right">
+                                        <span t-field="o.amount_total"/>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    </div>
+                </div>
+            </t>
+        </template>
+
+        <template id="report_credit_note">
+            <t t-call="web.html_container">
+                <t t-foreach="docs" t-as="o">
+                    <t t-set="lang" t-value="o.partner_id.lang"/>
+                    <t t-call="vcls-invoicing.report_credit_note_document" t-lang="lang"/>
+                </t>
+            </t>
+        </template>
+        <report
+                id="invoice_credit_note"
+                model="account.invoice"
+                string="Credit Note"
+                report_type="qweb-pdf"
+                name="vcls-invoicing.report_credit_note"
+                file="vcls-invoicing.report_credit_note"
+        />
+
+    </data>
+</odoo>

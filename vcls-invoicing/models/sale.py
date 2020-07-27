@@ -87,6 +87,29 @@ class SaleOrder(models.Model):
         store=True,
     )
 
+    family_invoice_status = fields.Selection([
+        ('upselling', 'Upselling Opportunity'),
+        ('invoiced', 'Fully Invoiced'),
+        ('to invoice', 'To Invoice'),
+        ('no', 'Nothing to Invoice')
+        ], string='Family Invoice Status', compute='_compute_family_invoice_status', store=True, readonly=True)
+
+    @api.depends('invoice_status','child_ids.invoice_status')
+    def _compute_family_invoice_status(self):
+        for so in self:
+            family_so = so + so.child_ids
+            statuses = family_so.mapped('invoice_status')
+            if so.state not in ('sale', 'done'):
+                so.family_invoice_status = 'no'
+            elif any(status == 'to invoice' for status in statuses):
+                so.family_invoice_status = 'to invoice'
+            elif all(status == 'invoiced' for status in statuses):
+                so.family_invoice_status = 'invoiced'
+            elif all(status in ['invoiced','upselling'] for status in statuses):
+                so.family_invoice_status = 'upselling'
+            else:
+                so.family_invoice_status = 'no'
+
     @api.depends('partner_id.invoice_admin_id')
     def _compute_invoice_admin_id_from_partner_id(self):
         for rec in self:
