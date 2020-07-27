@@ -185,6 +185,7 @@
         </record>
 
         <record id="purchase.action_invoice_pending" model="ir.actions.act_window">
+            <field name="view_mode">tree,form</field>
             <field name="view_ids" eval="[(5, 0, 0),
                 (0, 0, {'view_mode': 'tree', 'view_id': ref('vcls-suppliers.supplier_bills_view_tree')}),
                 (0, 0, {'view_mode': 'form', 'view_id': ref('vcls-suppliers.inherited_purchase_approval_view')}),
