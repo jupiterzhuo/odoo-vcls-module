@@ -14,7 +14,20 @@ class TranslatorSFOpportunity(TranslatorSFGeneral.TranslatorSFGeneral):
         mapOdoo = odoo.env['map.odoo']
         result = {}
 
+        context = odoo.env.context
+
         #_logger.info("{}".format(SF_Opportunity))
+        if SF_Opportunity['Repeat_Business__c']:
+            SF_Opportunity['LeadSource'] = 'Repeat Business'
+
+        if SF_Opportunity['LeadSource']:
+            result['marketing_project_id'] = mapOdoo.convertRef(SF_Opportunity['LeadSource'],odoo,'project.project',False)
+        if SF_Opportunity['CampaignId']:
+            result['marketing_task_id'] = TranslatorSFGeneral.TranslatorSFGeneral.toOdooId(SF_Opportunity['CampaignId'],"project.task","Campaign",odoo)
+        
+        if context.get('custom_context')=='small_update':
+            result['log_info'] = 'small_update {}'.format(SF_Opportunity['LeadSource'])
+            return result
 
         ### DEFAULT VALUES
         result['type'] = 'opportunity'
@@ -72,8 +85,6 @@ class TranslatorSFOpportunity(TranslatorSFGeneral.TranslatorSFGeneral):
         result['date_deadline'] = SF_Opportunity['Deadline_for_Sending_Proposal__c']
         result['date_closed'] = SF_Opportunity['CloseDate']
 
-        if SF_Opportunity['CampaignId']:
-            result['marketing_task_id'] = TranslatorSFGeneral.TranslatorSFGeneral.toOdooId(SF_Opportunity['CampaignId'],"project.task","Campaign",odoo)
         ### OTHER
         #result.update(odoo.env['crm.lead']._onchange_partner_id_values(int(result['partner_id']) if result['partner_id'] else False)) 
         result['message_ids'] = [(0, 0, TranslatorSFOpportunity.generateLog(SF_Opportunity))]

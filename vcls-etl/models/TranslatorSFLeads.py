@@ -22,11 +22,18 @@ class TranslatorSFLeads(TranslatorSFGeneral.TranslatorSFGeneral):
         if SF_Leads['Inactive_Lead__c']:
             result['active'] = False
         else:
-            result['active'] = True
+            #we don't want to reactivate archived leads
+            pass #result['active'] = True
 
         if SF_Leads['Opted_In__c']:
             result['opted_in'] = True
             result['gdpr_status'] = 'in'
+
+        if SF_Leads['LeadSource']:
+            result['marketing_project_id'] = mapOdoo.convertRef(SF_Leads['LeadSource'],odoo,'project.project',False)
+        if SF_Leads['Opt_in_Campaign__c']:
+            result['marketing_task_id'] = TranslatorSFGeneral.TranslatorSFGeneral.toOdooId(SF_Leads['Opt_in_Campaign__c'],"project.task","Campaign",odoo)
+
         if SF_Leads['Unsubscribed_from_Marketing_Comms__c']:
             if SF_Leads['Unsubscribed_from_Marketing_Comms__c'] == 'Unsubscribed':
                 result['opted_in'] = False
@@ -35,7 +42,7 @@ class TranslatorSFLeads(TranslatorSFGeneral.TranslatorSFGeneral):
             result['content_name'] = SF_Leads['Content_Name__c']
                 	
         if context.get('custom_context')=='small_update':
-            result['log_info'] = 'small_update {}'.format(result['active'])
+            result['log_info'] = 'small_update {}'.format(SF_Leads['LastName'] or False)
             return result
 
         ### IDENTIFICATION
@@ -61,10 +68,6 @@ class TranslatorSFLeads(TranslatorSFGeneral.TranslatorSFGeneral):
             result['description'] += 'Description : \n' + str(SF_Leads['Description']) + '\n'
         if SF_Leads['Initial_Product_Interest__c']:
             result['description'] += 'Initial Interest : \n' + str(SF_Leads['Initial_Product_Interest__c']) + '\n'
-
-        if SF_Leads['LeadSource']:
-            #_logger.info("Lead Source | {}".format(SF_Leads['LeadSource']))
-            result['marketing_project_id'] = mapOdoo.convertRef(SF_Leads['LeadSource'],odoo,'project.project',False)
 
         result = TranslatorSFLeads.partner_finder(result,SF_Leads,odoo)
         
@@ -107,8 +110,7 @@ class TranslatorSFLeads(TranslatorSFGeneral.TranslatorSFGeneral):
         result['message_ids'] = [(0, 0, TranslatorSFLeads.generateLog(SF_Leads))]
 
         #_logger.info("TRANSLATOR LEAD {}".format(result))
-        if SF_Leads['Opt_in_Campaign__c']:
-            result['marketing_task_id'] = TranslatorSFGeneral.TranslatorSFGeneral.toOdooId(SF_Leads['Opt_in_Campaign__c'],"project.task","Campaign",odoo)
+        
         if SF_Leads['Unsubscribe_Campaign__c']:
             result['marketing_task_out_id'] = TranslatorSFGeneral.TranslatorSFGeneral.toOdooId(SF_Leads['Unsubscribe_Campaign__c'],"project.task","Campaign",odoo)
         result['conversion_date'] = SF_Leads['ConvertedDate']

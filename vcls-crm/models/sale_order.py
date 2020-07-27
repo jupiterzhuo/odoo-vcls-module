@@ -115,10 +115,6 @@ class SaleOrder(models.Model):
         'Family Quotation Count', compute='_get_family_order_count'
     )
 
-    ts_invoicing_mode = fields.Selection([('tm', 'T&M'),
-                                          ('fp', 'Fixed price')],
-                                         'Invoicing mode')
-
     report_details = fields.Selection([
         ('simple', 'simple'),
         ('detailed', 'detailed')],
@@ -316,6 +312,17 @@ class SaleOrder(models.Model):
         parts = raw_name.lower().split(ref.lower()) #we use the ref to split
         parts.reverse() #we reverse to get the last part for any length
         return parts[0].strip()
+
+    @api.multi
+    def _write(self, values):
+        """ We override to cancel the automated creation of upselling messages"""
+        if values.get('invoice_status','') == 'upselling':
+            self = self.with_context(mail_activity_automation_skip = True)
+            _logger.info("UPSELLING {}".format(self.env.context))
+        """if 'invoice_status' in values:
+            rem = values.pop('invoice_status')""" 
+
+        return super(SaleOrder, self)._write(values)
     
     @api.multi
     def upsell(self):

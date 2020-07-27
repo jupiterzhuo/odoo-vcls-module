@@ -15,5 +15,28 @@
             </field>
         </record>  
     
+        <record id="sale_subscription_view_kanban_inherit" model="ir.ui.view">
+            <field name="name">sale.subscription.view.kanban.inherit</field>
+            <field name="model">sale.subscription</field>
+            <field name="inherit_id" ref="sale_subscription.sale_subscription_view_kanban"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='code']" position="after">
+                    <br/>
+                    <field name="services"/>
+                </xpath>
+            </field>
+        </record>  
+
+        <record id="sale_subscription_view_list_inherit_" model="ir.ui.view">
+            <field name="name">sale.subscription.view.list.inherit</field>
+            <field name="model">sale.subscription</field>
+            <field name="inherit_id" ref="sale_subscription.sale_subscription_view_list"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='code']" position="after">
+                    <field name="services"/>
+                </xpath>
+            </field>
+        </record>
+
     </data>
 </odoo>

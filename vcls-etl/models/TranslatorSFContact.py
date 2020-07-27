@@ -12,6 +12,19 @@ class TranslatorSFContact(TranslatorSFGeneral.TranslatorSFGeneral):
         result = {}
         context = odoo.env.context
         #_logger.info("ETL Contact | {}".format(SF_Contact))
+        if SF_Contact['Opt_in_Campaign__c']:
+            task_id = TranslatorSFGeneral.TranslatorSFGeneral.toOdooId(SF_Contact['Opt_in_Campaign__c'],"project.task","Campaign",odoo)
+            if task_id:
+                project = odoo.env['project.task'].browse(task_id).project_id
+                result['marketing_task_id'] = task_id
+                result['marketing_project_id'] = project.id
+            else:
+                pass
+
+        elif SF_Contact['LeadSource']:
+            result['marketing_project_id'] = mapOdoo.convertRef(SF_Contact['LeadSource'],odoo,'project.project',False)
+        else:
+            pass
 
         ### DEFAULT VALUES
         result['is_company'] = False
@@ -21,14 +34,15 @@ class TranslatorSFContact(TranslatorSFGeneral.TranslatorSFGeneral):
         if SF_Contact['Inactive_Contact__c']:
             result['active'] = False
         else:
-            result['active'] = True
+            #we don't what the contact to be reactivated
+            pass #result['active'] = True
         if SF_Contact['Unsubscribed_from_Marketing_Comms__c']:
             if SF_Contact['Unsubscribed_from_Marketing_Comms__c'] == 'Unsubscribed':
                 result['opted_in'] = False
                 result['gdpr_status'] = 'out'
 
         if context.get('custom_context')=='small_update':
-            result['log_info'] = 'small_update {}'.format(result['active'])
+            result['log_info'] = 'small_update {}'.format(SF_Contact['LastName'] or False)
             return result
 
         ### IDENTIFICATION
@@ -90,8 +104,7 @@ class TranslatorSFContact(TranslatorSFGeneral.TranslatorSFGeneral):
 
         #if SF_Contact['VCLS_Initial_Contact__c']:
             #result['vcls_contact_id'] = TranslatorSFGeneral.TranslatorSFGeneral.convertUserId(SF_Contact['VCLS_Initial_Contact__c'],odoo, SF)
-        if SF_Contact['Opt_in_Campaign__c']:
-            result['marketing_task_id'] = TranslatorSFGeneral.TranslatorSFGeneral.toOdooId(SF_Contact['Opt_in_Campaign__c'],"project.task","Campaign",odoo)
+        
         if SF_Contact['Unsubscribe_Campaign__c']:
             result['marketing_task_out_id'] = TranslatorSFGeneral.TranslatorSFGeneral.toOdooId(SF_Contact['Unsubscribe_Campaign__c'],"project.task","Campaign",odoo)
 
