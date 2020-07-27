@@ -27,6 +27,27 @@ class Company(models.Model):
 class Invoice(models.Model):
     _inherit = 'account.invoice'
 
+    attachment_number = fields.Integer('Number of Attachments', compute='_compute_attachment_number')
+
+    @api.multi
+    def _compute_attachment_number(self):
+        attachment_data = self.env['ir.attachment'].read_group([('res_model', '=', 'account.invoice'), ('res_id', 'in', self.ids)], ['res_id'], ['res_id'])
+        attachment = dict((data['res_id'], data['res_id_count']) for data in attachment_data)
+        for inv in self:
+            inv.attachment_number = attachment.get(inv.id, 0)
+
+    @api.multi
+    def action_get_attachment_view(self):
+        self.ensure_one()
+        res = self.env['ir.actions.act_window'].for_xml_id('base', 'action_attachment')
+        res['domain'] = [('res_model', '=', 'account.invoice'), ('res_id', 'in', self.ids)]
+        res['context'] = {
+            'default_res_model': 'account.invoice',
+            'default_res_id': self.id,
+            'edit': False,
+        }
+        return res
+
     @api.onchange('partner_id')
     def _part_change(self):
         inv_type = self.type or self.env.context.get('type', 'out_invoice')
