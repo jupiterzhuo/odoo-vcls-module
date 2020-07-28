@@ -232,6 +232,11 @@
             <field name="context">{'search_default_pcreview':1}</field>
         </record>
 
+        <record id="sale_timesheet.action_timesheet_from_invoice" model="ir.actions.act_window">
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="vcls-timesheet.vcls_timesheet_read_view"/>
+        </record>
+
         <record id="action_vcls_timesheet_tree" model="ir.actions.act_window">
             <field name="name">LC Review</field>
             <field name="type">ir.actions.act_window</field>
