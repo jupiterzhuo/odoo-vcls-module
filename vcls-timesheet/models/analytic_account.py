@@ -116,6 +116,7 @@ class AnalyticLine(models.Model):
 
     calculated_amount = fields.Float(
         compute='_compute_calculated_amount',
+        compute_sudo=True,
         string="Revenue",
         help="Unite Price x Revised Time",
         store=True,
