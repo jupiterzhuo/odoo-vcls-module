@@ -23,6 +23,22 @@ class Company(models.Model):
         string='Supplier Approver'
         )
 
+class Account(models.Model):
+    _inherit = 'account.account'
+
+    #we add a default analytic account to the ledger to partially automate accounting job
+    default_account_id = fields.Many2one(
+        comodel_name = 'account.analytic.account',
+    )
+
+class InvoiceLine(models.Model):
+    _inherit = 'account.invoice.line'
+
+    #if we change the product or the account_id, the analytic is also changed if not yet documented
+    @api.onchange('product_id','account_id')
+    def _get_default_analytic(self):
+        for line in self.filtered(lambda p: p.invoice_id.type in ('in_invoice', 'in_refund') and not p.account_analytic_id):
+            line.account_analytic_id = line.account_id.default_account_id if line.account_id else False
 
 class Invoice(models.Model):
     _inherit = 'account.invoice'
