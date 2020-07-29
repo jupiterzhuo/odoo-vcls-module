@@ -32,6 +32,16 @@
             </field>
         </record>
 
+        <record model="ir.ui.view" id="view_invoice_asset_category">
+            <field name="name">account.invoice.supplier.form</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account_asset.view_invoice_asset_category"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='asset_category_id']" position="replace">
+                </xpath>
+            </field>
+        </record>
+
         <record model="ir.ui.view" id="purchase_order_form_inherit">
             <field name="name">purchase.order.form.inherit</field>
             <field name="model">purchase.order</field>
