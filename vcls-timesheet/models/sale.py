@@ -239,6 +239,7 @@ class SaleOrderLine(models.Model):
         'invoice_lines.quantity')
         
     def _get_invoice_qty(self):
+        self = self.sudo()
         #Change qantity delivered for lines according to order.invoicing_mode and the line.vcls_type
         _logger.info("COMPUTE INVOICED QTY")
         super()._get_invoice_qty()
