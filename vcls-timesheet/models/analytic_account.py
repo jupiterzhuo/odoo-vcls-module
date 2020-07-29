@@ -283,7 +283,7 @@ class AnalyticLine(models.Model):
     @api.model
     def _timesheet_preprocess(self, vals):
        
-        _logger.info("TS PRE pre | {}".format(vals))
+        #_logger.info("TS PRE pre | {}".format(vals))
         #if we have task_id, we enforce project_id and main_project_id and related accounts
         if vals.get('task_id'):
             task = self.env['project.task'].sudo().browse(vals['task_id'])
