@@ -193,7 +193,6 @@ class SaleOrderLine(models.Model):
         """Change qantity delivered for lines according to order.invoicing_mode and the line.vcls_type"""
 
         #self = self.with_context(timesheet_rounding=True)
-        _logger.info("COMPUTE QTY DELIVERED")
         super()._compute_qty_delivered()
         for line in self:
             # In Time & Material, we invoice the rate product lines and set the other services to 0
@@ -242,7 +241,7 @@ class SaleOrderLine(models.Model):
         #Change qantity delivered for lines according to order.invoicing_mode and the line.vcls_type
         super()._get_invoice_qty()
         for line in self:
-            _logger.info("qty invoiced for {}\n Type {} | Mode {} | Tracking {}".format(line.name,line.product_id.vcls_type,line.order_id.invoicing_mode,line.product_id.service_tracking))
+            #_logger.info("qty invoiced for {}\n Type {} | Mode {} | Tracking {}".format(line.name,line.product_id.vcls_type,line.order_id.invoicing_mode,line.product_id.service_tracking))
             #we add the historical invoiced amount for migration purpose
             if (line.product_id.vcls_type in ['vcls_service']) and (line.order_id.invoicing_mode == 'fixed_price' or line.product_id.service_tracking == 'no'):
             #if (line.order_id.invoicing_mode == 'fixed_price' and line.product_id.vcls_type in ['vcls_service']) or (line.order_id.invoicing_mode == 'tm' and line.product_id.service_tracking == 'no'):
@@ -305,7 +304,7 @@ class SaleOrderLine(models.Model):
         super()._compute_untaxed_amount_invoiced()
 
         for line in self:
-            _logger.info("{}".format(line.vcls_type))
+            #_logger.info("{}".format(line.vcls_type))
             pass
 
         for line in self.filtered(lambda l: l.historical_invoiced_amount>0):
