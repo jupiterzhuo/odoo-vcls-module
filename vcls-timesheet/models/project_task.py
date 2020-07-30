@@ -217,10 +217,10 @@ class ProjectTask(models.Model):
         #gets parent tasks only
         for task in self.filtered(lambda s: not s.parent_id):
             #this is to fix if a task was added manually and has the same sale_line_id (sale.order.line type) as another task 
-            if task.sale_line_id.task_id != task:
+            """if task.sale_line_id.task_id != task:
                 #KPIs are run every hour and if they had been calculated before this fix was added, they need to be set to 0
                 task.zero_out_kpi()
-                continue
+                continue"""
             #gets all child and parent timesheets for this task. if "task" is a child task, skips it.
             analyzed_timesheet = task.project_id.timesheet_ids.filtered(lambda t: t.reporting_task_id == task)
             _logger.info("KPI {} {}".format(task.name, len(analyzed_timesheet)))
