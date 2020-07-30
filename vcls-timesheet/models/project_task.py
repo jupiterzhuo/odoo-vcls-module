@@ -216,16 +216,18 @@ class ProjectTask(models.Model):
     def _get_kpi(self):
         #gets parent tasks only
         for task in self.filtered(lambda s: not s.parent_id):
-            #this is to fix if a task was added manually and has the same sale_line_id (sale.order.line type) as another task 
-            """if task.sale_line_id.task_id != task:
-                #KPIs are run every hour and if they had been calculated before this fix was added, they need to be set to 0
-                task.zero_out_kpi()
-                continue"""
+
             #gets all child and parent timesheets for this task. if "task" is a child task, skips it.
             analyzed_timesheet = task.project_id.timesheet_ids.filtered(lambda t: t.reporting_task_id == task)
-            _logger.info("KPI {} {}".format(task.name, len(analyzed_timesheet)))
+            #_logger.info("KPI {} {}".format(task.name, len(analyzed_timesheet)))
 
-            task.contractual_budget = task.sale_line_id.price_unit * task.sale_line_id.product_uom_qty
+            #this is to fix if a task was added manually and has the same sale_line_id (sale.order.line type) as another task 
+            if task.sale_line_id.task_id != task:
+                #KPIs are run every hour and if they had been calculated before this fix was added, they need to be set to 0
+                task.contractual_budget = 0
+                #task.zero_out_kpi()
+            else:
+                task.contractual_budget = task.sale_line_id.price_unit * task.sale_line_id.product_uom_qty
 
             task.forecasted_budget = sum([
                 hourly_rate * resource_hours for hourly_rate, resource_hours in
@@ -292,6 +294,8 @@ class ProjectTask(models.Model):
             task.valuation_ratio = 100.0*(task.valued_hours / task.realized_hours) if task.realized_hours else False
 
             task.remaining_budget = task.contractual_budget - task.valued_budget
+
+            task.compute_consummed_completed_ratio()
 
             if  not task.allow_budget_modification:
                 task.contractual_budget = False
