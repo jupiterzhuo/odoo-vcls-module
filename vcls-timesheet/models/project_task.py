@@ -223,6 +223,7 @@ class ProjectTask(models.Model):
                 continue
             #gets all child and parent timesheets for this task. if "task" is a child task, skips it.
             analyzed_timesheet = task.project_id.timesheet_ids.filtered(lambda t: t.reporting_task_id == task)
+            _logger.info("KPI {} {}".format(task.name, len(analyzed_timesheet)))
 
             task.contractual_budget = task.sale_line_id.price_unit * task.sale_line_id.product_uom_qty
 
