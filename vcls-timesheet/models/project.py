@@ -45,7 +45,10 @@ class Project(models.Model):
     def compute_budget_consumed(self):
         for project in self:
             if project.contractual_budget:
-                project.budget_consumed = project.realized_budget / project.contractual_budget * 100
+                if project.invoicing_mode == 'fixed_price':
+                    project.budget_consumed = project.valued_budget / project.contractual_budget * 100
+                else:
+                    project.budget_consumed = project.realized_budget / project.contractual_budget * 100
             else:
                 project.budget_consumed = False
 
