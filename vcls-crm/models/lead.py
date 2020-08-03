@@ -983,6 +983,36 @@ class Leads(models.Model):
             temp += lead_sorted.mapped('marketing_task_ids').mapped('id')
             merged_data['marketing_task_ids'] = [(6, _, temp)]
 
+            new_list_out = [x for x in self if x.opted_out_date]
+            new_list_in = [x for x in self if x.opted_in_date]
+            if len(new_list_out) > 0:
+                lead_sorted_opted_out_date = sorted(new_list_out, key=lambda x: x.opted_out_date)[-1].opted_out_date
+            else:
+                lead_sorted_opted_out_date = False
+            if len(new_list_in) > 0:
+                lead_sorted_opted_in_date = sorted(new_list_in, key=lambda x: x.opted_in_date)[-1].opted_in_date
+            else:
+                lead_sorted_opted_in_date = False
+
+            gdpr_is_out = False
+            # if both dates are false but all the leads are opted-in
+            for lead in lead_sorted:
+                if lead.gdpr_status == 'out':
+                    gdpr_is_out = True
+
+            if lead_sorted_opted_in_date and lead_sorted_opted_out_date and lead_sorted_opted_out_date < lead_sorted_opted_in_date or not gdpr_is_out:
+                merged_data['opted_in_date'] = lead_sorted_opted_in_date
+                merged_data['opted_out_date'] = False
+                merged_data['opted_out'] = False
+                merged_data['opted_in'] = True
+                merged_data['gdpr_status'] = 'in'
+            else:
+                merged_data['opted_out_date'] = lead_sorted_opted_out_date
+                merged_data['opted_in_date'] = False
+                merged_data['opted_out'] = True
+                merged_data['opted_in'] = False
+                merged_data['gdpr_status'] = 'out'
+
         # write merged data into first opportunity
         opportunities_head.write(merged_data)
 
