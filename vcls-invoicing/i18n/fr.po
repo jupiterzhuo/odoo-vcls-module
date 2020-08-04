@@ -816,3 +816,8 @@ msgstr "TVA"
 #, python-format
 msgid "ID"
 msgstr "SIREN"
+
+#. module: vcls-invoicing
+#: model:ir.model.fields,field_description:vcls-invoicing.field_account_asset_category__generate_multi_asset
+msgid "Generate Multi Assets"
+msgstr "Générer plusieurs fiches d'immobilisation"

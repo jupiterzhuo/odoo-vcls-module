@@ -7,3 +7,4 @@ from . import product
 from . import invoice_line
 from . import res_bank
 from . import fiscal_position
+from . import account_asset_category
