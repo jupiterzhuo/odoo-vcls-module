@@ -201,6 +201,7 @@ obj_dict = {
     'do_contract':True,
     'do_lead':True,
     'do_opportunity':True,
+    'do_ledger_account':True,
     }
 model.sf_update_keys(obj_dict,full_update)
             </field>

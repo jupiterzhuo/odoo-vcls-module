@@ -282,10 +282,20 @@ class ETLMap(models.Model):
             }
             self.update_keys(params)
 
-        
-
-        
-
+        ### LEDGER ACCOUNT KEYS PROCESSING
+        if obj_dict.get('do_ledger_account',False):
+            sql = """
+                SELECT Id, LastModifiedDate FROM s2cor__Sage_ACC_Ledger_Account__c 
+                    """
+            params = {
+                'sfInstance':sfInstance,
+                'priority':500,
+                'externalObjName':'LedgerAccount',
+                'sql': self.build_sql(sql,[self.env.ref('vcls-etl.etl_sf_ledger_accountfilter').value,time_sql]),
+                'odooModelName':'account.account',
+                'is_full_update':is_full_update,
+            }
+            self.update_keys(params)
         
 
         ###CLOSING

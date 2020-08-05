@@ -153,5 +153,24 @@
             <field name="value"></field> 
         </record>
 
+        <record id="etl_sf_ledgeraccount_query" model="ir.config_parameter">
+            <field name="key">etl_sf_ledgeraccount_query</field>
+            <field name="value">
+                SELECT Id, Name, s2cor__Account_Number__c, s2cor__Description__c, 
+                s2cor__Parent__c, s2cor__Company__c 
+                FROM s2cor__Sage_ACC_Ledger_Account__c
+            </field>
+        </record>
+
+        <record id="etl_sf_ledgeraccount_filter" model="ir.config_parameter">
+            <field name="key">etl_sf_ledgeraccount_filter</field>
+            <field name="value"></field> 
+        </record>
+
+        <record id="etl_sf_ledgeraccount_post" model="ir.config_parameter">
+            <field name="key">etl_sf_ledgeraccount_post</field>
+            <field name="value"></field> 
+        </record>
+
     </data>
 </odoo>

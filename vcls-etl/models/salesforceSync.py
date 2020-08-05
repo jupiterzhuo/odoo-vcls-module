@@ -174,8 +174,11 @@ class salesforceSync(models.Model):
                                 counter += 1
                                 attributes = translator.translateToOdoo(sf_rec, sync, sfInstance)
                                 if not attributes:
-                                    key[0].write({'state':'postponed','priority':0})
-                                    _logger.info("ETL | Missing Mandatory info to process key {} - {}".format(key[0].externalObjName,key[0].externalId))
+                                    if key[0].state != 'upToDate':
+                                        key[0].write({'state':'postponed','priority':0})
+                                        _logger.info("ETL | Missing Mandatory info to process key {} - {}".format(key[0].externalObjName,key[0].externalId))
+                                    else:
+                                        _logger.info("ETL | Record already exist {} - {}".format(key[0].externalObjName,key[0].externalId))
                                     continue
 
                                 #UPDATE Case
