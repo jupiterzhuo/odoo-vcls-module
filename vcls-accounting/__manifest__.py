@@ -22,6 +22,7 @@
     'depends': [
         'base',
         'account',
+        'account_reports',
         'vcls-contact',
         ],
 
@@ -31,6 +32,7 @@
 
         ### VIEWS ###
         'views/account_move_line_views.xml',
+        'views/general_ledger_assets.xml',
     ],
     # only loaded in demonstration mode
     'demo': [
