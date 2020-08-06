@@ -32,7 +32,6 @@ class TranslatorSFLedgerAccount(TranslatorSFGeneral.TranslatorSFGeneral):
             result['name'] = SF_LedgerAccount['s2cor__Description__c']
             result['display_name'] = SF_LedgerAccount['Name']
             type_id = TranslatorSFLedgerAccount.convertType(SF, SF_LedgerAccount['s2cor__Parent__c'], odoo)
-            print(type_id)
             result['user_type_id'] = type_id
             result['company_id'] = odoo.env.ref('vcls-hr.company_VCINC').id
 
@@ -44,7 +43,6 @@ class TranslatorSFLedgerAccount(TranslatorSFGeneral.TranslatorSFGeneral):
     def convertType(SF, SfParent, odoo):
         queryType = "Select Name FROM s2cor__Sage_ACC_Ledger_Account__c WHERE id='{}'".format(str(SfParent))
         typeName = SF.getConnection().query(queryType)['records'][0]['Name']
-        print(typeName)
         accountType = odoo.env['account.account.type'].search([('name','=ilike',typeName)],limit=1)
         if accountType:
             return accountType.id
