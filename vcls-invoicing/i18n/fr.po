@@ -821,3 +821,18 @@ msgstr "SIREN"
 #: model:ir.model.fields,field_description:vcls-invoicing.field_account_asset_category__generate_multi_asset
 msgid "Generate Multi Assets"
 msgstr "Générer plusieurs fiches d'immobilisation"
+
+#. module: vcls-invoicing
+#: model:ir.module.category,name:vcls-invoicing.group_category_bank_account_number
+msgid "Bank & Account Numbers"
+msgstr "Banque & Numéros de compte"
+
+#. module: vcls-invoicing
+#: model:res.groups,name:vcls-invoicing.account_number_read_group
+msgid "User"
+msgstr "Utilisateur"
+
+#. module: vcls-invoicing
+#: model:res.groups,name:vcls-invoicing.account_number_edit_group
+msgid "Manager"
+msgstr "Gestionnaire"

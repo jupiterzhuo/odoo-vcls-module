@@ -1,0 +1,237 @@
+<odoo>
+    <data>
+
+        <record id="invoice_tree_with_po" model="ir.ui.view">
+            <field name="name">account.invoice.tree.with.po</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_tree"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='type']" position="after">
+                    <field name='po_id'/>
+                </xpath>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_invoice_form_inherit">
+            <field name="name">account.invoice.form</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.invoice_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//tree//field[@name='product_id']" position="attributes">
+                    <attribute name="domain">[('sale_ok','=',True), ('vcls_type', '!=', 'other')]</attribute>
+                    <attribute name="options">{'no_create': True, "no_open": True}</attribute>
+                </xpath>
+            </field>
+        </record>
+
+        <record model="ir.ui.view" id="view_invoice_form">
+            <field name="name">account.invoice.form</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="sale_timesheet_limit_date.invoice_form"/>
+            <field name="mode">primary</field>
+            <field name="priority" eval="2" />
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='number']" position="after">
+                    <field name="temp_name" readonly="1" class="oe_inline" attrs="{'invisible': [('state','not in',('draft',))]}"/>
+                </xpath>
+
+                <xpath expr="//field[@name='timesheet_limit_date']" position="replace">
+                </xpath>
+
+                <xpath expr="//field[@name='partner_bank_id']" position="replace">
+                </xpath>
+
+                <xpath expr="/form/sheet/group" position="replace">
+                    <group>
+                        <group string="Client">
+                            <field string="Client" name="partner_id" widget="res_partner_many2one" context="{'search_default_customer':1, 'show_address': 1, 'default_is_company': True, 'show_vat': True}" options="{&quot;always_reload&quot;: True, &quot;no_quick_create&quot;: True}" domain="[('customer', '=', True)]" required="1"/>
+                            <field name="payment_term_id"/>
+                            <field name="cash_rounding_id" groups="account.group_cash_rounding" invisible="1"/>
+                            <field name="user_id" groups="base.group_user" string="IA"/>
+                            <field name="invoice_template" required="1"/>
+                            <field name="merge_subtask"/>
+                            <field name="activity_report_template" required="0"/>
+                        </group>
+                        <group string="Project">
+                            <field name='scope_of_work'/>
+                            <field name='lc_laius'/>
+                            <field name='project_name'/>
+                        </group>
+                    </group>
+
+                    <group string="Invoice">
+                        <group>
+                            <field name="date_invoice" options="{'datepicker': {'warn_future': true}}" invisible="1"/>
+                            <field name="date_due" attrs="{'readonly': ['|',('payment_term_id','!=',False), ('state', 'in', ['open', 'in_payment', 'paid'])]}" force_save="1" invisible="1"/>
+                            <field name="move_name" invisible="1"/> 
+                            <field name="vcls_due_date" string="Due Date"/>
+                            <field name="period_start" required="1"/>
+                            <field name="timesheet_limit_date" string="Period End" required="1"/>
+                        </group>
+                        <group>
+                            <label for="currency_id" groups="base.group_multi_currency"/>
+                            <div groups="base.group_multi_currency">
+                                <field name="currency_id" options="{'no_create': True, 'no_open': True}" class="oe_inline"/>
+                                <field name="company_currency_id" invisible="1"/>
+                            </div>
+                            <field name='po_id'/>
+                            <field name='partner_bank_id' string="Bank Account" options="{'no_create': True, 'no_open': True}" domain="[('company_id','=',company_id)]"/>
+                            <field name='ready_for_approval' invisible="1"/>
+                            <button name='get_last_report' type="object"
+                                string="PDF" class="btn-primary"
+                                attrs="{'invisible': [('draft_count','=', 0)]}"/>
+
+                        </group>
+                    </group>
+
+                </xpath>
+                
+                <!--
+                attrs="{'invisible': ['|',('ready_for_approval', '=', False),('state','!=','draft')]}"-->
+                <xpath expr="//button[@name='action_invoice_open']" position="before">
+                    <button string="GENERATE DRAFT INVOICE" type="object" class="btn-primary" name="action_generate_draft_invoice" attrs="{'invisible': [('state', '!=', 'draft')]}"/>
+                </xpath>
+                <xpath expr="//button[@name='action_invoice_open']" position="before">
+                    <button string="GENERATE ACTIVITY REPORT" type="object" class="btn-primary" name="action_generate_activity_report"/>
+                </xpath>
+                <xpath expr="//button[@name='action_invoice_open']" position="before">
+                    <button string="Ready for Approval" type="object" class="btn-primary" name="action_ready_for_approval" attrs="{'invisible': [('ready_for_approval', '=', True)]}"/>
+                </xpath>
+
+                <div class="oe_button_box" name="button_box">
+                    <button name="action_activity_report_attachments" class="oe_stat_button" type="object" icon="fa-pencil-square-o" attrs="{'invisible':[('report_count','=', 0)]}">
+                        <field name="report_count" widget="statinfo" string="Activity Report"/>
+                    </button>
+                    <button name="action_generate_draft_invoice_attachments" class="oe_stat_button" type="object" icon="fa-pencil-square-o" attrs="{'invisible':[('draft_count','=', 0)]}">
+                        <field name="draft_count" widget="statinfo" string="Draft Invoice"/>
+                    </button>
+                </div>
+
+                <xpath expr="//button[@name='preview_invoice']" position="attributes">
+                    <attribute name="invisible">1</attribute>
+                </xpath>
+
+                <xpath expr="//button[@name='action_invoice_open']" position="attributes">
+                    <attribute name="groups">account.group_account_manager</attribute>
+                </xpath>
+                
+                <xpath expr="//button[@id='account_invoice_payment_btn']" position="attributes">
+                    <attribute name="attrs">{'invisible': ['|',('state', '!=', 'open'),('type','=','out_refund')]}</attribute>
+                </xpath>
+
+            </field>
+        </record>
+
+        <record id="account.action_invoice_tree1_view2" model="ir.actions.act_window.view">
+            <field name="view_id" ref="view_invoice_form"/>
+        </record>
+        <record id="account.action_invoice_tree1" model="ir.actions.act_window">
+            <field name="view_id" ref="view_invoice_form"/>
+        </record>
+
+        <record id='po_view_tree' model='ir.ui.view'>
+            <field name="name">po.view.tree</field>
+            <field name="model">invoicing.po</field>
+            <field name="arch" type="xml">
+                <tree create='1' editable="top" string="Purchase Order">
+                    <field name="active"/>
+                    <field name="name"/>
+                    <field name="client_ref" />
+                    <field name="partner_id"/>
+                    <field name="amount"/>
+                    <field name="currency_id"/>
+                    <field name="invoiced_amount" />
+                </tree>
+            </field>
+        </record>
+
+        <record id='ia_invoices_view_tree' model='ir.ui.view'>
+            <field name="name">ia.invoices.view.tree</field>
+            <field name="model">account.invoice</field>
+            <field name="priority">10</field>
+            <field name="arch" type="xml">
+                <tree string="Invoices">
+                    <field name="type"/>
+                    <field name="name" invisible="1"/>
+                    <field name="number" string="Reference"/>
+                    <field name="temp_name" string="Name"/>
+                    <field name="company_id"/>
+                    <field name="partner_id"/>
+                    <!--<field name="origin_sale_orders"/>-->
+                    <field name="period_start" string="Period Start"/>
+                    <field name="timesheet_limit_date" string="Period End"/>
+                    <field name="invoice_sending_date" string="Sending Date"/>
+                    <field name="vcls_due_date" string="Due Date" widget="date"/>
+                    <field name="amount_untaxed_invoice_signed"/>
+                    <field name="amount_tax_signed"/>
+                    <field name="amount_total_signed"/>
+                    <field name="residual_signed"/>
+                    <field name="fiscal_position_id"/>
+                    <field name="state"/>
+                    <field name="ready_for_approval" readonly="1"/>
+                    <field name="activity_ids"/>
+                    <field name="activity_state"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_po" model="ir.actions.act_window">
+            <field name="name">Client Purchase Order</field>
+            <field name="res_model">invoicing.po</field>
+            <field name="view_mode">tree</field>
+            <field name="view_id" ref="po_view_tree"/>
+        </record>
+
+        <record id="action_ia_invoices" model="ir.actions.act_window">
+            <field name="name">Invoices</field>
+            <field name="res_model">account.invoice</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref='vcls-invoicing.ia_invoices_view_tree'/>
+            <field name="domain">[('type','in',['out_invoice','out_refund'])]</field>
+            <field name="context">{'search_default_myinvoices':1,'search_default_status':1}</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('vcls-invoicing.ia_invoices_view_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('vcls-invoicing.view_invoice_form')}),
+            ]"/>
+        </record>
+
+        <record id="action_am_invoices" model="ir.actions.act_window">
+            <field name="name">Invoices</field>
+            <field name="res_model">account.invoice</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('vcls-invoicing.ia_invoices_view_tree')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('vcls-invoicing.view_invoice_form')}),
+            
+            ]"/>
+            <field name="domain">[('partner_id.user_id','=', uid)]</field>
+            <field name="context">{'search_default_draft':1,'group_by':['commercial_partner_id']}</field>
+        </record>
+
+        <record id="action_invoice_attachment" model="ir.actions.act_window">
+            <field name="name">Attachments</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">ir.attachment</field>
+            <field name="view_type">form</field>
+            <field name="view_id" eval="False"/>
+            <field name="search_view_id" ref="base.view_attachment_search"/>
+            <field name="help" type="html">
+                <p class="o_view_nocontent_smiling_face">
+                    Create a new document
+                </p>
+                <p>
+                    Also you will find here all the related documents and download it by clicking on any individual document.
+                </p>
+            </field>
+            <field name="domain">[('res_model','=','account.invoice')]</field>
+        </record>
+
+        <record id="account.action_account_invoice_confirm" model="ir.actions.act_window">
+            <field name="groups_id" eval="[(6, 0, [ref('account.group_account_manager')])]"/>
+        </record>
+        
+
+    </data>
+</odoo>

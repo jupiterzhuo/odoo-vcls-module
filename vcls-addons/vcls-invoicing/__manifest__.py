@@ -49,6 +49,7 @@
         'views/account_mail_template.sql',
         'wizard/sale_make_invoice_advance_views.xml',
         'views/account_asset_category.xml',
+        'views/account_payment_view.xml',
         # reports
         'reports/report_project_invoice_detailed.xml',
         'reports/report_project_invoice_aggregated.xml',

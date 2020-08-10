@@ -7,5 +7,21 @@
         <record id="finance_ia_group" model="res.groups">
             <field name="name">Invoice administrator Group</field>
         </record>
+
+        <record model="ir.module.category" id="group_category_bank_account_number">
+            <field name="name">Bank &amp; Account Numbers</field>
+            <field name="sequence">1</field>
+        </record>
+
+        <record id="account_number_read_group" model="res.groups">
+            <field name="name">User</field>
+            <field name="category_id" ref="group_category_bank_account_number"/>
+        </record>
+
+        <record id="account_number_edit_group" model="res.groups">
+            <field name="name">Manager</field>
+            <field name="implied_ids" eval="[(4,ref('vcls-invoicing.account_number_read_group'))]"/>
+            <field name="category_id" ref="group_category_bank_account_number"/>
+        </record>
     </data>
 </odoo>
