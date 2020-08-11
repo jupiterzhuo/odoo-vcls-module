@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
 from odoo import models, fields, api
-from odoo.exceptions import UserError, ValidationError
+
 
 class Move(models.Model):
     _inherit = 'account.move'
@@ -18,7 +18,7 @@ class Move(models.Model):
                 move.origin = invoice.origin
 
 
-class AccountAnalyticLine(models.Model):
+class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
     
     external_account = fields.Char(
@@ -65,6 +65,8 @@ class AccountAnalyticLine(models.Model):
         currency_field='base_currency_id',
         readonly=True)
 
+    active = fields.Boolean(default=True)
+
     @api.depends('debit','credit','company_currency_id')
     def _compute_base_values(self):
         for line in self.filtered(lambda l: l.debit>0 and l.company_currency_id):
@@ -86,6 +88,20 @@ class AccountAnalyticLine(models.Model):
             )
             line.convertion_rate = line.company_currency_id.rate
             line.credit_base_currency = credit_conv
+
+    @api.depends('move_id.line_ids', 'move_id.line_ids.tax_line_id', 'move_id.line_ids.debit', 'move_id.line_ids.credit')
+    def _compute_tax_base_amount(self):
+        """The base lines have been deactivated (cf _create_tax_cash_basis_base_line),
+        but we need to take them into account to compute the tax_base_amount """
+        for move_line in self:
+            if move_line.tax_line_id:
+                base_lines = move_line.move_id.with_context(active_test=False).line_ids\
+                    .filtered(lambda line: move_line.tax_line_id in line.tax_ids
+                              and move_line.partner_id == line.partner_id)
+                move_line.tax_base_amount = abs(sum(base_lines.mapped('balance')))
+            else:
+                move_line.tax_base_amount = 0
+
 
 class Invoice(models.Model):
     _inherit = 'account.invoice'
