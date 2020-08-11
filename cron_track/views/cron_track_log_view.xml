@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+        <record id="cron_track_tracking_log_form_view" model="ir.ui.view">
+            <field name="name">Cron Tracking Form View</field>
+            <field name="model">cron.track.log</field>
+            <field name="arch" type="xml">
+                <form string="">
+                    <sheet>
+                        <group>
+                            <field name="cron_track_id"/>
+                            <field name="error_msg"/>
+                            <field name="error_msg_time"/>
+                        </group>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!--tracking log tree view-->
+        <record id="cron_track_tracking_log_view" model="ir.ui.view">
+            <field name="name">Cron Tracking Tree View</field>
+            <field name="model">cron.track.log</field>
+            <field name="arch" type="xml">
+                <tree>
+                    <field name="cron_track_id"/>
+                    <field name="error_msg"/>
+                    <field name="error_msg_time"/>
+                </tree>
+            </field>
+        </record>
+
+        <record id="action_cron_tracking_log" model="ir.actions.act_window">
+            <field name="name">Cron Tracking Log</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">cron.track.log</field>
+            <field name="view_mode">tree,form</field>
+        </record>
+
+    </data>
+</odoo>
