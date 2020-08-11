@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+        <!-- Inherit Form View to Modify it -->
+        <record id="ir_cron_view_inherit" model="ir.ui.view">
+            <field name="name">Cron Form View Auto Commit</field>
+            <field name="model">ir.cron</field>
+            <field name="inherit_id" ref="base.ir_cron_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//sheet/div/button[@name='toggle_active']" position="after">
+                    <button string="Run Report"
+                            name="open_cron_track_log"
+                            type="object"
+                            class="btn btn btn-primary oe_stat_button text-center"
+                    />
+                </xpath>
+                <xpath expr="//field[@name='doall']" position="after">
+                    <field name="auto_commit"/>
+                </xpath>
+            </field>
+        </record>
+    </data>
+</odoo>

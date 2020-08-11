@@ -6,6 +6,7 @@ from datetime import datetime,timedelta
 
 import logging
 import datetime
+import time
 import math
 _logger = logging.getLogger(__name__)
 
@@ -32,6 +33,7 @@ class Employee(models.Model):
     def smart_timesheeting_init(self):
         to_update = self.search([('active','=',True),('employee_status','=','active'),('employee_type','=','internal')])
         to_update.write({'do_smart_timesheeting':True})
+        time.sleep(250)
 
         cron = self.env.ref('vcls-timesheet.cron_smart_timesheeting')
         cron.write({
