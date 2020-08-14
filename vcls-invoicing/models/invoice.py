@@ -541,8 +541,6 @@ class Invoice(models.Model):
             raise UserError(_("You cannot validate an invoice with a negative total amount. You should create a credit note instead."))
         if self.filtered(lambda inv: not inv.account_id):
             raise UserError(_('No account was found to create the invoice, be sure you have installed a chart of account.'))
-        if self.filtered(lambda inv: not inv.user_id):
-            raise UserError(_('No Invoice Administrator found. Please verify if your contact is related to a company and if this company has an IA configured.'))
 
         for invoice in self:
             invoice.write({'ready_for_approval': True})

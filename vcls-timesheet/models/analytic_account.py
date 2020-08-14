@@ -116,7 +116,6 @@ class AnalyticLine(models.Model):
 
     calculated_amount = fields.Float(
         compute='_compute_calculated_amount',
-        compute_sudo=True,
         string="Revenue",
         help="Unite Price x Revised Time",
         store=True,
@@ -432,8 +431,8 @@ class AnalyticLine(models.Model):
     def write(self, vals):
         """# we automatically update the stage if the ts is validated and stage = draft
         so_update = False
-        orders = self.env['sale.order']"""
-        _logger.info("ANALYTIC WRITE {}".format(vals))
+        orders = self.env['sale.order']
+        #_logger.info("ANALYTIC WRITE {}".format(vals))"""
 
         temp_self = self
         #if this is a modification authorized for lc during lc_review, we do it in sudo
