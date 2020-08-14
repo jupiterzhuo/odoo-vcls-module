@@ -63,7 +63,7 @@ class ProjectTask(models.Model):
         string="Invoicing Mode")
 
     allow_budget_modification = fields.Boolean(default="False")
-    recompute_kpi = fields.Boolean(default="False")
+    recompute_kpi = fields.Boolean(default="True")
 
     budget_consumed = fields.Float(
         string="Budget Consumed",
