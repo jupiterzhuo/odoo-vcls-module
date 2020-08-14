@@ -20,7 +20,12 @@ class Task(models.Model):
         string='Task Type',
         compute='_compute_task_type',
         store=True,)
-    
+
+    type_of_activity = fields.Many2many(
+        comodel_name='res.partner.type.activity',
+        string="Type of Activity",
+    )
+
     @api.depends('parent_id', 'project_id.project_type')
     def _compute_task_type(self):
         for task in self:
@@ -215,3 +220,12 @@ class Task(models.Model):
         #action['context'] = {}
         return action
 
+
+class ResPartnerTypeActivity(models.Model):
+    _description = 'Marketing Task Type of Activity'
+    _name = "res.partner.type.activity"
+    _order = "name"
+
+    name = fields.Char('Name', translate=True)
+    full_name = fields.Char('Full Name', translate=True)
+    active = fields.Boolean('Active', default=True)

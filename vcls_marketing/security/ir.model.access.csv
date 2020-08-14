@@ -3,3 +3,4 @@ access_project_marketing,access_project_marketing,model_project_marketing,base.g
 access_task_marketing,access_task_marketing,model_task_marketing,base.group_user,1,0,0,0
 access_project_marketing_am,access_project_marketing_am,model_project_marketing,vcls_security.vcls_account_manager,1,1,1,1
 access_task_marketing_am,access_task_marketing_am,model_task_marketing,vcls_security.vcls_account_manager,1,1,1,1
+access_res_partner_type_activity,access_res_partner_type_activity,model_res_partner_type_activity,base.group_user,1,1,1,1

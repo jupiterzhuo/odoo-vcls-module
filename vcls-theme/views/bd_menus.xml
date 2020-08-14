@@ -469,11 +469,21 @@
             sequence="6"
         />
 
-        
+        <!-- Marketing configuration -->
+        <menuitem
+            id="menu_bd_conf_marketing"
+            name="Marketing Configuration"
+            parent="menu_bd_conf_main"
+            sequence="100"
+        />
 
-        
-        
-        
+        <menuitem
+            id="menu_bd_conf_marketing_activity_type_task"
+            name="Type of Activity"
+            parent="menu_bd_conf_marketing"
+            action="vcls_marketing.action_type_of_activity_task"
+            sequence="1"
+        />
     </data>
 </odoo>
         

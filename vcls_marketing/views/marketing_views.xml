@@ -171,7 +171,7 @@
                         <group>
                             <field name="date_start" widget="date"/>
                             <field name="date_end" widget="date"/>
-                            <field name="tag_ids" string="Type" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"/>
+                            <field name="type_of_activity" string="Type of Activity" widget="many2many_tags" options="{'color_field': 'color', 'no_create_edit': True}"/>
                             <field name="business_line_id" string="Service Areas" widget="many2many_tags"/>
                         </group>
                     </group>
@@ -450,11 +450,22 @@
                     <filter string="Marketing Source" name="marketing_source" domain="[('is_marketing_related','=',True)]"/>
                     <filter string="Marketing Initial Source" name="marketing_initial_source" domain="[('initial_is_marketing_related','=',True)]"/>
                 </xpath>
-                
-
             </field>
         </record>
 
+        <record id="action_type_of_activity_task" model="ir.actions.act_window">
+            <field name="name">Type of Activity (task level)</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">res.partner.type.activity</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="domain"></field>
+            <field name="help" type="html">
+              <p class="o_view_nocontent_smiling_face">
+                 Create a new Type of Activity as the Tak level
+              </p>
+            </field>
+        </record>
     </data>
 </odoo>
 
