@@ -157,7 +157,7 @@
             <field name="key">etl_sf_ledgeraccount_query</field>
             <field name="value">
                 SELECT Id, Name, s2cor__Account_Number__c, s2cor__Description__c, 
-                s2cor__Parent__c, s2cor__Company__c 
+                s2cor__Parent__c, s2cor__Company__c, CurrencyIsoCode
                 FROM s2cor__Sage_ACC_Ledger_Account__c
             </field>
         </record>
@@ -169,6 +169,46 @@
 
         <record id="etl_sf_ledgeraccount_post" model="ir.config_parameter">
             <field name="key">etl_sf_ledgeraccount_post</field>
+            <field name="value"></field> 
+        </record>
+
+        <record id="etl_sf_ledgerentry_query" model="ir.config_parameter">
+            <field name="key">etl_sf_ledgerentry_query</field>
+            <field name="value">
+                SELECT Id, Name, CurrencyIsoCode, s2cor__Date__c, s2cor__Source_Document__c,
+                s2cor__Sequence_Number__c, s2cor__Journal__c, s2cor__Supplier_Tag__c
+                FROM s2cor__Sage_ACC_Ledger_Entry__c
+            </field>
+        </record>
+
+        <record id="etl_sf_ledgerentry_filter" model="ir.config_parameter">
+            <field name="key">etl_sf_ledgerentry_filter</field>
+            <field name="value"></field> 
+        </record>
+
+        <record id="etl_sf_ledgerentry_post" model="ir.config_parameter">
+            <field name="key">etl_sf_ledgerentry_post</field>
+            <field name="value"></field> 
+        </record>
+
+        <record id="etl_sf_ledgeritem_query" model="ir.config_parameter">
+            <field name="key">etl_sf_ledgeritem_query</field>
+            <field name="value">
+                SELECT Id, Name, CurrencyIsoCode, s2cor__Ledger_Entry__c, 
+                s2cor__Ledger_Account__c, s2cor__Date__c, s2cor__Base_Debit__c, 
+                s2cor__Base_Credit__c, s2cor__Exchange_Rate__c, s2cor__Description__c ,
+                s2cor__Supplier_Tag__c, s2cor__Document_Number_Tag__c
+                FROM s2cor__Sage_ACC_Ledger_Item__c 
+            </field>
+        </record>
+
+        <record id="etl_sf_ledgeritem_filter" model="ir.config_parameter">
+            <field name="key">etl_sf_ledgeritem_filter</field>
+            <field name="value"></field> 
+        </record>
+
+        <record id="etl_sf_ledgeritem_post" model="ir.config_parameter">
+            <field name="key">etl_sf_ledgeritem_post</field>
             <field name="value"></field> 
         </record>
 

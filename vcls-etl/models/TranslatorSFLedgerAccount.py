@@ -15,7 +15,6 @@ class TranslatorSFLedgerAccount(TranslatorSFGeneral.TranslatorSFGeneral):
         mapOdoo = odoo.env['map.odoo']
         result = {}
 
-        
         key = odoo.env['etl.sync.keys'].search([('externalId','=',str(SF_LedgerAccount['Id']))],limit=1)
         if key.state == "needCreateOdoo":
             account = odoo.env['account.account'].search([('code','=',str(SF_LedgerAccount['s2cor__Account_Number__c']))],limit=1)
@@ -23,7 +22,6 @@ class TranslatorSFLedgerAccount(TranslatorSFGeneral.TranslatorSFGeneral):
                 key = odoo.env['etl.sync.keys'].search([('externalId','=',str(SF_LedgerAccount['Id']))],limit=1)
                 key.write({'state':'upToDate','odooId':str(account.id)})
                 return False
-
 
         code = SF_LedgerAccount['s2cor__Account_Number__c']
 
@@ -34,6 +32,7 @@ class TranslatorSFLedgerAccount(TranslatorSFGeneral.TranslatorSFGeneral):
             type_id = TranslatorSFLedgerAccount.convertType(SF, SF_LedgerAccount['s2cor__Parent__c'], odoo)
             result['user_type_id'] = type_id
             result['company_id'] = odoo.env.ref('vcls-hr.company_VCINC').id
+            result['currency_id'] = TranslatorSFGeneral.TranslatorSFGeneral.convertCurrency(SF_LedgerAccount['CurrencyIsoCode'],odoo)
 
             #Allow Reconciliation
             result['reconcile'] = True

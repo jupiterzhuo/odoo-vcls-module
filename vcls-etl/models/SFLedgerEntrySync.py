@@ -1,4 +1,4 @@
-from . import TranslatorSFLedgerAccount
+from . import TranslatorSFLedgerEntry
 from . import ETL_SF
 from . import generalSync
 
@@ -13,12 +13,11 @@ _logger = logging.getLogger(__name__)
 
 from odoo import models, fields, api
 
-class SFLedgerAccountSync(models.Model):
-    _name = 'etl.salesforce.ledgeraccount'
+class SFLedgerEntrySync(models.Model):
+    _name = 'etl.salesforce.ledgerentry'
     _inherit = 'etl.sync.salesforce'
 
     def getSFTranslator(self, sfInstance):
-        return TranslatorSFLedgerAccount.TranslatorSFLedgerAccount(sfInstance.getConnection())
-
+        return TranslatorSFLedgerEntry.TranslatorSFLedgerEntry(sfInstance.getConnection())
 
 
