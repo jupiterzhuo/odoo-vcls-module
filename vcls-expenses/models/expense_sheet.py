@@ -124,12 +124,17 @@ class ExpenseSheet(models.Model):
                     record.user_id = record.employee_id.expense_manager_id or record.employee_id.parent_id.user_id
                 else:
                     record.user_id = False
-    
+
     @api.depends('project_id')
     def _compute_analytic_account(self):
         for sheet in self:
             sheet.analytic_account_id = sheet.project_id.analytic_account_id
-    
+            sheet.expense_line_ids.write({
+                'project_id': sheet.project_id.id,
+                'analytic_account_id': sheet.analytic_account_id.id,
+                'sale_order_id': sheet.sale_order_id.id,
+            })
+ 
     @api.onchange('type')
     def change_type(self):
         for sheet in self:
