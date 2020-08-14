@@ -141,7 +141,6 @@ class TranslatorSFLedgerItem(TranslatorSFGeneral.TranslatorSFGeneral):
     @staticmethod
     def updateKeysItem(SF, odoo):
         to_process = odoo.env['etl.sync.keys'].search([('state','not in',['upToDate','postponed']),('odooModelName','=','account.move.line')])
-
         if to_process:
             sql = "SELECT Id, Name FROM s2cor__Sage_ACC_Ledger_Item__c"
             records = SF.getConnection().query_all(sql)['records']
