@@ -34,8 +34,9 @@ class SFLedgerItemSync(models.Model):
             counter = 0
             for sf_rec in records:
                 counter += 1
+                key = keys.filtered(lambda p: p.externalId == sf_rec['Id'])
+                
                 if sf_rec['s2cor__Document_Number_Tag__c']:
-                    key = keys.filtered(lambda p: p.externalId == sf_rec['Id'])
                     reconciled = self.env['account.move.line'].browse(int(key[0].odooId)).full_reconcile_id
                     if not reconciled:
                         sql = "Select Id, Name, s2cor__Is_Reconciled__c From s2cor__Sage_ACC_Tag__c WHERE Id ='{}'".format(sf_rec['s2cor__Document_Number_Tag__c'])
@@ -54,15 +55,6 @@ class SFLedgerItemSync(models.Model):
                                         'reconciled_line_ids': [(6, 0, line_ids)]
                                     }).id
                                     _logger.info("New reconciliation ID : {}".format(str(reconcile)))
-                            
-                _logger.info("Reconciliation | Item {}/{} ".format(counter,len(records)))
-            self.reconciledEntriesOK(records, keys, sfInstance)
-
-    def reconciledEntriesOK(self, records, keys, sfInstance):
-        if records:
-            counter = 0
-            for sf_rec in records:
-                key = keys.filtered(lambda p: p.externalId == sf_rec['Id'])
                 reconciled = self.env['account.move.line'].browse(int(key[0].odooId)).full_reconcile_id
                 if not reconciled:
                     queryAccountNumber = "SELECT s2cor__Account_Number__c FROM s2cor__Sage_ACC_Ledger_Account__c WHERE Id ='{}'".format(str(sf_rec['s2cor__Ledger_Account__c']))
@@ -73,16 +65,17 @@ class SFLedgerItemSync(models.Model):
                             if accountNumber[0]['s2cor__Account_Number__c'].startswith('401') and Date < "2020-01-01":
                                 reconcile = self.env['account.full.reconcile'].search([('name','=','OK')],limit=1)
                                 if reconcile:
-                                    self.env['account.full.reconcile'].write({
+                                    reconcile.write({
                                         'reconciled_line_ids': [(4, int(key[0].odooId))]
                                     })
                                 else:
                                     reconcile = self.env['account.full.reconcile'].create({
                                         'name': "OK",
-                                        'reconciled_line_ids': [(0, 0, {int(key[0].odooId)})]
-                                    }).id
+                                        'reconciled_line_ids': [(4, int(key[0].odooId), 0)]
+                                    })
                                 _logger.info("New reconciliation ID : {}".format(str(reconcile.id)))
-                _logger.info("Reconciliation OK | Item {}/{} ".format(counter,len(records)))
+                            
+                _logger.info("Reconciliation | Item {}/{} ".format(counter,len(records)))
 
 
 
