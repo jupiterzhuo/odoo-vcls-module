@@ -58,7 +58,6 @@ class TranslatorSFLedgerEntry(TranslatorSFGeneral.TranslatorSFGeneral):
     @staticmethod
     def getJournalId(SF, SfId, odoo, SourceDocument, Date):
         sale = False
-        bill = False
         queryAccount = "SELECT s2cor__Ledger_Account__c FROM s2cor__Sage_ACC_Ledger_Item__c WHERE s2cor__Ledger_Entry__c ='{}'".format(str(SfId))
         ledgerItem = SF.getConnection().query(queryAccount)['records']
         if len(ledgerItem)>0:
@@ -70,16 +69,12 @@ class TranslatorSFLedgerEntry(TranslatorSFGeneral.TranslatorSFGeneral):
                         if accountNumber[0]['s2cor__Account_Number__c']:
                             if accountNumber[0]['s2cor__Account_Number__c'].startswith('512000'):
                                 return odoo.env.ref('vcls-etl.bank_of_america').id
-                            if accountNumber[0]['s2cor__Account_Number__c'].startswith('7'):
+                            elif accountNumber[0]['s2cor__Account_Number__c'].startswith('7'):
                                 sale = odoo.env.ref('vcls-etl.sales_journal').id
-                            if accountNumber[0]['s2cor__Account_Number__c'].startswith('401') and Date < "2020-01-01":
-                                bill = odoo.env.ref('vcls-etl.billed_journal').id
         if sale:
             return sale
         elif SourceDocument == 'Manual Adjustment':
             return odoo.env.ref('vcls-etl.manual_adjustment').id
-        elif bill:
-            return bill
         else:
             return odoo.env.ref('vcls-etl.purchase_journal').id
 
