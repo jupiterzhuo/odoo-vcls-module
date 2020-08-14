@@ -282,10 +282,50 @@ class ETLMap(models.Model):
             }
             self.update_keys(params)
 
-        
+        ### LEDGER ACCOUNT KEYS PROCESSING
+        if obj_dict.get('do_ledger_account',False):
+            sql = """
+                SELECT Id, LastModifiedDate FROM s2cor__Sage_ACC_Ledger_Account__c 
+                    """
+            params = {
+                'sfInstance':sfInstance,
+                'priority':500,
+                'externalObjName':'LedgerAccount',
+                'sql': self.build_sql(sql,[self.env.ref('vcls-etl.etl_sf_ledgeraccount_filter').value,time_sql]),
+                'odooModelName':'account.account',
+                'is_full_update':is_full_update,
+            }
+            self.update_keys(params)
 
-        
+        ### LEDGER ENTRY KEYS PROCESSING
+        if obj_dict.get('do_ledger_entry',False):
+            sql = """
+                SELECT Id, LastModifiedDate FROM s2cor__Sage_ACC_Ledger_Entry__c 
+                    """
+            params = {
+                'sfInstance':sfInstance,
+                'priority':500,
+                'externalObjName':'LedgerEntry',
+                'sql': self.build_sql(sql,[self.env.ref('vcls-etl.etl_sf_ledgerentry_filter').value,time_sql]),
+                'odooModelName':'account.move',
+                'is_full_update':is_full_update,
+            }
+            self.update_keys(params)
 
+        ### LEDGER ITEM KEYS PROCESSING
+        if obj_dict.get('do_ledger_item',False):
+            sql = """
+                SELECT Id, LastModifiedDate FROM s2cor__Sage_ACC_Ledger_Item__c  
+                    """
+            params = {
+                'sfInstance':sfInstance,
+                'priority':500,
+                'externalObjName':'LedgerItem',
+                'sql': self.build_sql(sql,[self.env.ref('vcls-etl.etl_sf_ledgeritem_filter').value,time_sql]),
+                'odooModelName':'account.move.line',
+                'is_full_update':is_full_update,
+            }
+            self.update_keys(params)
         
 
         ###CLOSING
