@@ -201,7 +201,9 @@ obj_dict = {
     'do_contract':True,
     'do_lead':True,
     'do_opportunity':True,
-    }
+    'do_ledger_account':True,
+    'do_ledger_entry':True,
+    } 
 model.sf_update_keys(obj_dict,full_update)
             </field>
         </record>
@@ -234,6 +236,20 @@ model.sf_process_keys(batch_size,loop,max_minutes)
             <field name="model_id" ref="model_etl_sync_keys" />
             <field name="state">code</field>
             <field name="code">model.relaunch_cron('vcls-etl.cron_process',2)
+            </field>
+        </record>
+
+        <record id="cron_reconciledEntries" model="ir.cron">
+            <field name="name">Reconciled Entries </field>
+            <field name="active" eval="False" />
+            <field name="user_id" ref="base.user_admin" />
+            <field name="numbercall">-1</field>
+            <field name="interval_number">1</field>
+            <field name="interval_type">minutes</field>
+            <field name="doall">False</field>
+            <field name="model_id" ref="model_etl_salesforce_ledgeritem" />
+            <field name="state">code</field>
+            <field name="code">model.reconciledEntries()
             </field>
         </record>
         

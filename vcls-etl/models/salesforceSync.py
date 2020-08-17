@@ -174,8 +174,11 @@ class salesforceSync(models.Model):
                                 counter += 1
                                 attributes = translator.translateToOdoo(sf_rec, sync, sfInstance)
                                 if not attributes:
-                                    key[0].write({'state':'postponed','priority':0})
-                                    _logger.info("ETL | Missing Mandatory info to process key {} - {}".format(key[0].externalObjName,key[0].externalId))
+                                    if key[0].state != 'upToDate':
+                                        key[0].write({'state':'postponed','priority':0})
+                                        _logger.info("ETL | Missing Mandatory info to process key {} - {}".format(key[0].externalObjName,key[0].externalId))
+                                    else:
+                                        _logger.info("ETL | Record already exist {} - {}".format(key[0].externalObjName,key[0].externalId))
                                     continue
 
                                 #UPDATE Case
@@ -198,6 +201,9 @@ class salesforceSync(models.Model):
                                     key[0].write({'state':'upToDate','odooId':odoo_id,'priority':0})
                                     #key[0].write({'state':'upToDate','priority':0})
                                     _logger.info("ETL | Record Created {}/{} | {} | {}".format(counter,len(to_process),key[0].externalObjName,attributes.get('log_info')))
+                                    if key[0].externalObjName == 'LedgerEntry':
+                                        entryId = key[0].externalId
+                                        translator.createItems(entryId, self, sfInstance)
 
                                 else:
                                     _logger.info("ETL | Non-managed key state {} | {}".format(key[0].id,key[0].state))
