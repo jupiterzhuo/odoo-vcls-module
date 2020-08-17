@@ -11,11 +11,9 @@ class TranslatorSFLedgerItem(TranslatorSFGeneral.TranslatorSFGeneral):
         super().__init__(SF)
     
     @staticmethod
-    def translateToOdoo(SF_LedgerItem, odoo, SF, ID):
+    def translateToOdoo(SF_LedgerItem, odoo, SF):
         mapOdoo = odoo.env['map.odoo']
         result = {}
-        if ID:
-            SF_LedgerItem['id'] = ID
         if SF_LedgerItem['s2cor__Ledger_Entry__c']:
             move_id = TranslatorSFGeneral.TranslatorSFGeneral.toOdooId(SF_LedgerItem['s2cor__Ledger_Entry__c'],"account.move","LedgerEntry",odoo)
             result['move_id'] = move_id
@@ -46,73 +44,11 @@ class TranslatorSFLedgerItem(TranslatorSFGeneral.TranslatorSFGeneral):
         result['ref'] = SF_LedgerItem['Name']
 
         #result['full_reconcile_id'] / SF_LedgerItem['s2cor__Document_Number_Tag__c']
-        print(result)
         if result['account_id']:
             return result
         result['account_id'] = odoo.env['account.account'].search([('code','=','512000-1000')],limit=1).id
         
         return result
-
-    @staticmethod
-    def createItem(SF, odoo):
-        to_process = odoo.env['etl.sync.keys'].search([('state','not in',['upToDate','postponed']),('odooModelName','=','account.move.line')])
-        dictCreate = []
-        if to_process:
-            template = to_process[0]
-            _logger.info("ETL | Found {} {} keys {} ".format(len(to_process),template.externalObjName,template.state))
-            counter = 0
-            query_id = "vcls-etl.etl_sf_{}_query".format(template.externalObjName.lower())
-            filter_id = "vcls-etl.etl_sf_{}_filter".format(template.externalObjName.lower())
-            postfilter_id = "vcls-etl.etl_sf_{}_post".format(template.externalObjName.lower())
-            sql = odoo.env['etl.sync.keys'].build_sql(odoo.env.ref(query_id).value,[odoo.env.ref(filter_id).value,odoo.env.ref("vcls-etl.etl_sf_time_filter").value],odoo.env.ref(postfilter_id).value)
-
-            records = SF.getConnection().query_all(sql)['records']
-            if records:
-                _logger.info("ETL |  {} returned {} records from SF".format(sql,len(records)))
-                #we start the processing loop
-                for sf_rec in records:
-                    key = to_process.filtered(lambda p: p.externalId == sf_rec['Id'])
-                    if key:
-                        counter += 1
-                        attributes = TranslatorSFLedgerItem.translateToOdoo(sf_rec, odoo, SF, key[0].odooId)
-
-                        if not attributes:
-                            if key[0].state != 'upToDate':
-                                key[0].write({'state':'postponed','priority':0})
-                                _logger.info("ETL | Missing Mandatory info to process key {} - {}".format(key[0].externalObjName,key[0].externalId))
-                            else:
-                                _logger.info("ETL | Record already exist {} - {}".format(key[0].externalObjName,key[0].externalId))
-                            continue
-                        #UPDATE Case
-                        if key[0].state == 'needUpdateOdoo':
-                            #we catch the existing record
-                            o_rec = odoo.env[key[0].odooModelName].with_context(active_test=False).search([('id','=',key[0].odooId)],limit=1)
-                            if o_rec:
-                                #if attributes.get('active',False):
-                                    #rem = attributes.pop('active')
-                                entry = odoo.env['account.move'].browse(attributes['move_id'])
-                                if entry:
-                                    entry.state = 'draft'
-                                    o_rec.with_context(tracking_disable=1).write(attributes)
-                                    key[0].write({'state':'upToDate','priority':0})
-                                    entry.state = 'posted'
-                                    _logger.info("ETL | Record Updated {}/{} | {} | {}".format(counter,len(to_process),key[0].externalObjName,attributes.get('log_info')))
-                            else:
-                                key[0].write({'state':'upToDate','priority':0})
-                                _logger.info("ETL | Missed Update - Odoo record not found {}/{} | {} | {}".format(counter,len(to_process),key[0].odooModelName,key[0].odooId))
-                        
-                        #CREATE Case
-                        elif key[0].state == 'needCreateOdoo':
-                            #odoo_id = odoo.env[key[0].odooModelName].with_context(tracking_disable=1).create(attributes).id
-                            dictCreate.append(dict(attributes))
-                            #key[0].write({'state':'upToDate','priority':0})
-                            _logger.info("ETL | Record Created {}/{} | {} | {}".format(counter,len(to_process),key[0].externalObjName,attributes.get('log_info')))
-
-                        else:
-                            _logger.info("ETL | Non-managed key state {} | {}".format(key[0].id,key[0].state))
-        if dictCreate:
-            odoo.env['account.move.line'].create(dictCreate)
-        TranslatorSFLedgerItem.updateKeysItem(SF, odoo)
 
     @staticmethod
     def generateLog(SF_LedgerItem):

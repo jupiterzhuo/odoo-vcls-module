@@ -203,8 +203,7 @@ obj_dict = {
     'do_opportunity':True,
     'do_ledger_account':True,
     'do_ledger_entry':True,
-    'do_ledger_item':True,
-    }
+    } 
 model.sf_update_keys(obj_dict,full_update)
             </field>
         </record>

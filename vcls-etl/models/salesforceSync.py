@@ -159,9 +159,7 @@ class salesforceSync(models.Model):
                 postfilter_id = "vcls-etl.etl_sf_{}_post".format(template.externalObjName.lower())
                 sql = self.env['etl.sync.keys'].build_sql(self.env.ref(query_id).value,[self.env.ref(filter_id).value,self.env.ref("vcls-etl.etl_sf_time_filter").value],self.env.ref(postfilter_id).value)
                 records = sfInstance.getConnection().query_all(sql)['records']
-                if template.externalObjName.lower() == 'ledgeritem':
-                    translator.createItem(sfInstance, sync)
-                elif records:
+                if records:
                     _logger.info("ETL |  {} returned {} records from SF".format(sql,len(records)))
                     #we start the processing loop
                     for sf_rec in records:
@@ -203,6 +201,9 @@ class salesforceSync(models.Model):
                                     key[0].write({'state':'upToDate','odooId':odoo_id,'priority':0})
                                     #key[0].write({'state':'upToDate','priority':0})
                                     _logger.info("ETL | Record Created {}/{} | {} | {}".format(counter,len(to_process),key[0].externalObjName,attributes.get('log_info')))
+                                    if key[0].externalObjName == 'LedgerEntry':
+                                        entryId = key[0].externalId
+                                        translator.createItems(entryId, self, sfInstance)
 
                                 else:
                                     _logger.info("ETL | Non-managed key state {} | {}".format(key[0].id,key[0].state))

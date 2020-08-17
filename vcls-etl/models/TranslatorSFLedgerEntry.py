@@ -11,6 +11,8 @@ class TranslatorSFLedgerEntry(TranslatorSFGeneral.TranslatorSFGeneral):
     def __init__(self,SF):
         super().__init__(SF)
     
+
+    
     @staticmethod
     def translateToOdoo(SF_LedgerEntry, odoo, SF):
         mapOdoo = odoo.env['map.odoo']
@@ -26,8 +28,13 @@ class TranslatorSFLedgerEntry(TranslatorSFGeneral.TranslatorSFGeneral):
         result['company_id'] = odoo.env.ref('vcls-hr.company_VCINC').id
 
         if SF_LedgerEntry['s2cor__Supplier_Tag__c']:
-            result['partner_id'] = TranslatorSFLedgerEntry.convertSupplierTag(SF,SF_LedgerEntry['s2cor__Supplier_Tag__c'],odoo)
-
+            accountId = TranslatorSFLedgerEntry.convertSupplierTag(SF,SF_LedgerEntry['s2cor__Supplier_Tag__c'],odoo)
+            partnerId = TranslatorSFGeneral.TranslatorSFGeneral.toOdooId(accountId, 'res.partner', 'Account', odoo)
+            if partnerId:
+                result['partner_id'] = partnerId
+            else:
+                contactId = TranslatorSFLedgerEntry.createContact(odoo, SF, accountId)
+                result['partner_id'] = contactId
         return result
 
     @staticmethod
@@ -48,11 +55,8 @@ class TranslatorSFLedgerEntry(TranslatorSFGeneral.TranslatorSFGeneral):
     def convertSupplierTag(SF, SfTag, odoo):
         queryType = "SELECT s2cor__Account__c FROM s2cor__Sage_ACC_Tag__c WHERE Id='{}'".format(str(SfTag))
         account = SF.getConnection().query(queryType)['records'][0]['s2cor__Account__c']
-        accountId = odoo.env['etl.sync.keys'].search([('externalId','=',str(account))],limit=1)
-        if accountId:
-            odooAccount = odooAccount = odoo.env['res.partner'].search([('id','=',accountId.odooId)],limit=1)
-            if odooAccount:
-                return odooAccount.id
+        if account:
+            return account
         return False
     
     @staticmethod
@@ -60,6 +64,7 @@ class TranslatorSFLedgerEntry(TranslatorSFGeneral.TranslatorSFGeneral):
         sale = False
         queryAccount = "SELECT s2cor__Ledger_Account__c FROM s2cor__Sage_ACC_Ledger_Item__c WHERE s2cor__Ledger_Entry__c ='{}'".format(str(SfId))
         ledgerItem = SF.getConnection().query(queryAccount)['records']
+        mapOdoo = odoo.env['map.odoo']
         if len(ledgerItem)>0:
             for item in ledgerItem:
                 if item['s2cor__Ledger_Account__c']:
@@ -68,14 +73,53 @@ class TranslatorSFLedgerEntry(TranslatorSFGeneral.TranslatorSFGeneral):
                     if len(accountNumber)>0:
                         if accountNumber[0]['s2cor__Account_Number__c']:
                             if accountNumber[0]['s2cor__Account_Number__c'].startswith('512000'):
-                                return odoo.env.ref('vcls-etl.bank_of_america').id
+                                return mapOdoo.convertRef('Voisin Consulting INC BOA ($)',odoo,'account.journal',False)
                             elif accountNumber[0]['s2cor__Account_Number__c'].startswith('7'):
-                                sale = odoo.env.ref('vcls-etl.sales_journal').id
+                                sale = mapOdoo.convertRef('Customer Invoices',odoo,'account.journal',False)
         if sale:
             return sale
         elif SourceDocument == 'Manual Adjustment':
-            return odoo.env.ref('vcls-etl.manual_adjustment').id
+            return mapOdoo.convertRef('Miscellaneous Operations',odoo,'account.journal',False)
         else:
-            return odoo.env.ref('vcls-etl.purchase_journal').id
+            return mapOdoo.convertRef('Vendor Bills',odoo,'account.journal',False)
 
+    @staticmethod
+    def createContact(odoo, SF, accountId):
+        translator = odoo.env['etl.salesforce.account'].getSFTranslator(SF)
+        queryAccount = odoo.env.ref('vcls-etl.etl_sf_account_query').value + " WHERE Id = '{}'".format(accountId)
+        records = SF.getConnection().query_all(queryAccount)['records'][0]
+        attributes = translator.translateToOdoo(records, odoo, SF)
+        if attributes:
+            odoo_id = odoo.env['res.partner'].with_context(tracking_disable=1).create(attributes).id
+            key = odoo.env['etl.sync.keys'].create({
+                'state' : 'upToDate',
+                'externalId' : accountId,
+                'odooId': odoo_id,
+                'externalObjName': 'Account',
+                'odooModelName': 'res.partner',
+                'search_value': 'ledger',
+            })
+            _logger.info("ETL | Record Created {} | {}".format(key.externalObjName,attributes.get('log_info')))
+            return odoo_id
+        else:
+            _logger.info("ETL | Missing Mandatory info to process key {} - {}".format('Account',accountId))
+            return False
+
+    @staticmethod
+    def createItems(entryId, sync, sfInstance):
+        dictCreate = []
+        counter = 0
+        translator = sync.env['etl.salesforce.ledgeritem'].getSFTranslator(sfInstance)
+        queryItems = sync.env.ref('vcls-etl.etl_sf_ledgeritem_query').value + " WHERE s2cor__Ledger_Entry__c = '{}'".format(entryId)
+        records = sfInstance.getConnection().query_all(queryItems)['records']
+        for sf_rec in records:
+            attributes = translator.translateToOdoo(sf_rec, sync, sfInstance)
+            if attributes:
+                dictCreate.append(dict(attributes))
+            counter += 1
         
+        if dictCreate:
+            sync.env['account.move.line'].create(dictCreate)
+            _logger.info("ETL | Records Created  {} | {}".format('LedgerItem',attributes.get('log_info')))
+
+
