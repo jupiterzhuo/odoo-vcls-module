@@ -35,7 +35,6 @@
         'data/parameters.xml',
         'data/queries.xml',
         'data/products.xml',
-        'data/journals.xml',
         'actions/etl_cronjob.xml',
 
         
