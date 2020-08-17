@@ -299,7 +299,7 @@ class SaleOrderLine(models.Model):
                 total * line.order_id.currency_rate
             )
 
-    @api.depends('invoice_lines', 'invoice_lines.price_total', 'invoice_lines.invoice_id.state', 'invoice_lines.invoice_id.type')
+    @api.depends('invoice_lines', 'invoice_lines.price_total', 'invoice_lines.invoice_id.state', 'invoice_lines.invoice_id.type','historical_invoiced_amount')
     def _compute_untaxed_amount_invoiced(self):
         super()._compute_untaxed_amount_invoiced()
 
