@@ -41,11 +41,11 @@ class Project(models.Model):
     )
 
     @api.multi
-    @api.depends("realized_budget", "contractual_budget")
+    @api.depends("valued_budget", "contractual_budget")
     def compute_budget_consumed(self):
         for project in self:
             if project.contractual_budget:
-                project.budget_consumed = project.realized_budget / project.contractual_budget * 100
+                project.budget_consumed = project.valued_budget / project.contractual_budget * 100
             else:
                 project.budget_consumed = False
 

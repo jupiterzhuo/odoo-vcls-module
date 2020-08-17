@@ -90,11 +90,11 @@ class ProjectTask(models.Model):
             task.invoicing_mode = task.project_id.invoicing_mode
 
     @api.multi
-    @api.depends("realized_budget", "contractual_budget")
+    @api.depends("valued_budget", "contractual_budget")
     def compute_budget_consumed(self):
         for task in self:
             if task.contractual_budget:
-                task.budget_consumed = task.realized_budget / task.contractual_budget * 100
+                task.budget_consumed = task.valued_budget / task.contractual_budget * 100
             else:
                 task.budget_consumed = 0
 
