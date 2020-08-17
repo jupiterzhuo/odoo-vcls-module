@@ -74,17 +74,3 @@ class TranslatorSFLedgerItem(TranslatorSFGeneral.TranslatorSFGeneral):
                 return odooAccount.id
         return False
 
-    @staticmethod
-    def updateKeysItem(SF, odoo):
-        to_process = odoo.env['etl.sync.keys'].search([('state','not in',['upToDate','postponed']),('odooModelName','=','account.move.line')])
-        if to_process:
-            sql = "SELECT Id, Name FROM s2cor__Sage_ACC_Ledger_Item__c"
-            records = SF.getConnection().query_all(sql)['records']
-            for sf_rec in records:
-                key = to_process.filtered(lambda p: p.externalId == sf_rec['Id'])
-                if key:
-                    if key[0].state == 'needCreateOdoo':
-                        odoo_id = odoo.env['account.move.line'].search([('ref','=',sf_rec['Name'])]).id
-                        if odoo_id:
-                            key[0].write({'state':'upToDate','odooId':odoo_id,'priority':0})
-
