@@ -299,15 +299,17 @@ class SaleOrderLine(models.Model):
                 total * line.order_id.currency_rate
             )
 
-    @api.depends('invoice_lines', 'invoice_lines.price_total', 'invoice_lines.invoice_id.state', 'invoice_lines.invoice_id.type','historical_invoiced_amount')
+    @api.depends('invoice_lines', 'invoice_lines.price_total', 'invoice_lines.invoice_id.state', 'invoice_lines.invoice_id.type','historical_invoiced_amount','order_id.invoicing_mode')
     def _compute_untaxed_amount_invoiced(self):
+        """
+        We override this method to take historical info (i.e. migration) into account in the sale order.
+        # If the sale line is a rate we invoice in time & material, then we don't use historical_invoiced_amount but the sum of timesheets with an historical status.
+        # If the sale line has no task or is invoiced in fixed price, then we add the historical_invoiced_amount to the untaxed_amount_invoiced.
+            ## To Maintain coherence, the delivered_qty and invoiced_qty is updated accordingly
+        """
         super()._compute_untaxed_amount_invoiced()
 
-        for line in self:
-            #_logger.info("{}".format(line.vcls_type))
-            pass
-
-        for line in self.filtered(lambda l: l.historical_invoiced_amount>0):
+        for line in self.filtered(lambda l: l.historical_invoiced_amount>0 and (l.order_id.invoicing_mode == 'fixed_price' or not l.task_id)):
             #_logger.info("Historical amount invoiced {} | {}".format(line.historical_invoiced_amount,line.order_id.name))
             line.untaxed_amount_invoiced += line.historical_invoiced_amount
 

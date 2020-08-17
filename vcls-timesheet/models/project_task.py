@@ -249,10 +249,10 @@ class ProjectTask(models.Model):
                     .mapped(lambda t:t.unit_amount_rounded * t.so_line_unit_price)
             )
             
-            task.invoiced_budget = sum(
+            """task.invoiced_budget = sum(
                 analyzed_timesheet.filtered(lambda t: t.stage_id in ('invoiced','historical'))
                     .mapped(lambda t:t.unit_amount_rounded * t.so_line_unit_price)
-            )
+            )"""
             
             if task.project_id.invoicing_mode != 'tm':
                 task.realized_budget = sum(
@@ -268,7 +268,7 @@ class ProjectTask(models.Model):
                         .mapped(lambda t:t.unit_amount * t.so_line_unit_price)
                 )
                 task.invoiced_budget = sum(
-                    analyzed_timesheet.filtered(lambda t: t.stage_id == 'invoiced')
+                    analyzed_timesheet.filtered(lambda t: t.stage_id in ('invoiced','historical'))
                         .mapped(lambda t:t.unit_amount_rounded * t.so_line_unit_price)
                 )
 
