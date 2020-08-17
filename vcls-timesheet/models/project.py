@@ -76,7 +76,7 @@ class Project(models.Model):
             project.cf_hours = sum(project.task_ids.mapped('cf_hours'))
             project.remaining_budget = project.contractual_budget - project.valued_budget
 
-            project.valuation_ratio = 100.0*(project.valued_hours / project.realized_hours) if project.realized_hours else False
+            project.valuation_ratio = 100.0*(project.valued_budget / project.realized_budget) if project.realized_budget else False
 
             # we recompute the invoiceable amount
             project.sale_order_id.order_line._compute_qty_delivered()
