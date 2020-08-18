@@ -33,8 +33,11 @@ class SFLedgerItemSync(models.Model):
         to_process = sfInstance.getConnection().query_all(sql)['records']
 
         inc_id = self.env.ref('vcls-hr.company_VCINC').id
-        records = self.env['account.move.line'].search([('company_id','=',inc_id), ('full_reconcile_id','=',False)])
+        records = self.env['account.move.line'].search([('company_id','=',inc_id), ('processed','=',False), ('full_reconcile_id','=',False)])
 
+        if not records:
+            records = self.env['account.move.line'].search([('company_id','=',inc_id), ('processed','=', True), ('full_reconcile_id','=',False)])
+            records.processed = False
         if records:
             counter = 0
             for od_rec in records:
@@ -62,12 +65,13 @@ class SFLedgerItemSync(models.Model):
                                             line_id = self.env['account.move.line'].search([('ref','=',item['Name'])],limit=1)
                                             if line_id:
                                                 line_ids.append(line_id.id)
+                                                line_id.processed = True
                                         if line_ids:
                                             reconcile = self.env['account.full.reconcile'].create({
                                                 'name': tags[0]['Name'],
                                                 'reconciled_line_ids': [(6, 0, line_ids)]
                                             }).id
-                                            _logger.info("New reconciliation ID : {}".format(str(reconcile)))
+                                            _logger.info("New reconciliation ID : {} For IDS : {}".format(str(reconcile),line_ids))
 
                         reconciled = od_rec.full_reconcile_id
                         if not reconciled:
@@ -88,6 +92,7 @@ class SFLedgerItemSync(models.Model):
                                                 'reconciled_line_ids': [(4, od_rec.id, 0)]
                                             })
                                         _logger.info("New reconciliation ID : {}".format(str(reconcile.id)))
+                    od_rec.processed = True
                 _logger.info("Reconciliation | Item {}/{} ".format(counter,len(records)))
 
 
