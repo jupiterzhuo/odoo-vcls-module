@@ -40,14 +40,14 @@ class SFLedgerItemSync(models.Model):
                     break
                 else:
                     counter += 1
-                    key = keys.filtered(lambda p: p.ref == sf_rec['Name'])
+                    key = self.env['account.move.line'].search([('ref','=',sf_rec['Name']), ('full_reconcile_id','=',False)],limit=1)
+                    
                     if key:
                         if sf_rec['s2cor__Document_Number_Tag__c']:
-                            reconciled = self.env['account.move.line'].browse(int(key[0].id)).full_reconcile_id
+                            reconciled = key.full_reconcile_id
                             if not reconciled:
                                 sql = "Select Id, Name, s2cor__Is_Reconciled__c From s2cor__Sage_ACC_Tag__c WHERE Id ='{}'".format(sf_rec['s2cor__Document_Number_Tag__c'])
                                 tags = sfInstance.getConnection().query_all(sql)['records']
-                                
                                 if tags[0]['s2cor__Is_Reconciled__c']:
                                     sql = "SELECT Id, Name FROM s2cor__Sage_ACC_Ledger_Item__c WHERE s2cor__Document_Number_Tag__c = '{}'".format(sf_rec['s2cor__Document_Number_Tag__c'])
                                     items = sfInstance.getConnection().query_all(sql)['records']
@@ -63,7 +63,7 @@ class SFLedgerItemSync(models.Model):
                                                 'reconciled_line_ids': [(6, 0, line_ids)]
                                             }).id
                                             _logger.info("New reconciliation ID : {}".format(str(reconcile)))
-                        reconciled = self.env['account.move.line'].browse(int(key[0].id)).full_reconcile_id
+                        reconciled = self.env['account.move.line'].browse(key.id).full_reconcile_id
                         if not reconciled:
                             queryAccountNumber = "SELECT s2cor__Account_Number__c FROM s2cor__Sage_ACC_Ledger_Account__c WHERE Id ='{}'".format(str(sf_rec['s2cor__Ledger_Account__c']))
                             accountNumber = sfInstance.getConnection().query(queryAccountNumber)['records']
@@ -74,12 +74,12 @@ class SFLedgerItemSync(models.Model):
                                         reconcile = self.env['account.full.reconcile'].search([('name','=','OK')],limit=1)
                                         if reconcile:
                                             reconcile.write({
-                                                'reconciled_line_ids': [(4, int(key[0].id))]
+                                                'reconciled_line_ids': [(4, key.id)]
                                             })
                                         else:
                                             reconcile = self.env['account.full.reconcile'].create({
                                                 'name': "OK",
-                                                'reconciled_line_ids': [(4, int(key[0].id), 0)]
+                                                'reconciled_line_ids': [(4, key.id, 0)]
                                             })
                                         _logger.info("New reconciliation ID : {}".format(str(reconcile.id)))
                                     
