@@ -249,7 +249,8 @@ model.sf_process_keys(batch_size,loop,max_minutes)
             <field name="doall">False</field>
             <field name="model_id" ref="model_etl_salesforce_ledgeritem" />
             <field name="state">code</field>
-            <field name="code">model.reconciledEntries()
+            <field name="code">max_minutes = 9
+            model.reconciledEntries(max_minutes)
             </field>
         </record>
         
