@@ -42,7 +42,6 @@ class TranslatorSFLedgerItem(TranslatorSFGeneral.TranslatorSFGeneral):
         result['currency_id'] = TranslatorSFGeneral.TranslatorSFGeneral.convertCurrency(SF_LedgerItem['CurrencyIsoCode'],odoo)
         result['quantity'] = 1.0
         result['ref'] = SF_LedgerItem['Name']
-        result['company_id'] = odoo.env.ref('vcls-hr.company_VCINC').id
 
         #result['full_reconcile_id'] / SF_LedgerItem['s2cor__Document_Number_Tag__c']
         if result['account_id']:
