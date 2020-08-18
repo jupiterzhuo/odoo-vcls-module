@@ -233,9 +233,8 @@ class ResPartner(models.Model):
         for rec in self:
             rec.active = False if rec.stage == 5 else True
 
-
     @api.multi
-    @api.depends('legacy_account','customer','supplier','employee')
+    @api.depends('legacy_account', 'customer', 'supplier', 'employee')
     def _compute_external_account(self):
         for partner in self:
             if partner.customer:
@@ -243,7 +242,7 @@ class ResPartner(models.Model):
                 continue
             if partner.employee:
                 #we grab the employee
-                employee = self.env['hr.employee'].search([('address_home_id.id','=',partner.id)],limit=1)
+                employee = self.env['hr.employee'].search([('address_home_id', '=', partner.id)], limit=1)
                 if employee:
                     partner.external_account = employee.employee_external_id
                     continue
