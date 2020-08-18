@@ -551,7 +551,7 @@ class AccountFiscalPosition(models.Model):
             _logger.info("FP state {}".format(domain_country + null_state_dom + zip_domain))
         if not fpos and zipcode:
             fpos = self.search(domain_country + state_domain + null_zip_dom, limit=1)
-            _logger.info("FP zip {}".format(domain_country + state_domain + null_zip_domn))
+            _logger.info("FP zip {}".format(domain_country + state_domain + null_zip_dom))
         if not fpos and state_id and zipcode:
             fpos = self.search(domain_country + null_state_dom + null_zip_dom, limit=1)
             _logger.info("FP state and zip {}".format(domain_country + null_state_dom + null_zip_dom))
@@ -566,7 +566,7 @@ class AccountFiscalPosition(models.Model):
             fpos = self.search(base_domain + null_country_dom, limit=1)
             _logger.info("FP fallback {}".format(base_domain + null_country_dom))
 
-        _logger.info("FP fp {}".format(fp))
+        _logger.info("FP fp {}".format(fpos))
         return fpos or False
 
     @api.model
