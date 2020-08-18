@@ -45,7 +45,8 @@ class ExpenseSheet(models.Model):
     )
 
     company_id = fields.Many2one(
-        related='employee_id.company_id'
+        related='employee_id.company_id',
+        store=True,
     )
 
     country_id = fields.Many2one(
