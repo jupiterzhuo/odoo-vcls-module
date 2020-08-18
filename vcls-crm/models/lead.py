@@ -2,7 +2,7 @@
 
 from odoo import models, fields, tools, api, _
 from odoo.exceptions import UserError, ValidationError, Warning
-from datetime import date
+from datetime import date, datetime
 import datetime
 import requests
 import json
@@ -398,7 +398,7 @@ class Leads(models.Model):
         compute = '_compute_gdpr'
     )"""
 
-    contact_us_message = fields.Char()
+    contact_us_message = fields.Text()
 
     @api.model
     def create(self, vals):
@@ -982,6 +982,12 @@ class Leads(models.Model):
             temp = lead_sorted[1:].mapped('marketing_task_id').mapped('id')
             temp += lead_sorted.mapped('marketing_task_ids').mapped('id')
             merged_data['marketing_task_ids'] = [(6, _, temp)]
+
+            contact_message_all = ""
+            for lead in lead_sorted:
+                if lead.contact_us_message: 
+                    contact_message_all += "\n Message on the " + lead.create_date.strftime("%d-%b-%Y: ") + lead.contact_us_message
+            merged_data['contact_us_message'] = contact_message_all
 
             new_list_out = [x for x in self if x.opted_out_date]
             new_list_in = [x for x in self if x.opted_in_date]
