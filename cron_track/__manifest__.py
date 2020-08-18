@@ -8,7 +8,7 @@
 
 {
     'name': 'Cron Track',
-    'version': '12.0.1.0',
+    'version': '12.0.2',
     'summary': 'Cron Track',
     'category': '',
     'description': """"

@@ -75,6 +75,7 @@ class CronTrack(models.Model):
 class CronTrackLog(models.Model):
     _name = "cron.track.log"
     _order = "error_msg_time desc"
+    _description = "Cron Track Log"
 
     cron_track_id = fields.Many2one('cron.track')
     error_msg = fields.Text(string="Error Message")
