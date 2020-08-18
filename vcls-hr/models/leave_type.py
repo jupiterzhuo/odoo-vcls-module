@@ -85,7 +85,7 @@ class LeaveType(models.Model):
         #if this seaerch is called by a view where the below domain has been defined.
         #This is used to have different search function according to the view
         leave_ids = super(LeaveType, self)._search(args, offset=offset, limit=limit, order=order, count=count, access_rights_uid=access_rights_uid)
-        _logger.info("LEAVE TYPE SEARCH | {} {} {} \n {}".format(employee_id.name if employee_id else 'NO EMPLOYEE',no_zero,args,self.browse(leave_ids).mapped('name') if leave_ids else 'NO LEAVES FOUND'))
+        _logger.info("LEAVE TYPE SEARCH | {} {} {} \n {}".format(self.env['hr.employee'].browse(employee_id).name if employee_id else 'NO EMPLOYEE',no_zero,args,self.browse(leave_ids).mapped('name') if leave_ids else 'NO LEAVES FOUND'))
         if not count and not order and employee_id and no_zero:
             leaves = self.browse(leave_ids)
             #we remove the leaves types based on allocations but with a counter == 0
