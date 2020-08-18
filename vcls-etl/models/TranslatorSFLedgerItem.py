@@ -48,6 +48,7 @@ class TranslatorSFLedgerItem(TranslatorSFGeneral.TranslatorSFGeneral):
             return result
         result['account_id'] = odoo.env['account.account'].search([('code','=','512000-1000')],limit=1).id
         
+
         return result
 
     @staticmethod
