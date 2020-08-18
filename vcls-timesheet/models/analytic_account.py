@@ -737,6 +737,8 @@ class AnalyticLine(models.Model):
 
         if to_clean:
             to_clean.unlink()
+        else:
+            _logger.info("No 0 hrs TS to clean")
 
     @api.model
     def _smart_timesheeting_cron(self,hourly_offset=0):
