@@ -115,7 +115,7 @@ class ReportAccountGeneralLedger(models.AbstractModel):
                         }
                     elif line.payment_id:
                         caret_type = 'account.payment'
-                    columns = [{'name': v} for v in [line.journal_id.name, format_date(self.env, line.date),
+                    columns = [{'name': v} for v in [line.journal_id.code, format_date(self.env, line.date),
                                                      name, partner_name, currency,
                                                      line_debit != 0 and self.format_value(line_debit) or '',
                                                      line_credit != 0 and self.format_value(line_credit) or '',
