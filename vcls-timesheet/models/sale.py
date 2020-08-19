@@ -340,6 +340,11 @@ class SaleOrderLine(models.Model):
         for line in self.filtered(lambda l: l.vcls_type=='rate' and l.order_id.invoicing_mode == 'fixed_price'):
             line.untaxed_amount_to_invoice = 0.0
 
+    def action_compute_kpi(self):
+        sos = self.env['crm.lead'].browse(self.env.context.get('active_ids'))
+        sos.mapped('tasks_ids')._get_kpi()
+        sos.mapped('project_ids')._get_kpi()
+
 
 class ProductTemplate(models.Model):
     _inherit = 'product.template'
