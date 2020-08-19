@@ -116,6 +116,11 @@ class SaleOrder(models.Model):
             #we get the default timecategories from the product_template, only if to time_cat already defined
             if not line.task_id.time_category_ids:
                 line.task_id.time_category_ids = line.product_id.product_tmpl_id.time_category_ids
+    
+    def action_compute_kpi(self):
+        sos = self.browse(self.env.context.get('active_ids'))
+        sos.mapped('tasks_ids')._get_kpi()
+        sos.mapped('project_ids')._get_kpi()
 
     @api.multi
     def recompute_lines(self):
@@ -339,11 +344,6 @@ class SaleOrderLine(models.Model):
         #in fixed price, we force rate lines to 0
         for line in self.filtered(lambda l: l.vcls_type=='rate' and l.order_id.invoicing_mode == 'fixed_price'):
             line.untaxed_amount_to_invoice = 0.0
-
-    def action_compute_kpi(self):
-        sos = self.env['crm.lead'].browse(self.env.context.get('active_ids'))
-        sos.mapped('tasks_ids')._get_kpi()
-        sos.mapped('project_ids')._get_kpi()
 
 
 class ProductTemplate(models.Model):
