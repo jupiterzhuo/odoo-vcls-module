@@ -63,7 +63,7 @@ class ProjectTask(models.Model):
         string="Invoicing Mode")
 
     allow_budget_modification = fields.Boolean(default="False")
-    recompute_kpi = fields.Boolean(default="False")
+    recompute_kpi = fields.Boolean(default="True")
 
     budget_consumed = fields.Float(
         string="Budget Consumed",
@@ -90,11 +90,11 @@ class ProjectTask(models.Model):
             task.invoicing_mode = task.project_id.invoicing_mode
 
     @api.multi
-    @api.depends("realized_budget", "contractual_budget")
+    @api.depends("valued_budget", "contractual_budget")
     def compute_budget_consumed(self):
         for task in self:
             if task.contractual_budget:
-                task.budget_consumed = task.realized_budget / task.contractual_budget * 100
+                task.budget_consumed = task.valued_budget / task.contractual_budget * 100
             else:
                 task.budget_consumed = 0
 
@@ -216,25 +216,25 @@ class ProjectTask(models.Model):
     def _get_kpi(self):
         #gets parent tasks only
         for task in self.filtered(lambda s: not s.parent_id):
+
+            #gets all child and parent timesheets for this task. if "task" is a child task, skips it.
+            analyzed_timesheet = task.project_id.timesheet_ids.filtered(lambda t: t.reporting_task_id == task)
+            #_logger.info("KPI {} {}".format(task.name, len(analyzed_timesheet)))
+
             #this is to fix if a task was added manually and has the same sale_line_id (sale.order.line type) as another task 
             if task.sale_line_id.task_id != task:
                 #KPIs are run every hour and if they had been calculated before this fix was added, they need to be set to 0
-                task.zero_out_kpi()
-                continue
-            #gets all child and parent timesheets for this task. if "task" is a child task, skips it.
-            analyzed_timesheet = task.project_id.timesheet_ids.filtered(lambda t: t.reporting_task_id == task)
-
-            task.contractual_budget = task.sale_line_id.price_unit * task.sale_line_id.product_uom_qty
+                task.contractual_budget = 0
+                historical_invoiced_amount = 0
+                #task.zero_out_kpi()
+            else:
+                task.contractual_budget = task.sale_line_id.price_unit * task.sale_line_id.product_uom_qty
+                historical_invoiced_amount = task.sale_line_id.historical_invoiced_amount
 
             task.forecasted_budget = sum([
                 hourly_rate * resource_hours for hourly_rate, resource_hours in
                 zip(task.forecast_ids.mapped('hourly_rate'), task.forecast_ids.mapped('resource_hours'))
             ])
-            
-            task.valued_budget = sum(
-                analyzed_timesheet.filtered(lambda t: t.stage_id not in ('draft', 'outofscope'))
-                    .mapped(lambda t:t.unit_amount_rounded * t.so_line_unit_price)
-            )
             
             task.pc_budget = sum(
                 analyzed_timesheet.filtered(lambda t: t.stage_id in ('pc_review'))
@@ -246,13 +246,17 @@ class ProjectTask(models.Model):
                     .mapped(lambda t:t.unit_amount_rounded * t.so_line_unit_price)
             )
             
-            task.invoiced_budget = sum(
+            """task.invoiced_budget = sum(
                 analyzed_timesheet.filtered(lambda t: t.stage_id in ('invoiced','historical'))
                     .mapped(lambda t:t.unit_amount_rounded * t.so_line_unit_price)
-            )
+            )"""
+
+            task.realized_budget = historical_invoiced_amount + sum(
+                    analyzed_timesheet.filtered(lambda t: t.stage_id not in ('draft', 'outofscope')).mapped(lambda t:t.unit_amount * t.so_line_unit_price)
+                )
             
             if task.project_id.invoicing_mode != 'tm':
-                task.realized_budget = sum(
+                task.valued_budget = sum(
                     task.sale_line_id.mapped(lambda l: l.qty_delivered * l.price_unit)
                 )
                 task.invoiced_budget = sum(
@@ -260,12 +264,11 @@ class ProjectTask(models.Model):
                 )
 
             else:
-                task.realized_budget = sum(
-                    analyzed_timesheet.filtered(lambda t: t.stage_id not in ('draft', 'outofscope'))
-                        .mapped(lambda t:t.unit_amount * t.so_line_unit_price)
+                task.valued_budget = historical_invoiced_amount + sum(
+                    analyzed_timesheet.filtered(lambda t: t.stage_id not in ('draft', 'outofscope')).mapped(lambda t:t.unit_amount_rounded * t.so_line_unit_price)
                 )
-                task.invoiced_budget = sum(
-                    analyzed_timesheet.filtered(lambda t: t.stage_id == 'invoiced')
+                task.invoiced_budget = historical_invoiced_amount + sum(
+                    analyzed_timesheet.filtered(lambda t: t.stage_id in ('invoiced','historical'))
                         .mapped(lambda t:t.unit_amount_rounded * t.so_line_unit_price)
                 )
 
@@ -288,9 +291,11 @@ class ProjectTask(models.Model):
             task.invoiced_hours = sum(analyzed_timesheet.filtered(
                 lambda t: t.stage_id in ('invoiced','historical')).mapped('unit_amount_rounded'))
 
-            task.valuation_ratio = 100.0*(task.valued_hours / task.realized_hours) if task.realized_hours else False
+            task.valuation_ratio = 100.0*(task.valued_budget / task.realized_budget) if task.realized_budget else False
 
             task.remaining_budget = task.contractual_budget - task.valued_budget
+
+            task.compute_consummed_completed_ratio()
 
             if  not task.allow_budget_modification:
                 task.contractual_budget = False
