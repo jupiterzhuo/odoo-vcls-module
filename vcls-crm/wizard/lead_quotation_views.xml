@@ -22,9 +22,8 @@
                                }"
                                domain="[
                                     ('parent_id', '=', False),
-                                    '|',
-                                    ('partner_id', '=', active_id.partner_id),
-                                    ('partner_id', '=', active_id.partner_id.parent_id),
+                                    ('partner_id', '=', partner_id),
+                                   
                                ]"
                         />
                     </group>
@@ -74,7 +73,7 @@
                         type="action" class="oe_highlight"
                         attrs="{'invisible': ['&amp;', ('probability', '=', 0), ('active', '=', False)]}"
                         context="{'search_default_partner_id': partner_id,
-                                  'default_partner_id': partner_id,
+                                  'default_partner_id': partner_id.parent_id if partner_id.parent_id else partner_id,
                                   'default_team_id': team_id,
                                   
                                   
