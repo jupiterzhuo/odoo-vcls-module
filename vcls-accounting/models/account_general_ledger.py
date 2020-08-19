@@ -7,6 +7,35 @@ from odoo.tools.misc import format_date
 class ReportAccountGeneralLedger(models.AbstractModel):
     _inherit = "account.general.ledger"
 
+    def _do_query(self, options, line_id, group_by_account=True, limit=False):
+        """In the last version of native V12 (19/08/20), there's a missing space on the sql request """
+        if group_by_account:
+            select = "SELECT \"account_move_line\".account_id"
+            select += ',COALESCE(SUM(\"account_move_line\".debit-\"account_move_line\".credit), 0),' \
+                      'SUM(\"account_move_line\".amount_currency),' \
+                      'SUM(\"account_move_line\".debit),SUM(\"account_move_line\".credit)'
+            if options.get('cash_basis'):
+                select = select.replace('debit', 'debit_cash_basis').replace('credit', 'credit_cash_basis')\
+                    .replace('balance', 'balance_cash_basis')
+        else:
+            select = "SELECT \"account_move_line\".id"
+        sql = "%s FROM %s WHERE %s%s"
+        if group_by_account:
+            sql += " GROUP BY \"account_move_line\".account_id"
+        else:
+            sql += " GROUP BY \"account_move_line\".id"
+            sql += " ORDER BY MAX(\"account_move_line\".date),\"account_move_line\".id"
+            if limit and isinstance(limit, int):
+                sql += " LIMIT " + str(limit)
+        user_types = self.env['account.account.type'].search([('type', 'in', ('receivable', 'payable'))])
+        with_sql, with_params = self._get_with_statement(user_types)
+        tables, where_clause, where_params = self.env['account.move.line']._query_get()
+        line_clause = line_id and ' AND \"account_move_line\".account_id = ' + str(line_id) or ''
+        query = sql % (select, tables, where_clause, line_clause)
+        self.env.cr.execute(with_sql + query, with_params + where_params)
+        results = self.env.cr.fetchall()
+        return results
+
     def _get_columns_name(self, options):
         column_names = super(ReportAccountGeneralLedger, self)._get_columns_name(options)
         column_names.insert(1, {'name': _("Journal")})
