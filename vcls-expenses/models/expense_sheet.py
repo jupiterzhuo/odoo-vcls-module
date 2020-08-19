@@ -68,7 +68,7 @@ class ExpenseSheet(models.Model):
         compute='_compute_user_id'
     )
     
-    payment_mode = fields.Selection([("own_account", "Employee (to reimburse)"), ("company_account", "Company")], default='own_account', related=False)
+    payment_mode = fields.Selection([("own_account", "Employee (to reimburse)"), ("company_account", "Company")], default=False, related=False,readonly=False)
 
     @api.constrains('journal_id', 'journal_id.company_id', 'company_id')
     def _check_expense_sheet_same_company(self):
