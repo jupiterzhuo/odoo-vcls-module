@@ -513,7 +513,7 @@ class SaleOrder(models.Model):
     
     
 
-
+"""
 class AccountFiscalPosition(models.Model):
     _inherit = 'account.fiscal.position'
 
@@ -596,3 +596,4 @@ class AccountFiscalPosition(models.Model):
             fp = self._get_fpos_by_region(delivery.country_id.id, delivery.state_id.id, delivery.zip, False)
 
         return fp.id if fp else False
+"""
