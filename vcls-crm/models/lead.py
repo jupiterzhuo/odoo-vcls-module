@@ -398,7 +398,8 @@ class Leads(models.Model):
         compute = '_compute_gdpr'
     )"""
 
-    contact_us_message = fields.Text()
+    contact_us_message = fields.Char()
+    contact_us_message_html = fields.Html()
 
     @api.model
     def create(self, vals):
@@ -697,7 +698,7 @@ class Leads(models.Model):
         data['client_product_ids'] = [(6, 0, self.client_product_ids.ids)]
         data['linkedin'] = self.linkedIn_url
         data['category_id'] = [(4, self.env.ref('vcls-contact.category_account').id, 0)]
-        data['contact_us_message'] = self.contact_us_message
+        data['contact_us_message_html'] = self.contact_us_message_html
         if is_company:
             data['altname'] = self.altname
         else:
@@ -985,9 +986,9 @@ class Leads(models.Model):
 
             contact_message_all = ""
             for lead in lead_sorted:
-                if lead.contact_us_message: 
-                    contact_message_all += "\n Message on the " + lead.create_date.strftime("%d-%b-%Y: ") + lead.contact_us_message
-            merged_data['contact_us_message'] = contact_message_all
+                if lead.contact_us_message_html: 
+                    contact_message_all += "\n Message on the " + lead.create_date.strftime("%d-%b-%Y: ") + lead.contact_us_message_html
+            merged_data['contact_us_message_html'] = contact_message_all
 
             new_list_out = [x for x in self if x.opted_out_date]
             new_list_in = [x for x in self if x.opted_in_date]

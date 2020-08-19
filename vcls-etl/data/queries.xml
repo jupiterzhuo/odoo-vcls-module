@@ -86,7 +86,7 @@
                 SELECT 
                 Id, Salutation, FirstName, MiddleName, LastName, OwnerId, Activity__c, Address, City, Company, Content_Name__c, Country,PostalCode, Street, 
                 CurrencyIsoCode, Email,First_VCLS_Contact_Point__c, Opt_in_Campaign__c, Unsubscribe_Campaign__c,
-                External_Referee__c, Fax, Functional_Focus__c, Inactive_Lead__c, Industry, Contact_us_Message__c, Initial_Product_Interest__c, Product_Type__c,
+                External_Referee__c, Fax, Functional_Focus__c, Inactive_Lead__c, Industry, Contact_us_Message_Html__c, Initial_Product_Interest__c, Product_Type__c,
                 LastModifiedDate, Title, Seniority__c, Phone, Website, Description, LeadSource, ConvertedDate,
                 State, Status, LinkedIn_Profile__c, Opted_In__c, Rating
                 FROM Lead

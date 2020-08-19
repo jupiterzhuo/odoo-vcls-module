@@ -555,7 +555,7 @@
               
                 <xpath expr="//field[@name='description']/.." position="after">
                     <page string="Contact Us Message">
-                        <field name="contact_us_message"/>
+                        <field name="contact_us_message_html" widget="html"/>
                     </page>
                 </xpath>
 

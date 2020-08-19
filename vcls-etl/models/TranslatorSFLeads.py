@@ -103,7 +103,7 @@ class TranslatorSFLeads(TranslatorSFGeneral.TranslatorSFGeneral):
         
         if SF_Leads['Industry']:
             result['industry_id'] = mapOdoo.convertRef(SF_Leads['Industry'],odoo,'res.partner.industry',False)
-        result['contact_us_message'] = SF_Leads['Contact_us_Message__c']
+        result['contact_us_message_html'] = SF_Leads['Contact_us_Message_html__c']
         result['function'] = SF_Leads['Title']
         if SF_Leads['Seniority__c']:
             result['partner_seniority_id'] = mapOdoo.convertRef(SF_Leads['Seniority__c'], odoo,'partner.seniority',False)
