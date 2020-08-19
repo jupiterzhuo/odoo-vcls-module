@@ -21,8 +21,10 @@
                                     'required': [('quotation_type', '!=', 'new')],
                                }"
                                domain="[
-                                    ('opportunity_id', '=', active_id),
-                                    ('parent_id', '=', False)
+                                    ('parent_id', '=', False),
+                                    '|',
+                                    ('partner_id', '=', active_id.partner_id),
+                                    ('partner_id', '=', active_id.partner_id.parent_id),
                                ]"
                         />
                     </group>
