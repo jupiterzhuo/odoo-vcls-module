@@ -88,6 +88,7 @@ class SaleAdvancePaymentInv(models.TransientModel):
             default_currency_id=order.currency_id.id)
         invoice = super(SaleAdvancePaymentInv, self)._create_invoice(order, so_line, amount)
         # Add the same followers to from the order to the invoice
+        invoice.po_id = order.po_id
         order_follower_partner_ids = order.message_partner_ids
         if order_follower_partner_ids:
             invoice._message_subscribe(partner_ids=order_follower_partner_ids.ids)
