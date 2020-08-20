@@ -111,7 +111,7 @@
                             <field name="opportunity_id" options="{'no_create': True,'no_create_edit': True}" attrs="{'readonly': [('id', '&gt;', 0)]}" domain="[('partner_id','=',partner_id)]"/>
                             <field name="internal_ref" options="{'no_create': True}" attrs="{'readonly': [('id', '&gt;', 0)]}"/>
                             <field name="sale_status" readonly="1"/>
-                            <field name="probability" readonly="1"/>
+                            <field name="probability" readonly="1" widget='integer'/>
                             <field name="parent_sale_order_id" invisible="1"/>
                             <field name="project_id" options="{'no_create': True}" string="Linked Project" invisible="1"/>
                         </group>
