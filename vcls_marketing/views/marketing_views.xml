@@ -23,6 +23,11 @@
                 <tree>
                     <field name="name"/>
                     <field name="project_id"/>
+                    <field name="date_start" string="Start Date"/>
+                    <field name="total_cost"/>
+                    <field name="country_group_id"/>
+                    <field name="business_line_id" string="Service Area" widget="many2many_tags"/>
+                    <field name="attendee_ids" string="VCLS attendee" widget="many2many_tags"/>
                 </tree>
             </field>
         </record>

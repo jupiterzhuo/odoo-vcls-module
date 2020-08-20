@@ -12,14 +12,14 @@ _logger = logging.getLogger(__name__)
 
 URL_POWER_AUTOMATE = "https://prod-29.westeurope.logic.azure.com:443/workflows/9f6737616b7047498a61a053cd883fc2/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=W5bnOEb4gMnP_E9_VnzK7c8AuYb2zGovg5BHwIoi-U8"
 
-class ResoucesLeads(models.Model):
+"""class ResoucesLeads(models.Model):
 
     _name = 'crm.resource.lead'
     _description = 'resource for lead'
     
     project_role_id = fields.Many2one(
         'hr.project_role', string='Seniority')
-    number = fields.Float('Number')
+    number = fields.Float('Number')"""
 
 
 class LeadStage(models.Model):
@@ -131,6 +131,11 @@ class Leads(models.Model):
     child_ids = fields.Many2many(
         'res.partner',
         compute='_compute_child_ids',
+    )
+
+    partner_parent_id = fields.Many2one(
+        'res.partner',
+        compute='_compute_partner_parent_id',
     )
 
     # Related fields in order to avoid mismatch & errors
@@ -264,10 +269,10 @@ class Leads(models.Model):
         string='Other Technical Experts', 
         )
     
-    resources_ids = fields.Many2many(
+    """resources_ids = fields.Many2many(
         'crm.resource.lead', 
         string='Resources', 
-        )
+        )"""
     
     CDA = fields.Boolean('CDA signed')
     MSA = fields.Boolean('MSA valid')
@@ -449,8 +454,12 @@ class Leads(models.Model):
     ###################
 
     def _compute_child_ids(self):
-           for partner in self.partner_id:
-               self.child_ids = partner.child_ids if partner.child_ids else False
+        for lead in self:
+            lead.child_ids = lead.partner_id.child_ids if lead.partner_id.child_ids else False
+    
+    def _compute_partner_parent_id(self):
+        for lead in self:
+            lead.partner_parent_id = lead.partner_id.parent_id if lead.partner_id.parent_id else lead.partner_id
 
     @api.depends('tag_ids')
     def _compute_sig_opp(self):

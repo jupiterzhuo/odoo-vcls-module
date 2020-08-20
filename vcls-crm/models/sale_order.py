@@ -129,6 +129,46 @@ class SaleOrder(models.Model):
         ('2', '3 month'),
         ('5', '5 month')],
         string='Validity duration', default='1')
+    
+    probability = fields.Float(
+        help='Related to the parent opportunity',
+        compute='_compute_probability',
+        readonly=True,
+        store=True,
+        default=0.01,
+    )
+
+    @api.depends('opportunity_id','opportunity_id.probability')
+    def _compute_probability(self):
+        for so in self.filtered(lambda p: p.opportunity_id):
+            so.probability = so.opportunity_id.probability
+    
+
+    sale_status = fields.Selection(
+        selection=[
+            ('draft','Draft'),
+            ('sent','Sent'),
+            ('cancel','Cancelled'),
+            ('lost','Lost'),
+            ('won','Won'),],
+        default='draft',
+        store=True,
+        compute='_compute_sale_status',
+    )
+
+    @api.depends('probability','state')
+    def _compute_sale_status(self):
+        for so in self:
+            if so.probability == 0.0:
+                so.sale_status = 'lost'
+            elif so.state in ['cancel','sent']:
+                so.sale_status = so.state
+            elif so.probability == 100:
+                so.sale_status = 'won'
+            else:
+                so.sale_status = 'draft'
+
+
 
     ###############
     # ORM METHODS #
@@ -513,3 +553,87 @@ class SaleOrder(models.Model):
     
     
 
+"""
+class AccountFiscalPosition(models.Model):
+    _inherit = 'account.fiscal.position'
+
+    @api.model
+    def _get_fpos_by_region(self, country_id=False, state_id=False, zipcode=False, vat_required=False):
+        if not country_id:
+            return False
+        base_domain = [('auto_apply', '=', True), ('vat_required', '=', vat_required)]
+        if self.env.context.get('force_company'):
+            base_domain.append(('company_id', 'in', [self.env.context.get('force_company'), False]))
+        null_state_dom = state_domain = [('state_ids', '=', False)]
+        null_zip_dom = zip_domain = [('zip_from', '=', 0), ('zip_to', '=', 0)]
+        null_country_dom = [('country_id', '=', False), ('country_group_id', '=', False)]
+
+        # DO NOT USE zipcode.isdigit() b/c '4020²' would be true, so we try/except
+        try:
+            zipcode = int(zipcode)
+            if zipcode != 0:
+                zip_domain = [('zip_from', '<=', zipcode), ('zip_to', '>=', zipcode)]
+        except (ValueError, TypeError):
+            zipcode = 0
+
+        if state_id:
+            state_domain = [('state_ids', '=', state_id)]
+
+        domain_country = base_domain + [('country_id', '=', country_id)]
+        domain_group = base_domain + [('country_group_id.country_ids', '=', country_id)]
+
+        # Build domain to search records with exact matching criteria
+        fpos = self.search(domain_country + state_domain + zip_domain, limit=1)
+        _logger.info("FP exact {}".format(domain_country + state_domain + zip_domain))
+        # return records that fit the most the criteria, and fallback on less specific fiscal positions if any can be found
+        if not fpos and state_id:
+            fpos = self.search(domain_country + null_state_dom + zip_domain, limit=1)
+            _logger.info("FP state {}".format(domain_country + null_state_dom + zip_domain))
+        if not fpos and zipcode:
+            fpos = self.search(domain_country + state_domain + null_zip_dom, limit=1)
+            _logger.info("FP zip {}".format(domain_country + state_domain + null_zip_dom))
+        if not fpos and state_id and zipcode:
+            fpos = self.search(domain_country + null_state_dom + null_zip_dom, limit=1)
+            _logger.info("FP state and zip {}".format(domain_country + null_state_dom + null_zip_dom))
+
+        # fallback: country group with no state/zip range
+        if not fpos:
+            fpos = self.search(domain_group + null_state_dom + null_zip_dom, limit=1)
+            _logger.info("FP country {}".format(domain_group + null_state_dom + null_zip_dom))
+
+        if not fpos:
+            # Fallback on catchall (no country, no group)
+            fpos = self.search(base_domain + null_country_dom, limit=1)
+            _logger.info("FP fallback {}".format(base_domain + null_country_dom))
+
+        _logger.info("FP fp {}".format(fpos))
+        return fpos or False
+
+    @api.model
+    def get_fiscal_position(self, partner_id, delivery_id=None):
+        if not partner_id:
+            return False
+        # This can be easily overridden to apply more complex fiscal rules
+        PartnerObj = self.env['res.partner']
+        partner = PartnerObj.browse(partner_id)
+
+        # if no delivery use invoicing
+        if delivery_id:
+            delivery = PartnerObj.browse(delivery_id)
+        else:
+            delivery = partner
+
+        # partner manually set fiscal position always win
+        if delivery.property_account_position_id or partner.property_account_position_id:
+            return delivery.property_account_position_id.id or partner.property_account_position_id.id
+
+        # First search only matching VAT positions
+        vat_required = bool(partner.vat)
+        fp = self._get_fpos_by_region(delivery.country_id.id, delivery.state_id.id, delivery.zip, vat_required)
+
+        # Then if VAT required found no match, try positions that do not require it
+        if not fp and vat_required:
+            fp = self._get_fpos_by_region(delivery.country_id.id, delivery.state_id.id, delivery.zip, False)
+
+        return fp.id if fp else False
+"""

@@ -30,6 +30,7 @@ class CustomerPortal(CustomerPortal):
             'expense': expense_sudo,
             'project': project,
             'project_id': project_id,
+            'countries' : request.env['res.country'].sudo().search([])
         }
         return {
             'html': request.env.ref('vcls-expenses.expense_modal').render(values),
@@ -58,7 +59,7 @@ class CustomerPortal(CustomerPortal):
 
         errors = []
         required_fields = [
-            'name', 'product_id', 'currency_id'
+            'name', 'product_id', 'currency_id', 
         ]
         for field in required_fields:
             if not kw.get(field):
@@ -84,13 +85,18 @@ class CustomerPortal(CustomerPortal):
                     'employee_id': employee_id.id,
                     'type': 'project',
                     'analytic_account_id': project_sudo.analytic_account_id.id,
+                    'sale_order_id' : project_sudo.sale_order_id.id,
+                    'country_id' : kw.get('country_id', False),
                 }
                 vals = sheet_sudo._get_info_from_employee(employee_id,vals)
-                # create a new sheet
                 sheet_id = sheet_sudo.create(vals)
+            if not sheet_id.country_id:
+                sheet_id.country_id = employee_id.country_id
             kw.update({
                 'employee_id': employee_id.id,
                 'sheet_id': sheet_id.id,
+                'sale_order_id' : sheet_id.project_id.sale_order_id.id,
+                'analytic_account_id' : sheet_id.project_id.analytic_account_id.id,
             })
             expense_sudo.create(kw)
         return request.redirect(project_url)

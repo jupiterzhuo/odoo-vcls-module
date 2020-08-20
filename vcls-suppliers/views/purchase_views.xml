@@ -32,6 +32,16 @@
             </field>
         </record>
 
+        <record model="ir.ui.view" id="view_invoice_asset_category">
+            <field name="name">account.invoice.supplier.form</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account_asset.view_invoice_asset_category"/>
+            <field name="arch" type="xml">
+                <xpath expr="//field[@name='asset_category_id']" position="replace">
+                </xpath>
+            </field>
+        </record>
+
         <record model="ir.ui.view" id="purchase_order_form_inherit">
             <field name="name">purchase.order.form.inherit</field>
             <field name="model">purchase.order</field>
@@ -158,9 +168,49 @@
             </field>
         </record>
 
+        <record model="ir.ui.view" id="view_account_form">
+            <field name="name">account.account.form</field>
+            <field name="model">account.account</field>
+            <field name="inherit_id" ref="account.view_account_form"/>
+            <field name="arch" type="xml">
+
+                <field name="code" position="after">
+                    <field name="default_account_id" string="Default Analytic"/>
+                </field>
+
+            </field>
+        </record>
+
+        <record id='supplier_bills_view_tree' model='ir.ui.view'>
+            <field name="name">supplier.bills.view.tree</field>
+            <field name="model">account.invoice</field>
+            <field name="priority">10</field>
+            <field name="arch" type="xml">
+                <tree string="Invoices">
+                    <field name="type"/>
+                    <field name="name" invisible="1"/>
+                    <field name="partner_id"/>
+                    <field name="number" string="Reference"/>
+                    <field name="company_id"/>
+                    <field name="fiscal_position_id"/>
+                    <field name="residual"/>
+                    <field name="currency_id"/>
+                    <field name="date_due"/>
+                    <field name="attachment_number" string=" "/>
+                    <button name="action_get_attachment_view" string="View Attachments" type="object"
+                            icon="fa-paperclip" attrs="{'invisible': [('attachment_number', '&lt;', 1)]}"/>
+                    <field name="state"/>
+                    <field name="ready_for_approval" readonly="1"/>
+                    <field name="activity_ids"/>
+                    <field name="activity_state"/>
+                </tree>
+            </field>
+        </record>
+
         <record id="purchase.action_invoice_pending" model="ir.actions.act_window">
+            <field name="view_mode">tree,form</field>
             <field name="view_ids" eval="[(5, 0, 0),
-                (0, 0, {'view_mode': 'tree', 'view_id': ref('vcls-invoicing.ia_invoices_view_tree')}),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('vcls-suppliers.supplier_bills_view_tree')}),
                 (0, 0, {'view_mode': 'form', 'view_id': ref('vcls-suppliers.inherited_purchase_approval_view')}),
             ]"/>
         </record>

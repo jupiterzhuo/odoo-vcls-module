@@ -109,8 +109,9 @@
                             <field name="parent_id" options="{'no_create': True}" readonly="1"/>
                             <field name="link_rates" attrs="{'invisible': [('parent_id', '=', False)]}" readonly="1"/>
                             <field name="opportunity_id" options="{'no_create': True,'no_create_edit': True}" attrs="{'readonly': [('id', '&gt;', 0)]}" domain="[('partner_id','=',partner_id)]"/>
-                            <!--<field name="opportunity_id" readonly="1"/>-->
                             <field name="internal_ref" options="{'no_create': True}" attrs="{'readonly': [('id', '&gt;', 0)]}"/>
+                            <field name="sale_status" readonly="1"/>
+                            <field name="probability" readonly="1"/>
                             <field name="parent_sale_order_id" invisible="1"/>
                             <field name="project_id" options="{'no_create': True}" string="Linked Project" invisible="1"/>
                         </group>
@@ -123,7 +124,7 @@
                             <field name="sale_order_template_id"  domain="[('product_category_id','=',product_category_id)]" string="2. Select Template" attrs="{'required': [('catalog_mode', '=', 'template'),('state','not in',['sale','done','cancel'])],}" options="{'no_create': True,'no_create_edit':True,'no_open':True}"/>
                             <field name="catalog_details" string="Show Detailed Catalog" invisible="1"/>
                         </group>
-                        <group string="Fine Filters (for specific line search)" invisible="1">
+                        <group string="Fine Filters (for specific line search)" invisible="1" name="fine_filters">
                             <field name="business_mode" widget="radio" string="3. Modify to focus on specific types"/>
                             <field name="deliverable_id" domain="[('product_category_id','=',product_category_id)]"/>
                         </group>
