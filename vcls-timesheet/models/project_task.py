@@ -252,7 +252,7 @@ class ProjectTask(models.Model):
             )"""
 
             task.realized_budget = historical_invoiced_amount + sum(
-                    analyzed_timesheet.filtered(lambda t: t.stage_id not in ('draft', 'outofscope')).mapped(lambda t:t.unit_amount * t.so_line_unit_price)
+                    analyzed_timesheet.filtered(lambda t: t.stage_id not in ('outofscope')).mapped(lambda t:t.unit_amount * t.so_line_unit_price)
                 )
             
             if task.project_id.invoicing_mode != 'tm':
@@ -265,7 +265,7 @@ class ProjectTask(models.Model):
 
             else:
                 task.valued_budget = historical_invoiced_amount + sum(
-                    analyzed_timesheet.filtered(lambda t: t.stage_id not in ('draft', 'outofscope')).mapped(lambda t:t.unit_amount_rounded * t.so_line_unit_price)
+                    analyzed_timesheet.filtered(lambda t: t.stage_id not in ('outofscope')).mapped(lambda t:t.unit_amount_rounded * t.so_line_unit_price)
                 )
                 task.invoiced_budget = historical_invoiced_amount + sum(
                     analyzed_timesheet.filtered(lambda t: t.stage_id in ('invoiced','historical'))
@@ -275,11 +275,11 @@ class ProjectTask(models.Model):
             task.forecasted_hours = sum(task.forecast_ids.mapped('resource_hours'))
             
             task.realized_hours = sum(analyzed_timesheet.filtered(
-                lambda t: t.stage_id not in ('draft', 'outofscope')
+                lambda t: t.stage_id not in ('outofscope')
             ).mapped('unit_amount'))
             
             task.valued_hours = sum(analyzed_timesheet.filtered(
-                lambda t: t.stage_id not in ('draft', 'outofscope')
+                lambda t: t.stage_id not in ('outofscope')
             ).mapped('unit_amount_rounded'))
             task.pc_hours = sum(analyzed_timesheet.filtered(
                 lambda t: t.stage_id in ('pc_review')
