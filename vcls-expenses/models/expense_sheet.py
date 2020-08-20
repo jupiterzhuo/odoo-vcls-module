@@ -58,7 +58,7 @@ class ExpenseSheet(models.Model):
     # OVERWRITTEN FIELDS #
     ######################
     user_id = fields.Many2one(
-        'res.users', 
+        'res.users',
         'Approver',
         readonly=True, 
         copy=False, 
@@ -67,6 +67,8 @@ class ExpenseSheet(models.Model):
         oldname='responsible_id',
         compute='_compute_user_id'
     )
+    
+    payment_mode = fields.Selection([("own_account", "Employee (to reimburse)"), ("company_account", "Company")], default=False, related=False,readonly=False)
 
     @api.constrains('journal_id', 'journal_id.company_id', 'company_id')
     def _check_expense_sheet_same_company(self):
@@ -169,12 +171,15 @@ class ExpenseSheet(models.Model):
                 action['context'] = {
                     'default_employee_id': rec.employee_id.id,
                     'default_analytic_account_id': rec.analytic_account_id.id,
-                    'default_sheet_id': rec.id}
+                    'default_sheet_id': rec.id,
+                    'default_payment_mode': rec.payment_mode,}
             elif rec.type == 'project':
                 action['context'] = {
                     'default_employee_id': rec.employee_id.id,
                     'default_sale_order_id': rec.sale_order_id.id,
-                    'default_sheet_id': rec.id}
+                    'default_sheet_id': rec.id,
+                    'default_payment_mode': rec.payment_mode,
+                    }
             return action
           
     """ We override this to ensure a default journal to be properly updated """

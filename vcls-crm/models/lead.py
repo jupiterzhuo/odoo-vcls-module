@@ -165,6 +165,11 @@ class Leads(models.Model):
         compute='_compute_child_ids',
     )
 
+    partner_parent_id = fields.Many2one(
+        'res.partner',
+        compute='_compute_partner_parent_id',
+    )
+
     # Related fields in order to avoid mismatch & errors
     opted_in = fields.Boolean(
         default= False,
@@ -482,8 +487,12 @@ class Leads(models.Model):
     ###################
 
     def _compute_child_ids(self):
-           for partner in self.partner_id:
-               self.child_ids = partner.child_ids if partner.child_ids else False
+        for lead in self:
+            lead.child_ids = lead.partner_id.child_ids if lead.partner_id.child_ids else False
+    
+    def _compute_partner_parent_id(self):
+        for lead in self:
+            lead.partner_parent_id = lead.partner_id.parent_id if lead.partner_id.parent_id else lead.partner_id
 
     @api.depends('tag_ids')
     def _compute_sig_opp(self):

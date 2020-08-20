@@ -116,6 +116,12 @@ class SaleOrder(models.Model):
             #we get the default timecategories from the product_template, only if to time_cat already defined
             if not line.task_id.time_category_ids:
                 line.task_id.time_category_ids = line.product_id.product_tmpl_id.time_category_ids
+    
+    def action_compute_kpi(self):
+        sos = self.browse(self.env.context.get('active_ids'))
+        sos.mapped('tasks_ids')._get_kpi()
+        sos.mapped('project_ids')._get_kpi()
+        #_logger.info("KPI RECOMPUTE {} \n{} \n{}".format(sos.mapped('name'),sos.mapped('tasks_ids.name'),sos.mapped('project_ids.name')))
 
     @api.multi
     def recompute_lines(self):
