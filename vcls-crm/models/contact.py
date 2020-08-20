@@ -48,6 +48,15 @@ class ContactExt(models.Model):
         readonly = True,
     )
 
+    sale_profile = fields.Selection(
+        selection=[
+            ('new','NEW'),
+            ('retained','RETAINED'),
+            ('black','BLACKLISTED'),
+        ],
+        default = 'new',
+    )
+
     def _compute_sale_order_count_without_cancelled(self):
         # retrieve all children partners and prefetch 'parent_id' on them
         all_partners = self.search([('id', 'child_of', self.ids)])

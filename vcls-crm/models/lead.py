@@ -330,6 +330,14 @@ class Leads(models.Model):
     proposal_type = fields.Selection([('email', 'Email Proposal'),
                                       ('simple', 'Simple Proposal'),
                                       ('complex', 'Complex Proposal'),])
+    
+    sale_profile = fields.Selection(
+        selection=[
+            ('new','NEW'),
+            ('retained','RETAINED'),
+            ('black','BLACKLISTED'),
+        ],
+    )
 
     #name = fields.Char() We don't compute, it breaks too much usecases
 
@@ -343,33 +351,6 @@ class Leads(models.Model):
     won_lost_description = fields.Char(string = 'Won/Lost details')
 
     linkedIn_url = fields.Char(string = 'LinkedIn profile')
-
-    
-    """opted_in_date = fields.Datetime(
-        string = 'Opted In Date',
-        default = lambda self: self.create_date,
-    )
-    opted_out_date = fields.Datetime(
-        string = 'Opted Out Date', 
-        related = 'unsubscribed_campaign_id.create_date'
-
-
-
-    
-    unsubscribed_campaign_id = fields.Many2one('utm.campaign', string = 'Opted Out Campaign')
-
-    
-    )
-
-    gdpr_status = fields.Selection(
-        [
-            ('undefined', 'Undefined'),
-            ('in', 'In'),
-            ('out', 'Out'),
-        ],
-        string = 'GDPR Status',
-        compute = '_compute_gdpr'
-    )"""
 
     contact_us_message = fields.Char()
 
