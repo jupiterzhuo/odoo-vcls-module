@@ -349,12 +349,48 @@ class SaleOrder(models.Model):
         all_orders = parent_order_id | child_orders
         action['domain'] = [('state', 'not in', ('draft', 'cancel')), ('id', 'in', all_orders.ids)]
         return action
+
+    @api.multi
+    def action_confirm(self):
+        ret = super().action_confirm()
+        self._check_sale_profile()
+        return ret
     
     
 
     ################
     # TOOL METHODS #
     ################
+    def _check_sale_profile(self):
+        """
+        If this is a new client related quote and we confirm it, then:
+            - The client turns from new to retained
+            - All quotations related the same opportunity remains NEW
+            - The related opportunity remains NEW
+            - All other records (Opps and Quotes) are turned to RETAINED
+        """
+        self.ensure_one()
+        if self.sale_profile == 'new':
+            #we update the parter and related
+            partners = self.env['res.partner']
+            partners |= self.partner_id | self.partner_id.parent_id | self.partner_id.child_ids
+            partners.write({'sale_profile':'retained'})
+
+            if self.opportunity_id:
+                #we look for opportunities related to the same partner, the related one is new, the others turn into retained
+                opps = self.env['crm.lead'].search([('partner_id','in',partners.mapped('id')),('sale_profile','!=','filtered')])
+                self.opportunity_id.sale_profile = 'new'
+                opps -= self.opportunity_id
+                opps.write({'sale_profile':'retained'})
+
+                #we do the same with sales orders
+                new_sos = self.search([('opportunity_id','=',self.opportunity_id.id),('sale_profile','!=','filtered')])
+                new_sos.write({'sale_profile':'new'})
+                all_sos = self.search([('partner_id','in',partners.mapped('id')),('sale_profile','!=','filtered')])
+                all_sos -= new_sos
+                all_sos.write({'sale_profile':'retained'})
+
+            
 
     def _get_name_without_ref(self,ref="ALTNAME-XXX",raw_name=""):
         parts = raw_name.lower().split(ref.lower()) #we use the ref to split
