@@ -379,20 +379,20 @@ class SaleOrder(models.Model):
             if self.opportunity_id:
                 #we look for opportunities related to the same partner, the related one is new, the others turn into retained
                 opps = self.env['crm.lead'].with_context(active_test=False).search([('partner_id','in',partners.ids),'|',('sale_profile','!=','filtered'),('sale_profile','=',False)])
-                _logger.info("OPPS {} | {}".format(opps.mapped('name'),partners.mapped('name')))
+                #_logger.info("OPPS {} | {}".format(opps.mapped('name'),partners.mapped('name')))
                 self.opportunity_id.sale_profile = 'new'
                 opps -= self.opportunity_id
-                _logger.info("OPPS {}".format(opps.mapped('name')))
+                #_logger.info("OPPS {}".format(opps.mapped('name')))
                 opps.write({'sale_profile':'retained'})
 
                 #we do the same with sales orders
                 new_sos = self.search([('opportunity_id','=',self.opportunity_id.id),'|',('sale_profile','!=','filtered'),('sale_profile','=',False)])
-                _logger.info("SOS {}".format(new_sos.mapped('name')))
+                #_logger.info("SOS {}".format(new_sos.mapped('name')))
                 new_sos.write({'sale_profile':'new'})
                 all_sos = self.search([('partner_id','in',partners.ids),'|',('sale_profile','!=','filtered'),('sale_profile','=',False)])
                 all_sos -= new_sos
                 all_sos.write({'sale_profile':'retained'})
-                _logger.info("SOS {}".format(all_sos.mapped('name')))
+                #_logger.info("SOS {}".format(all_sos.mapped('name')))
 
             
 
