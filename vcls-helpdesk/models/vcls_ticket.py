@@ -86,7 +86,7 @@ class Ticket(models.Model):
         string='Risk Assumption',)
     related_risk_description = fields.Text()
 
-    user_company = fields.Many2one("res.company", related="partner_id.company_id", string="Company of user", store=True)
+    user_company = fields.Many2one("res.company", related="partner_id.company_id", string="User Company", store=True)
 
     @api.depends('business_value','related_effort','related_risk')
     def _compute_change_score(self):

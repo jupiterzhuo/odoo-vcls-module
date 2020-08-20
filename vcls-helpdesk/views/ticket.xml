@@ -96,8 +96,6 @@
                     </group>
                 </form>
             </field>
-            
-
         </record>
       
         <record id="client_tickets_view_search" model="ir.ui.view">
@@ -128,11 +126,8 @@
                        <filter string="User Company" name="groupby_user_company" domain="[]" context="{'group_by':'user_company'}"/>
                     </group>
                 </search>
-              
-                </field>
-
+            </field>
         </record>
-      
-                  
+
   </data>
 </odoo>

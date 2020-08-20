@@ -11,7 +11,23 @@
         
         <!-- Overrides the default action to force VCLS form 
 helpdesk.helpdesk_ticket_action_team	-->
-        <record id="helpdesk_ticket_action_main_tree_vcls_OM" model="ir.actions.act_window">
+        <record id="helpdesk.helpdesk_ticket_action_main_tree" model="ir.actions.act_window">
+            <field name="name">Helpdesk Tickets</field>
+            <field name="res_model">helpdesk.ticket</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,kanban,form,activity</field>
+            
+            <field name="view_ids" eval="[(5, 0, 0),
+                (0, 0, {'view_mode': 'tree', 'view_id': ref('helpdesk.helpdesk_tickets_view_tree')}),
+                (0, 0, {'view_mode': 'kanban', 'view_id': ref('helpdesk.helpdesk_ticket_view_kanban')}),
+                (0, 0, {'view_mode': 'form', 'view_id': ref('view_ticket_form_default')}),
+            ]"/>
+            
+            <field name="search_view_id" ref="client_tickets_view_search"/>
+           
+        </record>
+
+    <record id="helpdesk_ticket_action_main_tree_vcls_OM" model="ir.actions.act_window">
             <field name="name">Helpdesk Tickets VCLS</field>
             <field name="res_model">helpdesk.ticket</field>
             <field name="view_type">form</field>
