@@ -379,7 +379,7 @@ class SaleOrder(models.Model):
             if self.opportunity_id:
                 #we look for opportunities related to the same partner, the related one is new, the others turn into retained
                 opps = self.env['crm.lead'].search([('partner_id','in',partners.mapped('id')),('sale_profile','!=','filtered')])
-                _logger.info("OPPS {}".format(opps.mapped('name'),partners.mapped('name')))
+                _logger.info("OPPS {} | {}".format(opps.mapped('name'),partners.mapped('name')))
                 self.opportunity_id.sale_profile = 'new'
                 opps -= self.opportunity_id
                 _logger.info("OPPS {}".format(opps.mapped('name')))
