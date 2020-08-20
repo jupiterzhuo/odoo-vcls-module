@@ -129,6 +129,20 @@ class SaleOrder(models.Model):
         ('2', '3 month'),
         ('5', '5 month')],
         string='Validity duration', default='1')
+    
+    probability = fields.Float(
+        help='Related to the parent opportunity',
+        compute='_compute_probability',
+        readonly=True,
+        store=True,
+        default=0,
+    )
+
+    @api.depends('opportunity_id','opportunity_id.probability')
+    def _compute_probability(self):
+        for so in self.filtered(lambda p: p.opportunity_id):
+            so.probability = so.opportunity_id.probability
+
 
     ###############
     # ORM METHODS #
