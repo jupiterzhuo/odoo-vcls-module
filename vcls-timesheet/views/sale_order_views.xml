@@ -41,14 +41,16 @@
                 <xpath expr="//field[@name='invoicing_mode']" position='after'>
                     <field name="fp_delivery_mode" widget="radio" attrs="{'invisible': [('invoicing_mode', '=', 'tm')]}"/>
                 </xpath>
-                <xpath expr="//field[@name='invoicing_mode']" position='before'>
-                    <button name="action_compute_kpi" 
-                        type="object" string="UPDATE KPI" class="btn-primary" groups="vcls_security.group_project_controller"
-                        context="{
-                            'active_id': id,
-                            'active_ids': [id],
-                        }">
-                    </button>
+                <xpath expr="//group[@name='fine_filters']" position='replace'>
+                    <group>
+                        <button name="action_compute_kpi" 
+                            type="object" string="UPDATE KPI" class="btn-primary" groups="vcls_security.group_project_controller"
+                            context="{
+                                'active_id': id,
+                                'active_ids': [id],
+                            }">
+                        </button>
+                    </group>
 
                 </xpath>
                 <xpath expr="//tree//field[@name='discount']" position="after">

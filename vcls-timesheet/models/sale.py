@@ -121,7 +121,7 @@ class SaleOrder(models.Model):
         sos = self.browse(self.env.context.get('active_ids'))
         sos.mapped('tasks_ids')._get_kpi()
         sos.mapped('project_ids')._get_kpi()
-        _logger.info("KPI RECOMPUTE {} \n{} \n{}".format(sos.mapped('name'),sos.mapped('tasks_ids.name'),sos.mapped('project_ids.name')))
+        #_logger.info("KPI RECOMPUTE {} \n{} \n{}".format(sos.mapped('name'),sos.mapped('tasks_ids.name'),sos.mapped('project_ids.name')))
 
     @api.multi
     def recompute_lines(self):

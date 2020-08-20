@@ -123,7 +123,7 @@
                             <field name="sale_order_template_id"  domain="[('product_category_id','=',product_category_id)]" string="2. Select Template" attrs="{'required': [('catalog_mode', '=', 'template'),('state','not in',['sale','done','cancel'])],}" options="{'no_create': True,'no_create_edit':True,'no_open':True}"/>
                             <field name="catalog_details" string="Show Detailed Catalog" invisible="1"/>
                         </group>
-                        <group string="Fine Filters (for specific line search)" invisible="1">
+                        <group string="Fine Filters (for specific line search)" invisible="1" name="fine_filters">
                             <field name="business_mode" widget="radio" string="3. Modify to focus on specific types"/>
                             <field name="deliverable_id" domain="[('product_category_id','=',product_category_id)]"/>
                         </group>
