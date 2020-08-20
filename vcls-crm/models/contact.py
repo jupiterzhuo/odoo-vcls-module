@@ -52,7 +52,7 @@ class ContactExt(models.Model):
         selection=[
             ('new','NEW'),
             ('retained','RETAINED'),
-            ('black','BLACKLISTED'),
+            ('filtered','FILTERED OUT'),
         ],
         default = 'new',
     )

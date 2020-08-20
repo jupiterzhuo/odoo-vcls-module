@@ -62,6 +62,7 @@ class LeadQuotation(models.TransientModel):
             'default_origin': lead.name,
             'default_source_id': lead.source_id.id,
             'default_opportunity_id': lead.id,
+            'default_sale_profile': lead.sale_profile,
             'default_program_id': lead.program_id.id,
             'default_scope_of_work': lead.scope_of_work,
             'default_product_category_id': lead.product_category_id.id,

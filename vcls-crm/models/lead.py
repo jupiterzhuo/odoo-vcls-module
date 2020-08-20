@@ -335,7 +335,7 @@ class Leads(models.Model):
         selection=[
             ('new','NEW'),
             ('retained','RETAINED'),
-            ('black','BLACKLISTED'),
+            ('filtered','FILTERED OUT'),
         ],
     )
 
@@ -532,8 +532,12 @@ class Leads(models.Model):
     def _clear_ref(self):
         for lead in self.filtered(lambda l: l.type=='opportunity'):
             lead.internal_ref = False
+
+    @api.onchange('partner_id')
+    def _get_partner_info(self):
+        for lead in self.filtered(lambda p: p.partner_id):
+            lead.sale_profile = lead.partner_id.sale_profile
             
-    
     @api.onchange('name')
     def _onchange_name(self):
         for lead in self.filtered(lambda l: l.type=='opportunity'):
@@ -575,39 +579,6 @@ class Leads(models.Model):
         else:
             _logger.info("No Client found to force opp ref {}".format(ref))
             return False
-    
-    """@api.depends('partner_id','type')
-    def _compute_internal_ref(self):
-        for lead in self:
-            if lead.partner_id and lead.type=='opportunity': #we compute a ref only for opportunities, not lead
-                if not lead.partner_id.altname:
-                    _logger.warning("Please document ALTNAME for the client {}".format(lead.partner_id.name))
-                else:
-                    next_index = lead.partner_id.core_process_index+1 or 1
-                    _logger.info("_compute_internal_ref: Core Process increment for {} from {} to {}".format(lead.partner_id.name,lead.partner_id.core_process_index,next_index))
-                    #lead.partner_id.write({'core_process_index': next_index})
-                    lead.internal_ref = "{}-{:03}".format(lead.partner_id.altname,next_index)
-                    lead.name_to_internal_ref(False)"""
-                    
-    """ @api.onchange('internal_ref')
-    def _set_internal_ref(self):
-        for lead in self:
-            #format checking
-            try:
-                ref_alt = lead.internal_ref[:-4]
-                ref_index = int(lead.internal_ref[-3:])
-                if ref_alt.upper() != lead.partner_id.altname.upper():
-                    _logger.warning("ALTNAME MISMATCH:{} in company and {} in opportunity {}".format(lead.partner_id.altname.upper(),ref_alt.upper(),lead.name))
-                    return
-                    #lead.internal_ref = False
-                
-                if ref_index > lead.partner_id.core_process_index:
-                    lead.partner_id.write({'core_process_index': ref_index})
-                    _logger.info("_set_internal_ref: Core Process update for {} to {}".format(lead.partner_id.name,ref_index))
-
-            except:
-                _logger.warning("Bad Lead Reference syntax: {}".format(lead.internal_ref))
-                #lead.internal_ref = False"""
 
 
     ################

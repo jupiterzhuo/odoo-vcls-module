@@ -167,6 +167,14 @@ class SaleOrder(models.Model):
                 so.sale_status = 'won'
             else:
                 so.sale_status = 'draft'
+    
+    sale_profile = fields.Selection(
+        selection=[
+            ('new','NEW'),
+            ('retained','RETAINED'),
+            ('filtered','FILTERED OUT'),
+        ],
+    )
 
 
 
