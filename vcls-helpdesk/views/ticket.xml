@@ -106,6 +106,7 @@
             <field name="model">helpdesk.ticket</field>
             <field name="arch" type="xml">
                 <search string="Tickets Search">
+                    <field name="user_company" invisible="1"/>
                     <field name="name"/>
                     <field name="id" string="Ticket ID"/>
                     <field name="tag_ids"/>
@@ -124,6 +125,7 @@
                     <group expand="0" string="Group By">
                        <filter string="Category" name="team" context="{'group_by':'team_id'}"/>
                        <filter string="Stage" name="stage" context="{'group_by':'stage_id'}"/>
+                       <filter string="User Company" name="groupby_user_company" domain="[]" context="{'group_by':'user_company'}"/>
                     </group>
                 </search>
               
