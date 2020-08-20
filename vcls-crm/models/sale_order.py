@@ -135,13 +135,39 @@ class SaleOrder(models.Model):
         compute='_compute_probability',
         readonly=True,
         store=True,
-        default=0,
+        default=0.01,
     )
 
     @api.depends('opportunity_id','opportunity_id.probability')
     def _compute_probability(self):
         for so in self.filtered(lambda p: p.opportunity_id):
             so.probability = so.opportunity_id.probability
+    
+
+    sale_status = fields.Selection(
+        selection=[
+            ('draft','Draft'),
+            ('sent','Sent'),
+            ('cancel','Cancelled'),
+            ('lost','Lost'),
+            ('won','Won'),],
+        default='draft',
+        store=True,
+        compute='_compute_sale_status',
+    )
+
+    @api.depends('probability','state')
+    def _compute_sale_status(self):
+        for so in self:
+            if so.probability == 0.0:
+                so.sale_status = 'lost'
+            elif so.state in ['cancel','sent']:
+                so.sale_status = so.state
+            elif so.probability == 100:
+                so.sale_status = 'won'
+            else:
+                so.sale_status = 'draft'
+
 
 
     ###############
