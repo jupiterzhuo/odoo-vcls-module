@@ -21,7 +21,11 @@ class TranslatorSFLedgerEntry(TranslatorSFGeneral.TranslatorSFGeneral):
         result['name'] = SF_LedgerEntry['Name']
         result['date'] = SF_LedgerEntry['s2cor__Date__c']
         result['ref'] = SF_LedgerEntry['s2cor__Sequence_Number__c']
-        result['state'] = 'posted'
+
+        if SF_LedgerEntry['s2cor__Layer__c'] == 'Actual Deleted':
+            result['state'] = 'draft'
+        else:
+            result['state'] = 'posted'
 
         result['journal_id'] = TranslatorSFLedgerEntry.getJournalId(SF,SF_LedgerEntry['Id'],odoo,SF_LedgerEntry['s2cor__Source_Document__c'],SF_LedgerEntry['s2cor__Date__c'])
         result['currency_id'] = TranslatorSFGeneral.TranslatorSFGeneral.convertCurrency(SF_LedgerEntry['CurrencyIsoCode'],odoo)

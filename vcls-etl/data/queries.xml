@@ -176,7 +176,7 @@
             <field name="key">etl_sf_ledgerentry_query</field>
             <field name="value">
                 SELECT Id, Name, CurrencyIsoCode, s2cor__Date__c, s2cor__Source_Document__c,
-                s2cor__Sequence_Number__c, s2cor__Journal__c, s2cor__Supplier_Tag__c
+                s2cor__Sequence_Number__c, s2cor__Journal__c, s2cor__Supplier_Tag__c, s2cor__Layer__c
                 FROM s2cor__Sage_ACC_Ledger_Entry__c
             </field>
         </record>
