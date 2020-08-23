@@ -125,7 +125,11 @@ class Invoice(models.Model):
             for project in invoice.project_ids:
                 if not project.parent_id and project.sale_order_id and project.sale_order_id.internal_ref:
                     project_string += project.sale_order_id.internal_ref + ' | ' 
-            invoice.temp_name = "{} from {} to {}".format(project_string,invoice.period_start,invoice.timesheet_limit_date)
+            if invoice.period_start or invoice.timesheet_limit_date:
+                invoice.temp_name = "{} from {} to {}".format(project_string, invoice.period_start, invoice.timesheet_limit_date)
+            else:
+                invoice.temp_name = "{}".format(project_string)
+
 
 
     @api.multi
@@ -541,6 +545,8 @@ class Invoice(models.Model):
             raise UserError(_("You cannot validate an invoice with a negative total amount. You should create a credit note instead."))
         if self.filtered(lambda inv: not inv.account_id):
             raise UserError(_('No account was found to create the invoice, be sure you have installed a chart of account.'))
+        if self.filtered(lambda inv: not inv.user_id):
+            raise UserError(_('No Invoice Administrator found. Please verify if your contact is related to a company and if this company has an IA configured.'))
 
         for invoice in self:
             invoice.write({'ready_for_approval': True})

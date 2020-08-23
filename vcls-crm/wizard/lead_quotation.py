@@ -21,6 +21,10 @@ class LeadQuotation(models.TransientModel):
         'sale.order', string="Existing quotation"
     )
 
+    partner_id = fields.Many2one(
+        'res.partner',
+    )
+
     link_rates = fields.Boolean(
         default = True,
         help="If ticked, rates of the parent quotation will be copied to childs, and linked during the life of the projects",
@@ -58,6 +62,7 @@ class LeadQuotation(models.TransientModel):
             'default_origin': lead.name,
             'default_source_id': lead.source_id.id,
             'default_opportunity_id': lead.id,
+            'default_sale_profile': lead.sale_profile,
             'default_program_id': lead.program_id.id,
             'default_scope_of_work': lead.scope_of_work,
             'default_product_category_id': lead.product_category_id.id,

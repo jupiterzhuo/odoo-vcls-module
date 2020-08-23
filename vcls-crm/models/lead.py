@@ -12,14 +12,14 @@ _logger = logging.getLogger(__name__)
 
 URL_POWER_AUTOMATE = "https://prod-29.westeurope.logic.azure.com:443/workflows/9f6737616b7047498a61a053cd883fc2/triggers/manual/paths/invoke?api-version=2016-06-01&sp=%2Ftriggers%2Fmanual%2Frun&sv=1.0&sig=W5bnOEb4gMnP_E9_VnzK7c8AuYb2zGovg5BHwIoi-U8"
 
-class ResoucesLeads(models.Model):
+"""class ResoucesLeads(models.Model):
 
     _name = 'crm.resource.lead'
     _description = 'resource for lead'
     
     project_role_id = fields.Many2one(
         'hr.project_role', string='Seniority')
-    number = fields.Float('Number')
+    number = fields.Float('Number')"""
 
 
 class LeadStage(models.Model):
@@ -131,6 +131,11 @@ class Leads(models.Model):
     child_ids = fields.Many2many(
         'res.partner',
         compute='_compute_child_ids',
+    )
+
+    partner_parent_id = fields.Many2one(
+        'res.partner',
+        compute='_compute_partner_parent_id',
     )
 
     # Related fields in order to avoid mismatch & errors
@@ -264,10 +269,10 @@ class Leads(models.Model):
         string='Other Technical Experts', 
         )
     
-    resources_ids = fields.Many2many(
+    """resources_ids = fields.Many2many(
         'crm.resource.lead', 
         string='Resources', 
-        )
+        )"""
     
     CDA = fields.Boolean('CDA signed')
     MSA = fields.Boolean('MSA valid')
@@ -325,6 +330,14 @@ class Leads(models.Model):
     proposal_type = fields.Selection([('email', 'Email Proposal'),
                                       ('simple', 'Simple Proposal'),
                                       ('complex', 'Complex Proposal'),])
+    
+    sale_profile = fields.Selection(
+        selection=[
+            ('new','NEW'),
+            ('retained','RETAINED'),
+            ('filtered','FILTERED OUT'),
+        ],
+    )
 
     #name = fields.Char() We don't compute, it breaks too much usecases
 
@@ -338,33 +351,6 @@ class Leads(models.Model):
     won_lost_description = fields.Char(string = 'Won/Lost details')
 
     linkedIn_url = fields.Char(string = 'LinkedIn profile')
-
-    
-    """opted_in_date = fields.Datetime(
-        string = 'Opted In Date',
-        default = lambda self: self.create_date,
-    )
-    opted_out_date = fields.Datetime(
-        string = 'Opted Out Date', 
-        related = 'unsubscribed_campaign_id.create_date'
-
-
-
-    
-    unsubscribed_campaign_id = fields.Many2one('utm.campaign', string = 'Opted Out Campaign')
-
-    
-    )
-
-    gdpr_status = fields.Selection(
-        [
-            ('undefined', 'Undefined'),
-            ('in', 'In'),
-            ('out', 'Out'),
-        ],
-        string = 'GDPR Status',
-        compute = '_compute_gdpr'
-    )"""
 
     contact_us_message = fields.Char()
 
@@ -449,8 +435,12 @@ class Leads(models.Model):
     ###################
 
     def _compute_child_ids(self):
-           for partner in self.partner_id:
-               self.child_ids = partner.child_ids if partner.child_ids else False
+        for lead in self:
+            lead.child_ids = lead.partner_id.child_ids if lead.partner_id.child_ids else False
+    
+    def _compute_partner_parent_id(self):
+        for lead in self:
+            lead.partner_parent_id = lead.partner_id.parent_id if lead.partner_id.parent_id else lead.partner_id
 
     @api.depends('tag_ids')
     def _compute_sig_opp(self):
@@ -542,8 +532,12 @@ class Leads(models.Model):
     def _clear_ref(self):
         for lead in self.filtered(lambda l: l.type=='opportunity'):
             lead.internal_ref = False
+
+    @api.onchange('partner_id')
+    def _get_partner_info(self):
+        for lead in self.filtered(lambda p: p.partner_id):
+            lead.sale_profile = lead.partner_id.sale_profile
             
-    
     @api.onchange('name')
     def _onchange_name(self):
         for lead in self.filtered(lambda l: l.type=='opportunity'):
@@ -585,39 +579,6 @@ class Leads(models.Model):
         else:
             _logger.info("No Client found to force opp ref {}".format(ref))
             return False
-    
-    """@api.depends('partner_id','type')
-    def _compute_internal_ref(self):
-        for lead in self:
-            if lead.partner_id and lead.type=='opportunity': #we compute a ref only for opportunities, not lead
-                if not lead.partner_id.altname:
-                    _logger.warning("Please document ALTNAME for the client {}".format(lead.partner_id.name))
-                else:
-                    next_index = lead.partner_id.core_process_index+1 or 1
-                    _logger.info("_compute_internal_ref: Core Process increment for {} from {} to {}".format(lead.partner_id.name,lead.partner_id.core_process_index,next_index))
-                    #lead.partner_id.write({'core_process_index': next_index})
-                    lead.internal_ref = "{}-{:03}".format(lead.partner_id.altname,next_index)
-                    lead.name_to_internal_ref(False)"""
-                    
-    """ @api.onchange('internal_ref')
-    def _set_internal_ref(self):
-        for lead in self:
-            #format checking
-            try:
-                ref_alt = lead.internal_ref[:-4]
-                ref_index = int(lead.internal_ref[-3:])
-                if ref_alt.upper() != lead.partner_id.altname.upper():
-                    _logger.warning("ALTNAME MISMATCH:{} in company and {} in opportunity {}".format(lead.partner_id.altname.upper(),ref_alt.upper(),lead.name))
-                    return
-                    #lead.internal_ref = False
-                
-                if ref_index > lead.partner_id.core_process_index:
-                    lead.partner_id.write({'core_process_index': ref_index})
-                    _logger.info("_set_internal_ref: Core Process update for {} to {}".format(lead.partner_id.name,ref_index))
-
-            except:
-                _logger.warning("Bad Lead Reference syntax: {}".format(lead.internal_ref))
-                #lead.internal_ref = False"""
 
 
     ################

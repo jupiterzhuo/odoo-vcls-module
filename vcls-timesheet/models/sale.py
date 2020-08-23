@@ -73,7 +73,7 @@ class SaleOrder(models.Model):
     @api.multi
     @api.depends('timesheet_limit_date')
     def _compute_timesheet_ids(self):
-        _logger.info("TS PATH | vcls-timesheet | sale.order | _compute_timesheet_ids")
+        #_logger.info("TS PATH | vcls-timesheet | sale.order | _compute_timesheet_ids")
         # this method copy of base method, it injects date in domain
         for order in self:
             if order.analytic_account_id:
@@ -116,6 +116,12 @@ class SaleOrder(models.Model):
             #we get the default timecategories from the product_template, only if to time_cat already defined
             if not line.task_id.time_category_ids:
                 line.task_id.time_category_ids = line.product_id.product_tmpl_id.time_category_ids
+    
+    def action_compute_kpi(self):
+        sos = self.browse(self.env.context.get('active_ids'))
+        sos.mapped('tasks_ids')._get_kpi()
+        sos.mapped('project_ids')._get_kpi()
+        #_logger.info("KPI RECOMPUTE {} \n{} \n{}".format(sos.mapped('name'),sos.mapped('tasks_ids.name'),sos.mapped('project_ids.name')))
 
     @api.multi
     def recompute_lines(self):
@@ -299,15 +305,17 @@ class SaleOrderLine(models.Model):
                 total * line.order_id.currency_rate
             )
 
-    @api.depends('invoice_lines', 'invoice_lines.price_total', 'invoice_lines.invoice_id.state', 'invoice_lines.invoice_id.type')
+    @api.depends('invoice_lines', 'invoice_lines.price_total', 'invoice_lines.invoice_id.state', 'invoice_lines.invoice_id.type','historical_invoiced_amount','order_id.invoicing_mode')
     def _compute_untaxed_amount_invoiced(self):
+        """
+        We override this method to take historical info (i.e. migration) into account in the sale order.
+        # If the sale line is a rate we invoice in time & material, then we don't use historical_invoiced_amount but the sum of timesheets with an historical status.
+        # If the sale line has no task or is invoiced in fixed price, then we add the historical_invoiced_amount to the untaxed_amount_invoiced.
+            ## To Maintain coherence, the delivered_qty and invoiced_qty is updated accordingly
+        """
         super()._compute_untaxed_amount_invoiced()
 
-        for line in self:
-            #_logger.info("{}".format(line.vcls_type))
-            pass
-
-        for line in self.filtered(lambda l: l.historical_invoiced_amount>0):
+        for line in self.filtered(lambda l: l.historical_invoiced_amount>0 and (l.order_id.invoicing_mode == 'fixed_price' or not l.task_id)):
             #_logger.info("Historical amount invoiced {} | {}".format(line.historical_invoiced_amount,line.order_id.name))
             line.untaxed_amount_invoiced += line.historical_invoiced_amount
 
