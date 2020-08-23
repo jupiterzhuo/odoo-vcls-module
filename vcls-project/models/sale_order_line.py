@@ -16,6 +16,10 @@ class SaleOrderLine(models.Model):
 
     @api.onchange('name','price_unit')
     def _onchange_replicate(self):
+        #we recompute KPI for task_related lines
+        to_recompute = self.mapped('task_id')
+        to_recompute.write({'recompute_kpi':True})
+
         for line in self.filtered(lambda l: l.vcls_type=='rate' and not l.order_id.parent_id): #if this is a rate in a parent quotations
             _logger.info("Linked Rate Line Modification | {} {}".format(line.name,line.order_id.name))
             #we search for child quotations

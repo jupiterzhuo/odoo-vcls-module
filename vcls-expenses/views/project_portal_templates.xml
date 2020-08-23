@@ -11,9 +11,7 @@
         <div class="row website_portal_project_expenses">
         <t t-set="expenses"
            t-value="project.expense_sheet_ids
-            .filtered(lambda sheet:
-                sheet.state == 'draft'
-                and sheet.employee_id.id in request.env.user.employee_ids.ids)
+            .filtered(lambda sheet: sheet.employee_id.id in request.env.user.employee_ids.ids)
             .mapped('expense_line_ids')"/>
         <div class="row col-md-12">
         <span class="h5 col-md-4"
@@ -37,6 +35,7 @@
                     <th>Price</th>
                     <th>Quantity</th>
                     <th>Total</th>
+                    <th>Status</th>
                     <th/>
                     <th/>
                 </tr>
@@ -53,8 +52,11 @@
                     <td><span t-esc="expense.unit_amount"/> <span t-esc="currency_id.symbol"/></td>
                     <td><span t-esc="expense.quantity"/> <span t-esc="product_uom_id.name"/></td>
                     <td><span t-esc="expense.total_amount"/> <span t-esc="currency_id.symbol"/></td>
-                    <td><button class="expense_edit fa fa-pencil btn btn-sm"></button></td>
-                    <td>
+                    <td><t t-esc="expense.state"/></td>
+                    <t t-if="expense.state == 'draft'">
+                        <td><button class="expense_edit fa fa-pencil btn btn-sm"></button></td>
+                    </t>
+                    <td t-if="expense.state == 'draft'">
                         <form t-attf-action="/my/project/expense/delete" method="post">
                             <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
                             <input type="hidden" name="expense_id" t-attf-value="#{expense.id}"/>
@@ -95,6 +97,7 @@
                                 <textarea type="text" name="description" class="form-control"
                                     t-attf-value="#{expense.description}"/>
                             </div>
+                            
                             <div class="form-group col-md-12">
                                 <label class="col-form-label" for="product_id">Product</label>
                                 <select class="form-control" name="product_id">
@@ -106,6 +109,19 @@
                                     </t>
                                 </select>
                             </div>
+
+                            <div class="form-group col-md-12">
+                                <label class="col-form-label" for="country_id">Country of Expense</label>
+                                <select class="form-control" name="country_id">
+                                    <t t-foreach="countries" t-as="country">
+                                        <option t-attf-value="#{country.id}"
+                                        t-att-selected="0">
+                                            <t t-esc="country.name"/>
+                                        </option>
+                                    </t>
+                                </select>
+                            </div>
+
                             <label class="col-form-label col-md-12" for="unit_amount">Price</label>
                             <div class="row col-md-12">
                             <div class="col-md-6">

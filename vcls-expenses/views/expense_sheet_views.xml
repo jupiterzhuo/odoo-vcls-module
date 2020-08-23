@@ -113,9 +113,9 @@
                     <!--<field name = 'project_id' attrs="{'invisible': [('type', '!=', 'project')], 'required': [('type', '=', 'project')]}" />-->
                 </xpath>
 
-                <field name="payment_mode" position="attributes">
-                    <attribute name="groups">hr_expense.group_hr_expense_manager</attribute>
-                </field>
+                <xpath expr="//field[@name='payment_mode']" position="replace">
+                    <field name="payment_mode" attrs="{'readonly': 0,'required': 1}" />
+                </xpath>
 
                 <field name="user_id" position="attributes">
                     <attribute name="readonly">1</attribute>

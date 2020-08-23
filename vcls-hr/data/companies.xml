@@ -26,7 +26,7 @@
         </record>
         
         <record id="company_RRG" model="res.company">
-            <field name="name">Regulatory Resources Group</field>
+            <field name="name">Voisin Consulting Life Sciences, UK Ltd</field>
         </record>
 
         <record id="company_BH" model="res.company">

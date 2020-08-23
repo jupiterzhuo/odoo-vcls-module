@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+        <record id="cron_status_template" model="mail.template">
+            <field name="name">Cron Status: Send by email</field>
+            <field name="model_id" ref="cron_track.model_cron_track"/>
+            <field name="email_from">${object.user_id.email_formatted |safe}</field>
+            <field name="partner_to">${object.user_id.id}</field>
+            <field name="subject">Cron Status Of : ${object.cron_name}</field>
+            <field name="body_html" type="html">
+<div style="margin: 0px; padding: 0px;">
+    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+        Dear ${object.user_id.name}
+        <br/>
+        <br/>
+        Cron Name : ${object.cron_name}
+        <br/>
+        <br/>
+        Start Time : ${object.start_time}
+        <br/>
+        <br/>
+        End Time :${object.end_time}
+        <br/>
+        <br/>
+        Total Taken Time : ${object.total_time}
+        <br/>
+        <br/>
+        Last Date of Cron Executed : ${object.last_date_cron_executed}
+        <br/>
+        <br/>
+        Total Cron Executed : ${object.total_count}
+        <br/>
+        <br/>
+        % if object.cron_track_log:
+            <table class="table table-sm">
+                <thead>
+                    <tr>
+                        <th>Error Messages</th>
+                    </tr>
+                </thead>
+
+            % for line in object.cron_track_log:
+                <tbody>
+                    <td class="text-left">
+                        ${line.error_msg}
+                    </td>
+                </tbody>
+            % endfor
+            </table>
+        % endif
+    </p>
+</div>
+            </field>
+            <field name="lang">${object.user_id.lang}</field>
+            <field name="user_signature" eval="True"/>
+            <field name="auto_delete" eval="True"/>
+        </record>
+
+    </data>
+</odoo>

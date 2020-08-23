@@ -282,11 +282,35 @@ class ETLMap(models.Model):
             }
             self.update_keys(params)
 
-        
+        ### LEDGER ACCOUNT KEYS PROCESSING
+        if obj_dict.get('do_ledger_account',False):
+            sql = """
+                SELECT Id, LastModifiedDate FROM s2cor__Sage_ACC_Ledger_Account__c 
+                    """
+            params = {
+                'sfInstance':sfInstance,
+                'priority':900,
+                'externalObjName':'LedgerAccount',
+                'sql': self.build_sql(sql,[self.env.ref('vcls-etl.etl_sf_ledgeraccount_filter').value,time_sql]),
+                'odooModelName':'account.account',
+                'is_full_update':is_full_update,
+            }
+            self.update_keys(params)
 
-        
-
-        
+        ### LEDGER ENTRY KEYS PROCESSING
+        if obj_dict.get('do_ledger_entry',False):
+            sql = """
+                SELECT Id, LastModifiedDate FROM s2cor__Sage_ACC_Ledger_Entry__c 
+                    """
+            params = {
+                'sfInstance':sfInstance,
+                'priority':800,
+                'externalObjName':'LedgerEntry',
+                'sql': self.build_sql(sql,[self.env.ref('vcls-etl.etl_sf_ledgerentry_filter').value,time_sql]),
+                'odooModelName':'account.move',
+                'is_full_update':is_full_update,
+            }
+            self.update_keys(params)
 
         ###CLOSING
         #we trigger the processing job
