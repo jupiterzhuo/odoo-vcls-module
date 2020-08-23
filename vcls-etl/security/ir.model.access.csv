@@ -11,3 +11,7 @@ access_map_odoo_admin,access_map_odoo_admin,vcls-etl.model_map_odoo,vcls-etl.vcl
 
 access_etl_salesforce_campaign_admin,access_etl_salesforce_campaign_admin,vcls-etl.model_etl_salesforce_campaign,vcls-etl.vcls_migrators,1,1,1,1
 access_etl_salesforce_project_admin,access_etl_salesforce_project_admin,vcls-etl.model_etl_salesforce_project,vcls-etl.vcls_migrators,1,1,1,1
+
+access_etl_salesforce_ledgeraccount_admin,access_etl_salesforce_ledgeraccount_admin,vcls-etl.model_etl_salesforce_ledgeraccount,vcls-etl.vcls_migrators,1,1,1,1
+access_etl_salesforce_ledgerentry_admin,access_etl_salesforce_ledgerentry_admin,vcls-etl.model_etl_salesforce_ledgerentry,vcls-etl.vcls_migrators,1,1,1,1
+access_etl_salesforce_ledgeritem_admin,access_etl_salesforce_ledgeritem_admin,vcls-etl.model_etl_salesforce_ledgeritem,vcls-etl.vcls_migrators,1,1,1,1

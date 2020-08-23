@@ -9,13 +9,17 @@
 
             <field name="arch" type="xml">
                 <data>
+                    <xpath expr="//field[@name='industry_id']" position="after">
+                        <field name="sale_profile"/>
+                    </xpath>
+
                     <button name="toggle_active" position="before">
                         <button class="oe_stat_button o_res_partner_tip_opp" type="action"
                             attrs="{'invisible': [('customer', '=', False)]}"
                             name="%(crm.crm_lead_opportunities)d"
                             icon="fa-star"
                             groups="sales_team.group_sale_salesman"
-                            context="{'search_default_partner_id': active_id}">
+                            context="{'search_default_partner_id': active_id,'default_sale_profile':sale_profile}">
                             <field string="Opportunities" name="opportunity_count" widget="statinfo"/>
                         </button>
                         <button class="oe_stat_button" type="action" name="%(sale.act_res_partner_2_sale_order)d"

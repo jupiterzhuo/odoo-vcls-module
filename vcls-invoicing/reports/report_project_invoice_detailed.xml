@@ -255,7 +255,10 @@
                                         <span t-field="o.amount_untaxed"/>
                                     </td>
                                 </tr>
+                            <!-- if the taxes are at 0% (wrong configuration) we automatically made them better looking -->
+                                <t t-set="has_tax" t-value="False"/>
                                 <t t-if="not o.amount_by_group and not o.amount_tax">
+                                    <t t-set="has_tax" t-value="True"/>
                                     <tr>
                                         <td><span>VAT 0.0%</span></td>
                                         <td class="text-right o_price_total">
@@ -265,6 +268,7 @@
                                     </tr>
                                 </t>
                                 <t t-foreach="o.amount_by_group" t-as="amount_by_group">
+
                                     <tr>
                                         <t t-if="len(o.tax_line_ids) == 1 and o.amount_untaxed == amount_by_group[2]">
                                             <td><span t-esc="amount_by_group[0]"/></td>
@@ -273,6 +277,8 @@
                                             </td>
                                         </t>
                                         <t t-else="">
+                                            <t t-if="amount_by_group[1] != 0.0">
+                                            <t t-set="has_tax" t-value="True"/>
                                             <td>
                                                 <span t-esc="amount_by_group[0]"/>
                                                 <span>&amp;nbsp;<span>on</span>
@@ -282,9 +288,21 @@
                                             <td class="text-right o_price_total">
                                                 <span t-esc="amount_by_group[3]"/>
                                             </td>
+                                            </t>
                                         </t>
+
                                     </tr>
                                 </t>
+                                <t t-if="has_tax is False">
+                                    <tr>
+                                    <td><span>VAT 0.0%</span></td>
+                                    <td class="text-right o_price_total">
+                                        <span t-field="o.amount_tax"
+                                        t-options='{"widget": "monetary", "display_currency": o.currency_id}'/>
+                                    </td>
+                                    </tr>
+                                </t>
+
                                 <tr class="border-black o_total">
                                     <td><strong>Total</strong></td>
                                     <td class="text-right">

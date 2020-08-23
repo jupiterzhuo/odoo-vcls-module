@@ -23,6 +23,33 @@ class Company(models.Model):
         string='Supplier Approver'
         )
 
+class Account(models.Model):
+    _inherit = 'account.account'
+
+    #we add a default analytic account to the ledger to partially automate accounting job
+    default_account_id = fields.Many2one(
+        comodel_name = 'account.analytic.account',
+    )
+
+class InvoiceLine(models.Model):
+    _inherit = 'account.invoice.line'
+
+    #if we change the product or the account_id, the analytic is also changed if not yet documented
+    @api.onchange('product_id')
+    def _get_default_analytic_from_product(self):
+        for line in self.filtered(lambda p: p.invoice_id.type in ('in_invoice', 'in_refund') and not p.account_analytic_id):
+            invoice = line.invoice_id
+            account = line.get_invoice_line_account(invoice.type, line.product_id, invoice.fiscal_position_id, invoice.company_id)
+            if account:
+                line.account_id = account
+                line.account_analytic_id = account.default_account_id if account.default_account_id else line.account_analytic_id
+            else:
+                line.account_id = False
+
+    @api.onchange('account_id')
+    def _get_default_analytic_from_account(self):
+        for line in self.filtered(lambda p: p.invoice_id.type in ('in_invoice', 'in_refund') and not p.account_analytic_id):
+            line.account_analytic_id = line.account_id.default_account_id if line.account_id else False
 
 class Invoice(models.Model):
     _inherit = 'account.invoice'
@@ -89,7 +116,8 @@ class Invoice(models.Model):
 
             account = invoice_line.get_invoice_line_account(type, product, fpos, company)
             if account:
-                invoice_line.account_id = account.id
+                invoice_line.account_id = account
+                invoice_line.account_analytic_id = account.default_account_id if account.default_account_id else invoice_line.account_analytic_id
             else:
                 invoice_line.account_id = False
 
@@ -100,7 +128,8 @@ class Invoice(models.Model):
         invoice_type = self.type or self.env.context.get('type', 'out_invoice')
         if invoice_type in ('in_invoice', 'in_refund'):
             if self.journal_id and self.journal_id.company_id.currency_id:
-                self.currency_id = self.partner_id.currency_id or self.journal_id.currency_id.id or self.journal_id.company_id.currency_id.id
+                self.currency_id = self.partner_id.currency_id or self.journal_id.currency_id or self.journal_id.company_id.currency_id
+    
 
     @api.multi
     def action_purchase_approval(self):
