@@ -80,6 +80,7 @@ class Project(models.Model):
 
             # we recompute the invoiceable amount
             project.sale_order_id.order_line._compute_qty_delivered()
+            project.compute_project_consummed_completed_ratio()
 
     @api.multi
     def action_projects_followup(self):
