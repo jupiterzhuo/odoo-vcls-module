@@ -79,7 +79,7 @@ class LeadQuotation(models.TransientModel):
             # copy the quotation content
             fields_to_copy = [
                 'pricelist_id', 'currency_id', 'note', 'team_id',#'tag_ids',
-                'active', 'fiscal_position_id', 'risk_score', 'program_id', 'opportunity_id',
+                'active', 'fiscal_position_id', 'risk_score', 'program_id', #'opportunity_id',
                 'company_id', 'deliverable_id', 'product_category_id', 'business_mode',
                 'agreement_id', 'po_id', 'payment_term_id', 'validity_date',
                 'scope_of_work', 'user_id', 'core_team_id', 'invoicing_frequency',

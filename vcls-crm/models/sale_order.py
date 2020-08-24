@@ -138,10 +138,23 @@ class SaleOrder(models.Model):
         default=0.01,
     )
 
+    opp_date_closed = fields.Datetime(
+        help='Related to the parent opportunity',
+        compute='_compute_date_closed',
+        readonly=True,
+        store=True,
+        default=False,
+    )
+
     @api.depends('opportunity_id','opportunity_id.probability')
     def _compute_probability(self):
         for so in self.filtered(lambda p: p.opportunity_id):
             so.probability = so.opportunity_id.probability
+    
+    @api.depends('opportunity_id','opportunity_id.date_closed')
+    def _compute_date_closed(self):
+        for so in self.filtered(lambda p: p.opportunity_id):
+            so.opp_date_closed = so.opportunity_id.date_closed
     
 
     sale_status = fields.Selection(
