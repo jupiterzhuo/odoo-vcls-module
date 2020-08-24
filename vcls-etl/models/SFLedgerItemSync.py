@@ -21,6 +21,37 @@ class SFLedgerItemSync(models.Model):
     def getSFTranslator(self, sfInstance):
         return TranslatorSFLedgerItem.TranslatorSFLedgerItem(sfInstance.getConnection())
 
+
+    def fixJournal(self):
+        userSF = self.env.ref('vcls-etl.SF_mail').value
+        passwordSF = self.env.ref('vcls-etl.SF_password').value
+        token = self.env.ref('vcls-etl.SF_token').value
+        sfInstance = ETL_SF.ETL_SF.getInstance(userSF, passwordSF, token)
+        sql = "Select Id From s2cor__Sage_ACC_Ledger_Entry__c WHERE s2cor__Layer__c = 'Actual Deleted' OR s2cor__Period__c = 98"
+        to_process = sfInstance.getConnection().query_all(sql)['records']
+
+        if to_process:
+            for record in to_process:
+                key = self.env['etl.sync.keys'].search([('externalId','=',record['Id'])])
+                if key:
+                    line = self.env['account.move'].browse(int(key.odooId))
+                    if line.id:
+                        line.state = 'draft'
+                        line.unlink()
+                    key.unlink()
+                    print("Record Deleted")
+
+        sql = "Select Id From s2cor__Sage_ACC_Ledger_Entry__c WHERE s2cor__Draft__c  = true"
+        to_process = sfInstance.getConnection().query_all(sql)['records']
+        if to_process:
+            for record in to_process:
+                key = self.env['etl.sync.keys'].search([('externalId','=',record['Id'])])
+                if key:
+                    line = self.env['account.move'].browse(int(key.odooId))
+                    if line.id:
+                        line.state = 'draft'
+                    print("Record Modif")
+
     def reconciledEntries(self, duration=10):
         userSF = self.env.ref('vcls-etl.SF_mail').value
         passwordSF = self.env.ref('vcls-etl.SF_password').value
@@ -37,7 +68,8 @@ class SFLedgerItemSync(models.Model):
 
         if not records:
             records = self.env['account.move.line'].search([('company_id','=',inc_id), ('processed','=', True), ('full_reconcile_id','=',False)])
-            records.processed = False
+            for record in records:
+                record.processed = False
         if records:
             counter = 0
             for od_rec in records:
@@ -92,6 +124,51 @@ class SFLedgerItemSync(models.Model):
                                                 'reconciled_line_ids': [(4, od_rec.id, 0)]
                                             })
                                         _logger.info("New reconciliation ID : {}".format(str(reconcile.id)))
+                                    elif accountNumber[0]['s2cor__Account_Number__c'].startswith('401000'):
+                                        line_ids = []
+                                        somme = 0
+                                        if od_rec.credit > 0:
+                                            lines = self.env['account.move.line'].search([('move_id','=',od_rec.move_id.id), ('account_id','=', od_rec.account_id.id), ('debit','>', 0)])
+                                            if lines:
+                                                for line in lines:
+                                                    line_ids.append(line.id)
+                                                    somme += line.debit
+                                                if somme == od_rec.credit:
+                                                        line_ids.append(od_rec.id)
+                                                        reconcile = self.env['account.full.reconcile'].create({
+                                                            'name': od_rec.move_id.name,
+                                                            'reconciled_line_ids': [(6, 0, line_ids)]
+                                                        })
+                                                        _logger.info("New reconciliation ID : {}".format(str(reconcile.id)))
+                                                else:
+                                                    line = self.env['account.move.line'].search([('account_id','=', od_rec.account_id.id), ('debit','=', od_rec.credit)], limit = 1)
+                                                    if line:
+                                                        reconcile = self.env['account.full.reconcile'].create({
+                                                                'name': "{} / {}".format(od_rec.move_id.name, line.move_id.name),
+                                                                'reconciled_line_ids': [(6, 0, [line.id, od_rec.id])]
+                                                        })
+                                                        _logger.info("New reconciliation ID : {}".format(str(reconcile.id)))
+                                        elif od_rec.debit > 0:
+                                            lines = self.env['account.move.line'].search([('move_id','=',od_rec.move_id.id), ('account_id','=', od_rec.account_id.id), ('credit','>', 0)])
+                                            if lines:
+                                                for line in lines:
+                                                    line_ids.append(line.id)
+                                                    somme += line.debit
+                                                if somme == od_rec.debit:
+                                                        line_ids.append(od_rec.id)
+                                                        reconcile = self.env['account.full.reconcile'].create({
+                                                            'name': od_rec.move_id.name,
+                                                            'reconciled_line_ids': [(6, 0, line_ids)]
+                                                        })
+                                                        _logger.info("New reconciliation ID : {}".format(str(reconcile.id)))
+                                                else:
+                                                    line = self.env['account.move.line'].search([('account_id','=', od_rec.account_id.id), ('credit','=', od_rec.debit)], limit = 1)
+                                                    if line:
+                                                        reconcile = self.env['account.full.reconcile'].create({
+                                                                'name': "{} / {}".format(od_rec.move_id.name, line.move_id.name),
+                                                                'reconciled_line_ids': [(6, 0, [line.id, od_rec.id])]
+                                                        })
+                                                        _logger.info("New reconciliation ID : {}".format(str(reconcile.id)))
                     od_rec.processed = True
                 _logger.info("Reconciliation | Item {}/{} ".format(counter,len(records)))
 

@@ -21,8 +21,7 @@ class TranslatorSFLedgerEntry(TranslatorSFGeneral.TranslatorSFGeneral):
         result['name'] = SF_LedgerEntry['Name']
         result['date'] = SF_LedgerEntry['s2cor__Date__c']
         result['ref'] = SF_LedgerEntry['s2cor__Sequence_Number__c']
-
-        if SF_LedgerEntry['s2cor__Layer__c'] == 'Actual Deleted':
+        if result['s2cor__Draft__c']:
             result['state'] = 'draft'
         else:
             result['state'] = 'posted'
