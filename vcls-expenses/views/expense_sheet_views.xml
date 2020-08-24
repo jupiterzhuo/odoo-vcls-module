@@ -85,6 +85,7 @@
             <field name="arch" type="xml">
                 <filter name="state" position="replace">
                     <filter string="Status" domain="[]" context="{'group_by': 'state'}" name="state"/>
+                    <filter string="Employee Type" domain="[]" context="{'group_by': 'employee_type'}" name="employee_type"/>
                 </filter>
             </field>
         </record>

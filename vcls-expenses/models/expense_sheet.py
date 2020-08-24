@@ -54,6 +54,10 @@ class ExpenseSheet(models.Model):
         #required=True
     )
 
+    employee_type = fields.Selection(
+        related='employee_id.employee_type',
+        store=True,
+    )
     ######################
     # OVERWRITTEN FIELDS #
     ######################
