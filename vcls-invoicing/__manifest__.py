@@ -16,7 +16,7 @@
     # for the full list
     'category': 'Uncategorized',
 
-    'version': '1.7.64',
+    'version': '1.7.65',
 
 
 
