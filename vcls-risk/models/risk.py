@@ -64,7 +64,6 @@ class Risk(models.Model):
     @api.model
     def _raise_risk(self, risk_type, resource):
         risk = self.create({'risk_type_id': risk_type.id, 'resource': resource})
-        risk._populate_risk_ids()
         risk.send_notification()
         return risk
     
@@ -115,7 +114,7 @@ class Risk(models.Model):
             if res_model not in self.env:
                 raise ValidationError(_('Resource model is not valid'))
             if not res_id.isdigit() or not self.env[res_model].browse(int(res_id)).exists():
-                raise ValidationError(_('Resource id is not valid'))
+                raise ValidationError(_(f'Resource id is not valid: {res_model} - {res_id}'))
 
     @api.model
     def create(self, vals):

@@ -99,7 +99,7 @@ class Project(models.Model):
     risk_ids = fields.Many2many(
         'risk', string='Risk',
         compute='_compute_risk_ids',
-        # store=True,
+        store=True,
     )
 
     risk_score = fields.Integer(

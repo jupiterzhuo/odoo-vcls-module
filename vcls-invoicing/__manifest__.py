@@ -18,8 +18,6 @@
 
     'version': '1.7.65',
 
-
-
     # any module necessary for this one to work correctly
     'depends': [
         'base',
