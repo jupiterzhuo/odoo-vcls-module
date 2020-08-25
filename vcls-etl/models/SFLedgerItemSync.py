@@ -21,37 +21,6 @@ class SFLedgerItemSync(models.Model):
     def getSFTranslator(self, sfInstance):
         return TranslatorSFLedgerItem.TranslatorSFLedgerItem(sfInstance.getConnection())
 
-
-    def fixJournal(self):
-        userSF = self.env.ref('vcls-etl.SF_mail').value
-        passwordSF = self.env.ref('vcls-etl.SF_password').value
-        token = self.env.ref('vcls-etl.SF_token').value
-        sfInstance = ETL_SF.ETL_SF.getInstance(userSF, passwordSF, token)
-        sql = "Select Id From s2cor__Sage_ACC_Ledger_Entry__c WHERE s2cor__Layer__c = 'Actual Deleted' OR s2cor__Period__c = 98"
-        to_process = sfInstance.getConnection().query_all(sql)['records']
-
-        if to_process:
-            for record in to_process:
-                key = self.env['etl.sync.keys'].search([('externalId','=',record['Id'])])
-                if key:
-                    line = self.env['account.move'].browse(int(key.odooId))
-                    if line.id:
-                        line.state = 'draft'
-                        line.unlink()
-                    key.unlink()
-                    print("Record Deleted")
-
-        sql = "Select Id From s2cor__Sage_ACC_Ledger_Entry__c WHERE s2cor__Draft__c  = true"
-        to_process = sfInstance.getConnection().query_all(sql)['records']
-        if to_process:
-            for record in to_process:
-                key = self.env['etl.sync.keys'].search([('externalId','=',record['Id'])])
-                if key:
-                    line = self.env['account.move'].browse(int(key.odooId))
-                    if line.id:
-                        line.state = 'draft'
-                    print("Record Modif")
-
     def reconciledEntries(self, duration=10):
         userSF = self.env.ref('vcls-etl.SF_mail').value
         passwordSF = self.env.ref('vcls-etl.SF_password').value
