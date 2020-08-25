@@ -516,7 +516,7 @@ class Project(models.Model):
     @api.model
     def end_project_activities_scheduling(self):
         for project_id in self.search([('active', '=', True), ('parent_id', '=', False)]):
-            task_ids = [task for child_id in project_id.child_id for task in child_id.task_ids]
+            task_ids = [task for child_id in project_id.child_id + project_id for task in child_id.task_ids]
             if task_ids and all(task.stage_id.status in ("completed", "cancelled") for task in task_ids):
                 users_summary = {
                     project_id.partner_id.user_id.id: _('Client Feedback'),

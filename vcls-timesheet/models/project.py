@@ -41,20 +41,29 @@ class Project(models.Model):
     )
 
     @api.multi
-    @api.depends("realized_budget", "contractual_budget")
+    @api.depends("valued_budget", "contractual_budget")
     def compute_budget_consumed(self):
         for project in self:
             if project.contractual_budget:
-                project.budget_consumed = project.realized_budget / project.contractual_budget * 100
+                project.budget_consumed = project.valued_budget / project.contractual_budget * 100
             else:
                 project.budget_consumed = False
 
     @api.depends('task_ids.stage_allow_ts')
     def _compute_timesheet_open(self):
         for rec in self:
-            all_tasks = rec.task_ids | rec.child_id.mapped('task_ids') | rec.child_id.mapped('task_ids').mapped('child_ids') | rec.task_ids.mapped('child_ids') 
+            all_tasks = rec.task_ids | rec.child_id.mapped('task_ids') | rec.task_ids.mapped('child_ids') | rec.parent_id.mapped('task_ids')
             bools = all_tasks.mapped('stage_allow_ts')
-            rec.timesheet_open = True if any(bools) else False
+            timesheet_open = True if any(bools) else False
+            rec.timesheet_open = timesheet_open
+            if rec.parent_id:
+                rec.parent_id.write({
+                    "timesheet_open": timesheet_open,
+                })   
+            if rec.child_id:
+                rec.child_id.write({
+                    "timesheet_open": timesheet_open,
+                })
 
     @api.multi
     def _get_kpi(self):
@@ -76,10 +85,11 @@ class Project(models.Model):
             project.cf_hours = sum(project.task_ids.mapped('cf_hours'))
             project.remaining_budget = project.contractual_budget - project.valued_budget
 
-            project.valuation_ratio = 100.0*(project.valued_hours / project.realized_hours) if project.realized_hours else False
+            project.valuation_ratio = 100.0*(project.valued_budget / project.realized_budget) if project.realized_budget else False
 
             # we recompute the invoiceable amount
             project.sale_order_id.order_line._compute_qty_delivered()
+            project.compute_project_consummed_completed_ratio()
 
     @api.multi
     def action_projects_followup(self):

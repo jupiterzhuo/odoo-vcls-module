@@ -26,6 +26,8 @@ class ResPartner(models.Model):
     
     ### CUSTOM FIELDS FOR EVERY KIND OF CONTACTS ###
 
+    custom_search = fields.Char(index=True, compute='_compute_custom_search', store=True)
+
     description = fields.Text()
 
     hidden = fields.Boolean(
@@ -233,9 +235,8 @@ class ResPartner(models.Model):
         for rec in self:
             rec.active = False if rec.stage == 5 else True
 
-
     @api.multi
-    @api.depends('legacy_account','customer','supplier','employee')
+    @api.depends('legacy_account', 'customer', 'supplier', 'employee')
     def _compute_external_account(self):
         for partner in self:
             if partner.customer:
@@ -243,7 +244,7 @@ class ResPartner(models.Model):
                 continue
             if partner.employee:
                 #we grab the employee
-                employee = self.env['hr.employee'].search([('address_home_id.id','=',partner.id)],limit=1)
+                employee = self.env['hr.employee'].search([('address_home_id', '=', partner.id)], limit=1)
                 if employee:
                     partner.external_account = employee.employee_external_id
                     continue
@@ -339,6 +340,16 @@ class ResPartner(models.Model):
                     'title': _("Warning"),
                     'message': _("A contact with this email already exists."),
                 }}
+
+    @api.depends('display_name','altname','email')
+    def _compute_custom_search(self):
+        for rec in self:
+            string = ""
+            string += rec.display_name if rec.display_name else ""
+            string += rec.altname if rec.altname else ""
+            string += rec.email if rec.email else ""
+            strip_str = ''.join(c for c in string if c.isalnum())
+            rec.custom_search = strip_str
 
     ##################
     # ACTION METHODS #

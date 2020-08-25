@@ -34,14 +34,15 @@ class TranslatorSFContact(TranslatorSFGeneral.TranslatorSFGeneral):
         if SF_Contact['Inactive_Contact__c']:
             result['active'] = False
         else:
-            result['active'] = True
+            #we don't what the contact to be reactivated
+            pass #result['active'] = True
         if SF_Contact['Unsubscribed_from_Marketing_Comms__c']:
             if SF_Contact['Unsubscribed_from_Marketing_Comms__c'] == 'Unsubscribed':
                 result['opted_in'] = False
                 result['gdpr_status'] = 'out'
 
         if context.get('custom_context')=='small_update':
-            result['log_info'] = 'small_update {}'.format(result['active'])
+            result['log_info'] = 'small_update {}'.format(SF_Contact['LastName'] or False)
             return result
 
         ### IDENTIFICATION

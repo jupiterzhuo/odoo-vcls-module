@@ -116,6 +116,7 @@ class AnalyticLine(models.Model):
 
     calculated_amount = fields.Float(
         compute='_compute_calculated_amount',
+        compute_sudo=True,
         string="Revenue",
         help="Unite Price x Revised Time",
         store=True,
@@ -282,7 +283,7 @@ class AnalyticLine(models.Model):
     @api.model
     def _timesheet_preprocess(self, vals):
        
-        _logger.info("TS PRE pre | {}".format(vals))
+        #_logger.info("TS PRE pre | {}".format(vals))
         #if we have task_id, we enforce project_id and main_project_id and related accounts
         if vals.get('task_id'):
             task = self.env['project.task'].sudo().browse(vals['task_id'])
@@ -306,7 +307,7 @@ class AnalyticLine(models.Model):
             if vals.get('timesheet_invoice_id'):
                 vals['stage_id'] = 'invoiced'
 
-        _logger.info("TS PRE post | {}".format(vals))
+        #_logger.info("TS PRE post | {}".format(vals))
         vals = super(AnalyticLine, self)._timesheet_preprocess(vals)
    
         return vals
@@ -324,11 +325,11 @@ class AnalyticLine(models.Model):
         sudo_self = self.sudo()  # this creates only one env for all operation that required sudo()
         orders = self.env['sale.order'] 
 
-        _logger.info("TS POST pre | {}".format(values))
+        #_logger.info("TS POST pre | {}".format(values))
 
         #we check if the timesheet is 'At Risk'
         if any([field_name in values for field_name in ['employee_id','project_id']]):
-            _logger.info("TS POST | at risk test")
+            #_logger.info("TS POST | at risk test")
             for timesheet in sudo_self:
                 result[timesheet.id].update({
                     'at_risk': sudo_self._get_at_risk_values(values.get('project_id',timesheet.project_id.id),values.get('employee_id',timesheet.employee_id.id)),
@@ -341,13 +342,13 @@ class AnalyticLine(models.Model):
                 tasks = sudo_self.env['project.task'].browse(values['task_id'])
             else:
                 tasks |= sudo_self.mapped('task_id')
-            _logger.info("TS POST | task recompute {}".format(tasks.mapped('name')))
+            #_logger.info("TS POST | task recompute {}".format(tasks.mapped('name')))
             tasks.write({'recompute_kpi':True})
         
         #if we move a ts to draft, it's automatically set to lc_review if already approved
         if values.get('stage_id','/') == 'draft':
             for timesheet in sudo_self.filtered(lambda t: t.validated):
-                _logger.info("TS POST | direct lc_rev {}".format(timesheet.name))
+                #_logger.info("TS POST | direct lc_rev {}".format(timesheet.name))
                 result[timesheet.id].update({
                     'stage_id': 'lc_review',
                 })
@@ -369,7 +370,7 @@ class AnalyticLine(models.Model):
 
                 result[timesheet.id].update(up_vals)
 
-                _logger.info("TS POST | so_line update {} {}".format(timesheet.name,up_vals))
+                #_logger.info("TS POST | so_line update {} {}".format(timesheet.name,up_vals))
 
         #trigger order update according to modified values in the timesheet
         if any([field_name in values for field_name in ['task_id','unit_amount_rounded','stage_id','date']]):
@@ -387,11 +388,11 @@ class AnalyticLine(models.Model):
 
         for order in orders:
             order.timesheet_limit_date = order.timesheet_limit_date
-            _logger.info("TS POST | order update {}".format(order.name))
+            #_logger.info("TS POST | order update {}".format(order.name))
         
         
         #TODO travel time category to take in account
-        _logger.info("TS POST post | {}".format(result))
+        #_logger.info("TS POST post | {}".format(result))
         
         return result
 
@@ -431,8 +432,8 @@ class AnalyticLine(models.Model):
     def write(self, vals):
         """# we automatically update the stage if the ts is validated and stage = draft
         so_update = False
-        orders = self.env['sale.order']
-        #_logger.info("ANALYTIC WRITE {}".format(vals))"""
+        orders = self.env['sale.order']"""
+        _logger.info("ANALYTIC WRITE {}".format(vals))
 
         temp_self = self
         #if this is a modification authorized for lc during lc_review, we do it in sudo
@@ -442,18 +443,18 @@ class AnalyticLine(models.Model):
             if (len(self) == len(self.filtered(lambda p: p.stage_id == 'lc_review' and p.project_id.user_id.id == self._uid))) \
                 and (not any([field_name in vals for field_name in ['unit_amount','employee_id']])): 
                 temp_self = self.sudo()
-                _logger.info("TS CHECK WRITE | LC review case sudo")
+                #_logger.info("TS CHECK WRITE | LC review case sudo")
 
         # we check the case where we change the unit_amount only and not the rounded value.
         #this case can't be done in post_process because we need the delta value before it's recomputed
         if vals.get('unit_amount', False) and not vals.get('unit_amount_rounded', False):
             for timesheet in self.filtered(lambda t: t.is_timesheet):
                 vals['unit_amount_rounded'] = vals['unit_amount'] + timesheet.calculated_delta_time
-                _logger.info("TS CHECK WRITE | Delta Time {} + {} = {}".format(vals['unit_amount'],timesheet.calculated_delta_time,vals['unit_amount_rounded']))
+                #_logger.info("TS CHECK WRITE | Delta Time {} + {} = {}".format(vals['unit_amount'],timesheet.calculated_delta_time,vals['unit_amount_rounded']))
                 ok = super(AnalyticLine, temp_self).write(vals)
         
         else:
-            _logger.info("TS CHECK WRITE | Regular Case")
+            #_logger.info("TS CHECK WRITE | Regular Case")
             ok = super(AnalyticLine, temp_self).write(vals)
 
         return ok
@@ -736,6 +737,8 @@ class AnalyticLine(models.Model):
 
         if to_clean:
             to_clean.unlink()
+        else:
+            _logger.info("No 0 hrs TS to clean")
 
     @api.model
     def _smart_timesheeting_cron(self,hourly_offset=0):

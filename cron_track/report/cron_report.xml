@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <data>
+        <template id="report_cron_tracking">
+            <t t-call="web.external_layout">
+                <t t-call="web.html_container">
+                    <table class="table table-sm o_main_table">
+                        <thead>
+                            <tr>
+                                <th class="text-left">Cron Name</th>
+                                <th class="text-right">Start Time</th>
+                                <th class="text-right">End Time</th>
+                                <th class="text-right">Total Taken Time</th>
+                                <th class="text-right">Total Executed</th>
+                                <th class="text-right">Total Failed</th>
+                                <th class="text-right">Last Date Cron Executed</th>
+                            </tr>
+                        </thead>
+                        <t t-foreach="docs" t-as="doc">
+                            <tbody class="sale_tbody">
+                                <td class="text-left">
+                                    <span t-field="doc.cron_name"/>
+                                </td>
+                                <td class="text-right">
+                                    <span t-field="doc.start_time"/>
+                                </td>
+                                <td class="text-right">
+                                    <span t-field="doc.end_time"/>
+                                </td>
+                                <td class="text-right">
+                                    <span t-field="doc.total_time"/>
+                                </td>
+                                <td class="text-right">
+                                    <span t-field="doc.total_count"/>
+                                </td>
+                                <td class="text-right">
+                                    <span t-field="doc.failed_cron_count"/>
+                                </td>
+                                <td class="text-right">
+                                    <span t-field="doc.last_date_cron_executed"/>
+                                </td>
+                            </tbody>
+                        </t>
+                    </table>
+                </t>
+            </t>
+        </template>
+    </data>
+</odoo>

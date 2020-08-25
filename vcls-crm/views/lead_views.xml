@@ -312,6 +312,7 @@
                 <page name="segmentation" string="Business Segmentation">
                     <group>
                         <group>
+                            <field name="sale_profile"/>
                             <field name="country_group_id"/>
                             <field name="industry_id" options="{'no_create': True, 'no_create_edit' : True}"/>
                         </group>
@@ -445,6 +446,7 @@
                         <page name="segmentation" string="Business Segmentation">
                             <group>
                                 <group>
+                                    <field name="sale_profile"/>
                                     <field name="country_group_id"/>
                                     <field name="industry_id"/>
                                 </group>

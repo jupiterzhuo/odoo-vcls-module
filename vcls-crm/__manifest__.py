@@ -12,8 +12,7 @@
     'website': "http://www.voisinconsulting.com",
 
     'category': 'Uncategorized',
-
-    'version': '1.3.25',
+    'version': '1.6.11',
 
 
 

@@ -22,14 +22,22 @@
                     <h2 class="mt0">
                         <strong>Credit Note:</strong> <br/>
                         <span t-field="o.number"/>
+                        <br/>
                     </h2>
-
+                        <t t-if="o.project_name" name="project_name" class="mt-1">
+                        <strong>From the project:</strong>
+                            <span t-field="o.project_name"/>
+                            <br/>
+                        </t>
                         <t t-if="o.origin" name="origin" class="mt-1">
-                        <br/>
-                        <br/>
                             <strong>From the invoice:</strong>
                             <span t-field="o.origin"/>
-                            <br/><br/>
+                            <br/>
+                        </t>
+                        <t t-if="o.date" name="date" class="mt-1">
+                            <strong>Date :</strong>
+                            <span t-field="o.date"/>
+                            <br/>
                         </t>
 
                     <div t-if="o.origin" name="origin" class="mt-1">
