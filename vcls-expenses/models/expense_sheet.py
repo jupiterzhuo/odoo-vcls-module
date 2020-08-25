@@ -74,7 +74,7 @@ class ExpenseSheet(models.Model):
     
     payment_mode = fields.Selection([("own_account", "Employee (to reimburse)"), ("company_account", "Company")], default=False, related=False,readonly=False)
 
-    @api.constrains('journal_id', 'journal_id.company_id', 'company_id')
+    @api.constrains('journal_id', 'company_id')
     def _check_expense_sheet_same_company(self):
         for sheet in self:
             if not sheet.company_id or not sheet.journal_id:
