@@ -44,8 +44,19 @@ class Ticket(models.Model):
         related=False, 
         string='Company', 
         store=True, 
-        readonly=False,
+        readonly=True,
+        compute = '_compute_company_id',
         )
+
+    @api.depends('partner_id')
+    def _compute_company_id(self):
+        for ticket in self.filtered(lambda t: t.partner_id):
+            employee = self.env['rh.employee'].sudo().with_context(active_test=False).search([('related_partner_id','=',ticket.partner_id)],limit=1)
+            if employee:
+                ticket.company_id = employee.company_id
+            else:
+                ticket.company_id = ticket.partner_id.company_id
+
 
     subcategory_id = fields.Many2one(
         'helpdesk.ticket.subcategory',
