@@ -40,6 +40,7 @@ class Ticket(models.Model):
     #################
     
     company_id = fields.Many2one(
+        comodel_name='res.company',
         related=False, 
         string='Company', 
         #store=True, 
