@@ -51,7 +51,7 @@ class Ticket(models.Model):
     @api.depends('partner_id')
     def _compute_company_id(self):
         for ticket in self.filtered(lambda t: t.partner_id):
-            employee = self.env['rh.employee'].sudo().with_context(active_test=False).search([('related_partner_id','=',ticket.partner_id)],limit=1)
+            employee = self.env['hr.employee'].sudo().with_context(active_test=False).search([('related_partner_id','=',ticket.partner_id)],limit=1)
             if employee:
                 ticket.company_id = employee.company_id
             else:
