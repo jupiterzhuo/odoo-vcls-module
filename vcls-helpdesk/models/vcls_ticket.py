@@ -55,10 +55,10 @@ class Ticket(models.Model):
         for ticket in self.filtered(lambda t: t.partner_id):
             user = self.env['res.users'].sudo().with_context(active_test=False).search([('partner_id','=',ticket.partner_id.id)],limit=1)
             if user:
-                _logger.info("TICKET COMPANY | user {}".format(user.name))
+                _logger.info("TICKET COMPANY | user {} in {}".format(user.name,user.company_id.name))
                 ticket.company_id = user.company_id
             else:
-                _logger.info("TICKET COMPANY | partner {}".format(ticket.partner_id.name))
+                _logger.info("TICKET COMPANY | partner {} in {}".format(ticket.partner_id.name,ticket.partner_id.company_id.name))
                 ticket.company_id = ticket.partner_id.company_id
 
 
