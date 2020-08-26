@@ -3,6 +3,8 @@
 #Odoo Imports
 from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
+import logging
+_logger = logging.getLogger(__name__)
 
 class WizardTicket(models.TransientModel):
     _name = 'wizard.ticket'
@@ -53,8 +55,10 @@ class Ticket(models.Model):
         for ticket in self.filtered(lambda t: t.partner_id):
             employee = self.env['hr.employee'].with_context(active_test=False).search([('related_partner_id','=',ticket.partner_id)],limit=1)
             if employee:
+                _logger.info("TICKET COMPANY | employee {}".format(employee.name))
                 ticket.company_id = employee.company_id
             else:
+                _logger.info("TICKET COMPANY | partner {}".format(ticket.partner_id.name))
                 ticket.company_id = ticket.partner_id.company_id
 
 
