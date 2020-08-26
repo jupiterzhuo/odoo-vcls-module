@@ -43,8 +43,8 @@ class Ticket(models.Model):
         comodel_name='res.company',
         related=False, 
         string='Company', 
-        #store=True, 
-        #readonly=True,
+        store=True, 
+        readonly=False,
         )
 
     subcategory_id = fields.Many2one(
