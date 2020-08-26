@@ -160,7 +160,7 @@
                         </group>
                         <group>
                             <widget name="pie_chart" title="Status" attrs="{'groupby': 'won_status'}"/>
-                            <widget name="pie_chart" title="Source Distribution" attrs="{'groupby': 'initial_marketing_project_id'}"/>
+                            <widget name="pie_chart" title="Initial Source Distribution" attrs="{'groupby': 'initial_marketing_project_id'}"/>
                         </group>
                     </group>
 
