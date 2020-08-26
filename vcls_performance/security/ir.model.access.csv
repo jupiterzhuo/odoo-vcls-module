@@ -1,0 +1,3 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+performance_period_default,performance.period.default,model_performance_period,,1,0,0,0
+performance_sales_default,performance.sales.default,model_performance_sales,,1,0,0,0
