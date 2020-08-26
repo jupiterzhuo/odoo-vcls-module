@@ -39,6 +39,13 @@ class Ticket(models.Model):
     # Custom Fields #
     #################
     
+    company_id = fields.Many2one(
+        related=False, 
+        string='Company', 
+        #store=True, 
+        #readonly=True,
+        )
+
     subcategory_id = fields.Many2one(
         'helpdesk.ticket.subcategory',
         string='Subcategory',
