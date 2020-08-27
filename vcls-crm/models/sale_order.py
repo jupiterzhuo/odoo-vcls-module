@@ -189,7 +189,36 @@ class SaleOrder(models.Model):
         ],
     )
 
+    sales_reporting_date = fields.Datetime(
+        store=True,
+        compute='_compute_sales_reporting_date',
+    )
 
+    @api.depends('create_date','confirmation_date','opp_date_closed')
+    def _compute_sales_reporting_date(self):
+        for so in self:
+            if so.confirmation_date:
+                so.sales_reporting_date = so.confirmation_date
+            elif so.opp_date_closed:
+                so.sales_reporting_date = so.opp_date_closed
+            else:
+                so.sales_reporting_date = so.create_date
+
+    converted_untaxed_amount = fields.Float(
+        store=True,
+        help='Amount converted in EUR',
+        compute='_compute_converted_untaxed_amount',
+    )
+
+    @api.depends('sales_reporting_date','amount_untaxed','currency_id')
+    def _compute_converted_untaxed_amount(self):
+        for so in self:
+            so.converted_untaxed_amount = so.currency_id._convert(
+                so.untaxed_amount,
+                self.env.ref('base.EUR'),
+                self.env.user.company_id,
+                so.sales_reporting_date or fields.Datetime.now(),
+            )
 
     ###############
     # ORM METHODS #
