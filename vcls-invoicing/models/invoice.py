@@ -32,6 +32,7 @@ class Invoice(models.Model):
         'res.users',
         string='Invoicing Administrator',
         related='commercial_partner_id.invoice_admin_id',
+        store=True,
         )
 
     invoice_sending_date = fields.Datetime()
