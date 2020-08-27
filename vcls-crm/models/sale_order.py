@@ -3,7 +3,7 @@
 from odoo import models, fields, tools, api
 from collections import OrderedDict
 from odoo.tools import OrderedSet
-
+from datetime import datetime, timedelta
 from odoo.exceptions import UserError, ValidationError, Warning
 import math
 
@@ -175,6 +175,173 @@ class SaleOrder(models.Model):
             ('filtered','FILTERED OUT'),
         ],
     )
+
+
+
+
+    existing_templates = fields.Many2many('sale.order.template', relation='rel_table_sale_order_existing', )
+    
+    template_ids = fields.Many2many('sale.order.template',  relation='rel_table_sale_order_template',)
+
+    vcls_version = fields.Float(default=lambda self: float(self.env.ref('vcls-crm.sale_order_template_version').value))
+
+
+    @api.multi
+    def submit_multi_template(self):
+      
+        sections = {}
+        sec = ' '
+        existing_order_lines = self.order_line
+        new_templates = self.template_ids
+        existing_products = existing_order_lines.mapped('product_id')
+        templates_to_add = new_templates - self.existing_templates
+        templates_to_remove = self.existing_templates - new_templates
+
+        for templ in templates_to_remove:
+            for templ_line in templ.sale_order_template_line_ids:
+                if templ_line.product_id not in (new_templates - templates_to_remove).mapped('sale_order_template_line_ids.product_id') and templ_line.display_type != 'line_section':
+                    
+                    to_delete = existing_order_lines.filtered(lambda o_line: o_line.from_sale_line_template == templ_line)
+                    if to_delete and len(to_delete) == 1:
+                        if to_delete.task_id.timesheet_ids or to_delete.task_id.child_ids.mapped('timesheet_ids'):
+                            raise UserWarning("A template that was removed already has a task associated with time coded, cannot delete")
+                        else:
+                            existing_order_lines -= to_delete
+                            to_delete.unlink()
+                    else:
+                        product_to_delete = existing_order_lines.filtered(lambda o_line: o_line.product_id == templ_line.product_id)
+                        if len(product_to_delete) == 1:
+                            existing_order_lines -= product_to_delete
+                            product_to_delete.unlink()
+            self.existing_templates -= templ
+
+  
+        
+        
+        for template in sorted(templates_to_add, key=lambda x: x.sequence):
+            if template.number_of_days > 0:
+                self.validity_date = fields.Date.to_string(datetime.now() + timedelta(template.number_of_days))
+            if template.note:
+                self.note += template.note
+            if template.require_payment:
+                self.require_payment = True
+            if template.require_signature:
+                self.require_signature = True
+
+            option_lines = []
+            for option in template.sale_order_template_option_ids:
+                data = self._compute_option_data_for_template_change(option)
+                option_lines.append((0, 0, data))
+            self.sale_order_option_ids = option_lines
+
+            for templ_line in template.sale_order_template_line_ids:
+                if templ_line.display_type == 'line_section':
+                    sec = templ_line.name
+                    if sec not in sections.keys():
+                        sections[sec] = []
+                    else:
+                        continue
+                if templ_line.product_id in existing_products:
+                    continue
+                if templ_line.product_id:
+                    existing_products |= templ_line.product_id
+                
+                sections.setdefault(sec, []).append(self.template_to_order_line(templ_line))
+            self.existing_templates += template
+
+
+        
+        order_lines = [a for lis in sections.values() for a in lis]
+        if order_lines:
+            self.order_line = order_lines
+            
+            self.order_line._compute_tax_id()
+
+        
+        if self.order_line:
+            dic = {'no_sec': self.env['sale.order.line']}
+            last = 'no_sec'
+            for line in self.order_line:
+                if line.display_type == 'line_section':
+                    dic.setdefault(line.name, self.env['sale.order.line'])
+                    last = line.name
+                else:
+                    dic[last] |= line
+
+
+            sec_seq = 100
+            rate_seq = 10000000
+            line_seq = 1
+
+            for templ in self.template_ids.sorted(lambda x: x.sequence):
+                secs = templ.mapped('sale_order_template_line_ids').filtered(lambda sol: sol.display_type == "line_section")
+                for sec in secs:
+                    if dic.get(sec.name, False):
+                        if dic[sec.name].filtered(lambda x:x.vcls_type == 'rate'):
+                            dic[sec.name].write({'sequence': rate_seq + line_seq})
+                            self.order_line.filtered(lambda x: x.display_type == "line_section" and x.name == sec.name).write({'sequence':rate_seq})
+                            rate_seq += 100
+                            dic.pop(sec.name)
+                            continue
+                        dic[sec.name].write({'sequence': sec_seq + line_seq})
+                        self.order_line.filtered(lambda x: x.display_type == "line_section" and x.name == sec.name).write({'sequence':sec_seq})
+                        sec_seq += 100
+                        dic.pop(sec.name)
+                                 
+
+
+                
+            
+            for k,v in dic.items():
+                if v:
+                    v.write({'sequence': sec_seq + line_seq})
+                    self.order_line.filtered(lambda x: x.display_type == "line_section" and x.name == k).write({'sequence': sec_seq})
+                    sec_seq += 100
+
+            self.order_line = self.order_line.sorted(key=lambda x: x.sequence)
+            
+
+
+            line_secs_to_delete = self.env['sale.order.line']
+
+            for i in range(len(self.order_line) - 1):
+                if self.order_line[i].display_type == 'line_section' and self.order_line[i+1].display_type == 'line_section':
+                    line_secs_to_delete |= self.order_line[i]
+            if self.order_line:
+                if self.order_line[-1].display_type == 'line_section':
+                    line_secs_to_delete |= self.order_line[-1]
+            line_secs_to_delete.unlink()
+
+
+    @api.multi
+    def template_to_order_line(self, line):
+        data = self._compute_line_data_for_template_change(line)
+        if line.product_id:
+            discount = 0
+            if self.pricelist_id:
+                price = self.pricelist_id.with_context(uom=line.product_uom_id.id).get_product_price(line.product_id, 1, False)
+                if self.pricelist_id.discount_policy == 'without_discount' and line.price_unit:
+                    discount = (line.price_unit - price) / line.price_unit * 100
+                    # negative discounts (= surcharge) are included in the display price
+                    if discount < 0:
+                        discount = 0
+                    else:
+                        price = line.price_unit
+            else:
+                price = line.price_unit
+            data.update({
+                'price_unit': price,
+                'discount': 100 - ((100 - discount) * (100 - line.discount) / 100),
+                'product_uom_qty': line.product_uom_qty,
+                'product_id': line.product_id.id,
+                'product_uom': line.product_uom_id.id,
+                'customer_lead': self._get_customer_lead(line.product_id.product_tmpl_id),
+            })
+            if self.pricelist_id:
+                data.update(self.env['sale.order.line']._get_purchase_price(self.pricelist_id, line.product_id, line.product_uom_id, fields.Date.context_today(self)))
+        data.update({'from_sale_line_template': line.id})
+        return (0, 0, data)
+
 
 
 
@@ -542,7 +709,7 @@ class SaleOrder(models.Model):
         for so in self:
             sect_index = 0
             for line in so.order_line:
-                if not line.section_line_id: #this is a section line
+                if not line.section_line_id: #this is a section line  ## could be a product, but isnt in a sec.
                     sect_index += 100
                     line_index = 0
 
@@ -598,7 +765,7 @@ class SaleOrder(models.Model):
           
             self.order_line = order_lines
             self.order_line._compute_tax_id()
-    
+
     
 
 """
@@ -685,3 +852,4 @@ class AccountFiscalPosition(models.Model):
 
         return fp.id if fp else False
 """
+
