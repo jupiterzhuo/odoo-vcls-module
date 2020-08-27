@@ -24,7 +24,7 @@ class PerformancePeriod(models.Model):
           if not type_model:
                return
           else:
-               perf_obj = self.env['type_model']
+               perf_obj = self.env[type_model]
 
           for period in self:
                loop_date = period.date_start
