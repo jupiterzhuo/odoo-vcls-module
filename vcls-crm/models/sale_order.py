@@ -182,8 +182,7 @@ class SaleOrder(models.Model):
     existing_templates = fields.Many2many('sale.order.template', relation='rel_table_sale_order_existing', )
     
     template_ids = fields.Many2many('sale.order.template',  relation='rel_table_sale_order_template',)
-    vcls_version = fields.Float(default=False)
-    # vcls_version = fields.Float(default=lambda self: float(self.env.ref('vcls-crm.sale_order_template_version').value))
+    vcls_version = fields.Float(default=lambda self: float(self.env.ref('vcls-crm.sale_order_template_version').value))
 
 
     @api.multi
