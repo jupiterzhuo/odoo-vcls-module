@@ -14,7 +14,7 @@
     'category': 'Uncategorized',
 
 
-    'version': '1.6.21',
+    'version': '1.6.22',
 
 
     # any module necessary for this one to work correctly
