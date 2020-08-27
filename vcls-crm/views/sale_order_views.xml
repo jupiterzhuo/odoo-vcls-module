@@ -124,9 +124,25 @@
                     <group string="Product Catalog (Edit to retrieve products from various catalog)">
                         <group string="Main Filters">
                             <field name="catalog_mode" invisible="1"/>
+                            <field name="vcls_version" invisible="1"/>
                             <field name="product_category_id" string="1. Select Catalog" attrs="{'required': [('catalog_mode', 'in', ['template','generic']),('state','not in',['sale','done','cancel'])],}" options="{'no_create': True,'no_create_edit':True,'no_open':True}"/>
-                            <field name="sale_order_template_id"  domain="[('product_category_id','=',product_category_id)]" string="2. Select Template" attrs="{'required': [('catalog_mode', '=', 'template'),('state','not in',['sale','done','cancel'])],}" options="{'no_create': True,'no_create_edit':True,'no_open':True}"/>
                             <field name="catalog_details" string="Show Detailed Catalog" invisible="1"/>
+                            <field name="sale_order_template_id"  domain="[('product_category_id','=',product_category_id)]" string="2. Select Template" attrs="{'invisible' : [('vcls_version','&gt;',1)] }" options="{'no_create': True,'no_create_edit':True,'no_open':True}"/>
+
+                            <field name="template_ids" readonly="0" domain="[('product_category_id','=', product_category_id)]" string='' attrs="{'invisible' : [ ('vcls_version','&lt;',2)]}">
+                                
+                            <tree create="0" edit="1">
+                                <field name="sequence" widget="handle"/>
+                                <field name="name"/>
+                            </tree>
+                            </field>
+                            <button type="object"
+                                    name="submit_multi_template"
+                                    class="oe_stat_button"
+                                    string="Submit Template"
+                                    invisible="[ ('vcls_version','&lt;',2)]">
+                            </button>
+
                         </group>
                         <group string="Fine Filters (for specific line search)" invisible="1" name="fine_filters">
                             <field name="business_mode" widget="radio" string="3. Modify to focus on specific types"/>

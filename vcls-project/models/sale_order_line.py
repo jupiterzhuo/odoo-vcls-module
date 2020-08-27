@@ -45,11 +45,11 @@ class SaleOrderLine(models.Model):
             #we delete any linked rate product if we find it
             for child in line.order_id.child_ids.filtered(lambda c: c.link_rates):
                 to_delete = child.order_line.filtered(lambda f: f.product_id == line.product_id)
-                to_delete.unlink()
                 _logger.info("Linked Rate Line Deletion | {} in {}".format(to_delete.mapped('name'),child.name))
+                to_delete.unlink()
         super().unlink()
 
-    
+
     @api.model_create_multi
     def create(self, vals_list):
         lines = super().create(vals_list)
@@ -59,7 +59,7 @@ class SaleOrderLine(models.Model):
         
         to_replicate = lines.filtered(lambda p: not p.order_id.parent_id and p.vcls_type == 'rate') #if we create a rate line in a parent quotation
         update = self.prepare_linked_line(to_replicate,'create')
-        for child in line.order_id.child_ids.filtered(lambda c: c.link_rates):
+        for child in lines.mapped('order_id.child_ids').filtered(lambda c: c.link_rates):
             child.order_line = update
             _logger.info("Linked Rate Line Creation | {} in {}".format(update,child.name))
 

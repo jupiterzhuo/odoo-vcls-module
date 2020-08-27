@@ -30,6 +30,19 @@ class SaleOrderLine(models.Model):
         store=False
     )
 
+    from_sale_line_template = fields.Many2one('sale.order.template.line', string="From Template")
+
+    @api.constrains('name')
+    def unique_sol_names(self):
+        for rec in self:
+            if rec.display_type != 'line_section' and  rec.name in (rec.order_id.mapped('order_line') - rec).filtered(lambda x: x.display_type != 'line_section' and x.vcls_type != 'rate').mapped('name'):
+                if rec.name[-1].isdigit():
+                    rec.write({'name': rec.name[:-1] + str(int(rec.name[-1]) + 1)})
+                else:
+                    rec.write({'name': rec.name + " 2"})
+
+
+
     @api.multi
     def _get_section_line_id(self):
         for line in self:
