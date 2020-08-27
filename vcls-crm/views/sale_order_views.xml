@@ -137,9 +137,9 @@
                             <button type="object"
                                     name="submit_multi_template"
                                     class="oe_stat_button"
-                                    string="Submit Template"
-                                    invisible="[ ('vcls_version','&lt;',0.2)]">
+                                    string="Submit Template">
                             </button>
+                            <!-- invisible="[ ('vcls_version','&lt;',0.2)]" -->
                         </group>
                         <group string="Fine Filters (for specific line search)" invisible="1" name="fine_filters">
                             <field name="business_mode" widget="radio" string="3. Modify to focus on specific types"/>
