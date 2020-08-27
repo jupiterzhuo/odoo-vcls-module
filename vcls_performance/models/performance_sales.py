@@ -74,7 +74,8 @@ class PerformanceSales(models.Model):
      def _compute_period_sales(self):
           for perf in self:
                #we get the relevant sale.order
-               sos = self.env['sale.order'].search([('company_id','=',perf.company_id),('opp_date_closed.date()','>=',perf.date_start),('opp_date_closed.date()','<=',perf.date_end)])
+               #sos = self.env['sale.order'].search([('company_id','=',perf.company_id),('opp_date_closed.date()','>=',perf.date_start),('opp_date_closed.date()','<=',perf.date_end)])
+               sos = self.env['sale.order'].search([('company_id','=',perf.company_id),('opp_date_closed','>=',perf.date_start),('opp_date_closed','<=',perf.date_end)])
                _logger.info("PERF | Found {} SO in period {}".format(len(sos),perf.date_start))
 
 
