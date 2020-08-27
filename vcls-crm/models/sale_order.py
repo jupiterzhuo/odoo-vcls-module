@@ -214,7 +214,7 @@ class SaleOrder(models.Model):
     def _compute_converted_untaxed_amount(self):
         for so in self:
             so.converted_untaxed_amount = so.currency_id._convert(
-                so.untaxed_amount,
+                so.amount_untaxed,
                 self.env.ref('base.EUR'),
                 self.env.user.company_id,
                 so.sales_reporting_date or fields.Datetime.now(),
