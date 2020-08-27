@@ -39,6 +39,8 @@ class PerformancePeriod(models.Model):
                               'date_start':loop_date,
                               'date_end':p_date_end,
                               'period_index':index,
+                              'currency_id':self.env.ref('base.EUR').id,
+                              'sales_objective_period':period.objective_sales/12,
                          })
                          _logger.info("PERF | {} created {} {} {}".format(type_model,new.date_start,new.date_end,new.period_index))
                     index +=1
@@ -60,12 +62,12 @@ class PerformanceMixin(models.AbstractModel):
           related = 'period_id.company_id',
           store = True,
      )
-     performance_type = fields.Selection(
+     """performance_type = fields.Selection(
           selection = [
                ('sales','Sales'),
                ('revenues','Revenues'),
           ]
-     )
+     )"""
 
      date_start = fields.Date()
      date_end = fields.Date()
