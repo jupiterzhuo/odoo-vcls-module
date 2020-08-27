@@ -77,10 +77,29 @@ class PerformanceSales(models.Model):
                #we get the relevant sale.order
                sos = self.env['sale.order'].search([
                     ('company_id','=',perf.company_id.id),
-                    ('opp_date_closed','>=',perf.date_start),
-                    ('opp_date_closed','<=',perf.date_end),
+                    ('sales_reporting_date','>=',perf.date_start),
+                    ('sales_reporting_date','<=',perf.date_end),
                     ('sale_status','not in',['cancel'])])
                _logger.info("PERF | Found {} SO in period {}".format(len(sos),perf.date_start))
+
+               new_sos = sos.filtered(lambda p: p.sale_status=='new')
+               retained_sos = sos.filtered(lambda p: p.sale_status=='retained')
+
+               perf.sales_new_period = sum(new_sos.filtered(lambda s: s.sale_status == 'won').mapped('converted_untaxed_amount'))
+               perf.sales_retained_period = sum(retained_sos.filtered(lambda s: s.sale_status == 'won').mapped('converted_untaxed_amount'))
+               perf.sales_total_period  = perf.sales_new_period + perf.sales_retained_period
+
+               perf.sales_count_new_period = len(new_sos.filtered(lambda s: s.sale_status == 'won'))
+               perf.sales_count_retained_period = len(retained_sos.filtered(lambda s: s.sale_status == 'won'))
+               perf.sales_count_total_period  = perf.sales_count_new_period + perf.sales_count_retained_period
+
+               perf.losses_new_period = sum(new_sos.filtered(lambda s: s.sale_status == 'lost').mapped('converted_untaxed_amount'))
+               perf.losses_retained_period = sum(retained_sos.filtered(lambda s: s.sale_status == 'lost').mapped('converted_untaxed_amount'))
+               perf.losses_total_period  = perf.losses_new_period + perf.losses_retained_period
+
+               perf.losses_count_new_period = len(new_sos.filtered(lambda s: s.sale_status == 'lost'))
+               perf.losses_count_retained_period = len(retained_sos.filtered(lambda s: s.sale_status == 'lost'))
+               perf.losses_count_total_period  = perf.losses_count_new_period + perf.losses_count_retained_period
 
 
 
