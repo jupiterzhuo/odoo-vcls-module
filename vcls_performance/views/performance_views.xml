@@ -1,28 +1,37 @@
 <odoo>
   <data>
     <!-- explicit list view definition -->
-    <!--
-    <record model="ir.ui.view" id="vcls_performance.list">
-      <field name="name">vcls_performance list</field>
-      <field name="model">vcls_performance.vcls_performance</field>
+    
+    <record model="ir.ui.view" id="view_period_list">
+      <field name="name">view_period_list</field>
+      <field name="model">performance.period</field>
       <field name="arch" type="xml">
         <tree>
           <field name="name"/>
-          <field name="value"/>
-          <field name="value2"/>
+          <field name="company_id"/>
+          <field name="date_start"/>
+          <field name="date_end"/>
+          <field name="objective_sales"/>
+          <!--<button type="action" name="action_build_sales" icon="fa-calculator"/>-->
         </tree>
       </field>
     </record>
-    -->
+    
 
     <!-- actions opening views on models -->
-    <!--
-    <record model="ir.actions.act_window" id="vcls_performance.action_window">
-      <field name="name">vcls_performance window</field>
-      <field name="res_model">vcls_performance.vcls_performance</field>
+    
+    <record model="ir.actions.act_window" id="action_performance_period">
+      <field name="name">Performance Period</field>
+      <field name="res_model">performance.period</field>
       <field name="view_mode">tree,form</field>
     </record>
-    -->
+
+    <!-- Top menu item -->
+    
+    <menuitem name="Performance" id="menu_performance_root" parent="base.reporting_menuitem"/>
+    <menuitem name="Periods" id="menu_performance_period" parent="menu_performance_root" action="action_performance_period"/>
+    
+    
 
     <!-- server action to the one above -->
     <!--
@@ -40,13 +49,10 @@
     </record>
     -->
 
-    <!-- Top menu item -->
-    <!--
-    <menuitem name="vcls_performance" id="vcls_performance.menu_root"/>
-    -->
+    
     <!-- menu categories -->
     <!--
-    <menuitem name="Menu 1" id="vcls_performance.menu_1" parent="vcls_performance.menu_root"/>
+    
     <menuitem name="Menu 2" id="vcls_performance.menu_2" parent="vcls_performance.menu_root"/>
     -->
     <!-- actions -->

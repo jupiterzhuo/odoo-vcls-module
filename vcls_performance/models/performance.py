@@ -71,7 +71,7 @@ class PerformanceMixin(models.AbstractModel):
      date_end = fields.Date()
 
      period_index = fields.Integer()
-     need_recompute = fields.Boolean()
+     need_recompute = fields.Boolean(default=True)
 
      """@api.model
      def build_performances(self,period_id=False,frequency='monthly',performance_type=False):
