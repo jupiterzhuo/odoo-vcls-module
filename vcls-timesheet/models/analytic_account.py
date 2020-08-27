@@ -160,6 +160,12 @@ class AnalyticLine(models.Model):
     def show_grid_cell(self, domain=[], column_value='', row_values={}):
         line = self.sudo().search(domain, limit=1)
         date = column_value
+        for item in domain:
+            if type(item) == list:
+                if 'user_id' in item:
+                    user_id = item[2]
+                if 'name' in item:
+                    name = item[2]
         if not line:
             # fetch the latest line
             task_value = row_values.get('task_id')
@@ -168,6 +174,8 @@ class AnalyticLine(models.Model):
                 direct_previous_line = self.sudo().search([
                     ('date', '<', date),
                     ('task_id', '=', task_id),
+                    ('user_id', '=', user_id),
+                    ('name', '=', name),
                 ], limit=1, order='date desc')
                 if direct_previous_line:
                     task_id = direct_previous_line.task_id
