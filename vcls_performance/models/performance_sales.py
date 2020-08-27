@@ -6,7 +6,7 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
-class PerformanceSales(models.AbstractModel):
+class PerformanceSales(models.Model):
      _name = 'performance.sales'
      _description = 'Performance Sales'
      _inherit = 'performance.mixin'

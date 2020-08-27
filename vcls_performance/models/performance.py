@@ -32,8 +32,7 @@ class PerformancePeriod(models.Model):
                while loop_date < period.date_end:
                     p_date_end = loop_date + relativedelta(months=delta_month,days=-1)
                     #we check if already exists
-                    existing = False
-                    #existing = perf_obj.search([('period_id','=',period.id),('date_start','=',loop_date),('date_end','=',p_date_end)],limit=1)
+                    existing = perf_obj.search([('period_id','=',period.id),('date_start','=',loop_date),('date_end','=',p_date_end)],limit=1)
                     if not existing:
                          new = perf_obj.create({
                               'period_id':period.id,
