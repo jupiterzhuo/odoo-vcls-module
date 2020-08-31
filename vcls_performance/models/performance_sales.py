@@ -126,8 +126,9 @@ class PerformanceSales(models.Model):
                perf.active_total_weighted = perf.active_new_weighted + perf.active_retained_weighted
 
      def _compute_period_sales(self):
-          #today = date.today()
-          for perf in self:
+          ordered_perf = self.sorted(lambda p: (p.period_id.date_start,p.period_index))
+          for perf in ordered_perf:
+               _logger.info("PERF | Period Sales Calculation | {}-{} index {}-{}".format(perf.period_id.name,perf.period_id.date_start,perf.period_index,perf.date_start))
                #we get the relevant sale.order
                sos = self.env['sale.order'].search([
                     ('company_id','=',perf.company_id.id),
@@ -188,6 +189,13 @@ class PerformanceSales(models.Model):
                perf.pipe_total_period = perf.pipe_new_period + perf.pipe_retained_period
                perf.pipe_total_period_weighted = perf.pipe_new_period_weighted + perf.pipe_retained_period_weighted
                perf.pipe_count_total_period = perf.pipe_count_new_period + perf.pipe_count_retained_period
+     
+     def _compute_cumulative_sales(self):
+          #we order per period and index
+          ordered_perf = self.sorted(lambda p: (p.period_id.date_start,p.period_index))
+          for perf in ordered_perf:
+               _logger.info("PERF | Cumulative Sales Calculation | {}-{} index {}-{}".format(perf.period_id.name,perf.period_id.date_start,perf.period_index,perf.date_start))
+
 
                     
 
