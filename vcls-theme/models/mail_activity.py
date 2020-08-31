@@ -42,12 +42,13 @@ class MailActivity(models.Model):
             'in_refund': 'Vendor Credit note',
         }
         for activity in self:
+            rec = self.env[activity.res_model].browse(activity.res_id)
             if activity.res_model == 'account.invoice':
-                activity.res_name = "%s | %s" % (TYPES[activity.type], activity.temp_name or '')
+                activity.res_name = "%s | %s" % (TYPES[rec.type], rec.temp_name or '')
             elif activity.res_model == 'project.task':
-                activity.res_name = "%s - %s" % (activity.name, activity.project_id.display_name or '')
+                activity.res_name = "%s - %s" % (activity.name, rec.project_id.display_name or '')
             else:
-                activity.res_name = self.env[activity.res_model].browse(activity.res_id).name_get()[0][1]
+                activity.res_name = rec.name_get()[0][1]
 
     @api.depends('user_id')  
     def _get_lm_ids(self):
