@@ -30,48 +30,48 @@ class PerformanceSales(models.Model):
 
      #Realized Sales
      sales_new_period = fields.Monetary(readonly=True) #OK
-     sales_new_cumulative = fields.Monetary(readonly=True)
+     sales_new_cumulative = fields.Monetary(readonly=True) #OK
      sales_retained_period = fields.Monetary(readonly=True) #OK
-     sales_retained_cumulative = fields.Monetary(readonly=True)
+     sales_retained_cumulative = fields.Monetary(readonly=True) #OK
      sales_total_period = fields.Monetary(readonly=True) #OK
-     sales_total_cumulative = fields.Monetary(readonly=True)
+     sales_total_cumulative = fields.Monetary(readonly=True) #OK
 
      sales_count_new_period = fields.Integer(readonly=True) #OK
-     sales_count_new_cumulative = fields.Integer(readonly=True)
+     sales_count_new_cumulative = fields.Integer(readonly=True) #OK
      sales_count_retained_period = fields.Integer(readonly=True) #OK
-     sales_count_retained_cumulative = fields.Integer(readonly=True)
+     sales_count_retained_cumulative = fields.Integer(readonly=True) #OK
      sales_count_total_period = fields.Integer(readonly=True) #OK
-     sales_count_total_cumulative = fields.Integer(readonly=True)
+     sales_count_total_cumulative = fields.Integer(readonly=True) #OK
 
      #Realized Losses
      losses_new_period = fields.Monetary(readonly=True) #OK
-     losses_new_cumulative = fields.Monetary(readonly=True)
+     losses_new_cumulative = fields.Monetary(readonly=True) #OK
      losses_retained_period = fields.Monetary(readonly=True) #OK
-     losses_retained_cumulative = fields.Monetary(readonly=True)
+     losses_retained_cumulative = fields.Monetary(readonly=True) #OK
      losses_total_period = fields.Monetary(readonly=True) #OK
-     losses_total_cumulative = fields.Monetary(readonly=True)
+     losses_total_cumulative = fields.Monetary(readonly=True) #OK
 
      losses_count_new_period = fields.Integer(readonly=True) #OK
-     losses_count_new_cumulative = fields.Integer(readonly=True)
+     losses_count_new_cumulative = fields.Integer(readonly=True) #OK
      losses_count_retained_period = fields.Integer(readonly=True) #OK
-     losses_count_retained_cumulative = fields.Integer(readonly=True)
+     losses_count_retained_cumulative = fields.Integer(readonly=True) #OK
      losses_count_total_period = fields.Integer(readonly=True) #OK
-     losses_count_total_cumulative = fields.Integer(readonly=True)
+     losses_count_total_cumulative = fields.Integer(readonly=True) #OK
 
      #ratios
      win_loss_count_new_period = fields.Float(readonly=True) #OK
-     win_loss_count_new_cumulative = fields.Float(readonly=True)
+     win_loss_count_new_cumulative = fields.Float(readonly=True) #OK
      win_loss_count_retained_period = fields.Float(readonly=True) #OK
-     win_loss_count_retained_cumulative = fields.Float(readonly=True)
+     win_loss_count_retained_cumulative = fields.Float(readonly=True) #OK
      win_loss_count_total_period = fields.Float(readonly=True) #OK
-     win_loss_count_total_cumulative = fields.Float(readonly=True)
+     win_loss_count_total_cumulative = fields.Float(readonly=True) #OK
 
      win_loss_new_period = fields.Float(readonly=True) #OK
-     win_loss_new_cumulative = fields.Float(readonly=True)
+     win_loss_new_cumulative = fields.Float(readonly=True) #OK
      win_loss_retained_period = fields.Float(readonly=True) #OK
-     win_loss_retained_cumulative = fields.Float(readonly=True)
+     win_loss_retained_cumulative = fields.Float(readonly=True) #OK
      win_loss_total_period = fields.Float(readonly=True) #OK
-     win_loss_total_cumulative = fields.Float(readonly=True)
+     win_loss_total_cumulative = fields.Float(readonly=True) #OK
 
      #pipeline
      pipe_new_period = fields.Monetary(readonly=True) #OK
@@ -84,15 +84,15 @@ class PerformanceSales(models.Model):
      pipe_count_retained_period = fields.Integer(readonly=True) #OK
      pipe_count_total_period = fields.Integer(readonly=True) #OK
 
-     pipe_new_cumulative = fields.Monetary(readonly=True) 
-     pipe_new_cumulative_weighted = fields.Monetary(readonly=True) 
-     pipe_retained_cumulative = fields.Monetary(readonly=True) 
-     pipe_retained_cumulative_weighted = fields.Monetary(readonly=True) 
-     pipe_total_cumulative = fields.Monetary(readonly=True) 
-     pipe_total_cumulative_weighted = fields.Monetary(readonly=True) 
-     pipe_count_new_cumulative = fields.Integer(readonly=True)
-     pipe_count_retained_cumulative = fields.Integer(readonly=True)
-     pipe_count_total_cumulative = fields.Integer(readonly=True)
+     pipe_new_cumulative = fields.Monetary(readonly=True) #OK
+     pipe_new_cumulative_weighted = fields.Monetary(readonly=True)  #OK
+     pipe_retained_cumulative = fields.Monetary(readonly=True)  #OK
+     pipe_retained_cumulative_weighted = fields.Monetary(readonly=True)  #OK
+     pipe_total_cumulative = fields.Monetary(readonly=True)  #OK
+     pipe_total_cumulative_weighted = fields.Monetary(readonly=True)  #OK
+     pipe_count_new_cumulative = fields.Integer(readonly=True) #OK
+     pipe_count_retained_cumulative = fields.Integer(readonly=True) #OK
+     pipe_count_total_cumulative = fields.Integer(readonly=True) #OK
 
      #active snapshot
      active_count_new = fields.Integer(readonly=True) #OK
@@ -192,9 +192,72 @@ class PerformanceSales(models.Model):
      
      def _compute_cumulative_sales(self):
           #we order per period and index
+          c_fields = [
+               'sales_new_cumulative',
+               'sales_retained_cumulative',
+               'sales_total_cumulative',
+               'sales_count_new_cumulative',
+               'sales_count_retained_cumulative',
+               'sales_count_total_cumulative',
+               'losses_new_cumulative',
+               'losses_retained_cumulative',
+               'losses_total_cumulative',
+               'losses_count_new_cumulative',
+               'losses_count_retained_cumulative',
+               'losses_count_total_cumulative',
+               'pipe_new_cumulative',
+               'pipe_new_cumulative_weighted', 
+               'pipe_retained_cumulative', 
+               'pipe_retained_cumulative_weighted', 
+               'pipe_total_cumulative', 
+               'pipe_total_cumulative_weighted', 
+               'pipe_count_new_cumulative',
+               'pipe_count_retained_cumulative',
+               'pipe_count_total_cumulative',
+               ]
+          
+          p_fields = [f.replace('cumulative','period') for f in c_fields]
+
           ordered_perf = self.sorted(lambda p: (p.period_id.date_start,p.period_index))
           for perf in ordered_perf:
                _logger.info("PERF | Cumulative Sales Calculation | {}-{} index {}-{}".format(perf.period_id.name,perf.period_id.date_start,perf.period_index,perf.date_start))
+               #prev_perfs = self.search([('period_id','=',perf.period_id.id),('period_index','<=',perf.period_index)])
+               last_perf = self.search([('period_id','=',perf.period_id.id),('period_index','=',perf.period_index-1)],limit=1)
+               if last_perf:
+                    last_data = last_perf.read(c_fields)
+               else:
+                    last_data = {field_name:0 for field_name in c_fields}
+               current_data = perf.read(p_fields)
+               _logger.info("PERF | \nLast Data {}\nCurrent Data {}".format(last_data,current_data))
+
+               vals = {}
+               for field in c_fields:
+                    vals.update({field: last_data[field] + current_data[field.replace('cumulative','period')]})
+               
+               _logger.info("PERF | New Values {}".format(vals))
+               perf.write(vals)
+
+               #ratios
+               if (perf.sales_count_new_cumulative + perf.losses_new_cumulative) > 0:
+                    perf.win_loss_count_new_cumulative = perf.sales_count_new_cumulative / (perf.sales_count_new_cumulative + perf.losses_count_new_cumulative)
+                    perf.win_loss_new_cumulative = perf.sales_new_cumulative / (perf.sales_new_cumulative + perf.losses_new_cumulative)
+               else:
+                    perf.win_loss_count_new_cumulative = False
+                    perf.win_loss_new_cumulative = False
+               
+               if (perf.sales_count_retained_cumulative + perf.losses_retained_cumulative) > 0:
+                    perf.win_loss_count_retained_cumulative = perf.sales_count_retained_cumulative / (perf.sales_count_retained_cumulative + perf.losses_count_retained_cumulative)
+                    perf.win_loss_retained_cumulative = perf.sales_retained_cumulative / (perf.sales_retained_cumulative + perf.losses_retained_cumulative)
+               else:
+                    perf.win_loss_count_retained_cumulative = False
+                    perf.win_loss_retained_cumulative = False
+               
+               if  (perf.sales_total_cumulative + perf.losses_total_cumulative) > 0:
+                    perf.win_loss_total_cumulative = perf.sales_total_cumulative / (perf.sales_total_cumulative + perf.losses_total_cumulative)
+               else:
+                    perf.win_loss_total_cumulative = False
+
+
 
 
                     
