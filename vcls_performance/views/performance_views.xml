@@ -30,6 +30,44 @@
     
     <menuitem name="Performance" id="menu_performance_root" parent="base.reporting_menuitem"/>
     <menuitem name="Periods" id="menu_performance_period" parent="menu_performance_root" action="action_performance_period"/>
+
+
+    <record id="pivot_sales_perf" model="ir.ui.view">
+        <field name="name">pivot.sales.performances</field>
+        <field name="model">performance.sales</field>
+        <field name="arch" type="xml">
+            <pivot string="Sales Performances" display_quantity="true">
+                <field name="date_start" type="row"/>
+                <field name="company_id" type="col"/>
+                <field name="sales_objective_cumulative" type="measure"/>
+                <field name="sales_total_cumulative" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    
+    <record id="graph_sales_perf" model="ir.ui.view">
+        <field name="name">graph.sales.perf</field>
+        <field name="model">performance.sales</field>
+        <field name="arch" type="xml">
+            <graph string="Prorated Revenue" type="line" stacked="True">
+                <field name="date_start" type="row"/>
+                <field name="sales_objective_cumulative" type="measure"/>
+                <field name="sales_total_cumulative" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_sales_perf" model="ir.actions.act_window">
+        <field name="name">Sales Performances</field>
+        <field name="res_model">performance.sales</field>
+        <field name="view_mode">pivot,graph</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'pivot', 'view_id': ref('pivot_sales_perf')}), 
+            (0, 0, {'view_mode': 'graph', 'view_id': ref('graph_sales_perf')}),
+        ]"/>
+    </record>
+    
+    <!-- Top menu item -->
     
     
 
