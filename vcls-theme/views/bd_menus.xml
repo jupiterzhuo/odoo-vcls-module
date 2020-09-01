@@ -279,7 +279,7 @@
             id="menu_sales_performances"
             name="Sales Performances"  
             parent="vcls-theme.menu_bd_rep_main" 
-            action="action_sales_perf"
+            action="vcls_performance.action_sales_perf"
             sequence="12"
         />
 
