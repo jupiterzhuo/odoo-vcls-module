@@ -224,10 +224,10 @@ class PerformanceSales(models.Model):
                #prev_perfs = self.search([('period_id','=',perf.period_id.id),('period_index','<=',perf.period_index)])
                last_perf = self.search([('period_id','=',perf.period_id.id),('period_index','=',perf.period_index-1)],limit=1)
                if last_perf:
-                    last_data = last_perf.read(c_fields)
+                    last_data = last_perf.read(c_fields)[0]
                else:
                     last_data = {field_name:0 for field_name in c_fields}
-               current_data = perf.read(p_fields)
+               current_data = perf.read(p_fields)[0]
                _logger.info("PERF | \nLast Data {}\nCurrent Data {}".format(last_data,current_data))
 
                vals = {}
