@@ -33,10 +33,10 @@ class SFLedgerItemSync(models.Model):
         to_process = sfInstance.getConnection().query_all(sql)['records']
 
         inc_id = self.env.ref('vcls-hr.company_VCINC').id
-        records = self.env['account.move.line'].search([('company_id','=',inc_id), ('processed','=',False), ('full_reconcile_id','=',False), ('account_id','=',5437)])
+        records = self.env['account.move.line'].search([('company_id','=',inc_id), ('processed','=',False), ('full_reconcile_id','=',False)])
 
         if not records:
-            records = self.env['account.move.line'].search([('company_id','=',inc_id), ('processed','=', True), ('full_reconcile_id','=',False), ('account_id','=',5437)])
+            records = self.env['account.move.line'].search([('company_id','=',inc_id), ('processed','=', True), ('full_reconcile_id','=',False)])
             for record in records:
                 record.processed = False
         if records:
