@@ -118,9 +118,19 @@
                     <attribute name="groups">vcls_security.group_finance_invoice_administrator</attribute>
                 </xpath>
                 
+                <xpath expr="//button[@id='account_invoice_payment_btn']" position="replace">
+                    <button 
+                        name="action_register_invoice_payment" 
+                        type="object" states="open" string="Register Payment" 
+                        groups="account.group_account_invoice" class="oe_highlight"
+                        attrs="{'invisible': ['|',('state', '!=', 'open'),('type','=','out_refund')]}"/>
+                </xpath>
+
+                <!--
                 <xpath expr="//button[@id='account_invoice_payment_btn']" position="attributes">
                     <attribute name="attrs">{'invisible': ['|',('state', '!=', 'open'),('type','=','out_refund')]}</attribute>
                 </xpath>
+                -->
 
             </field>
         </record>

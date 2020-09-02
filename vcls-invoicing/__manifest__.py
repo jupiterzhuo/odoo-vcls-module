@@ -16,7 +16,7 @@
     # for the full list
     'category': 'Uncategorized',
 
-    'version': '1.7.67',
+    'version': '1.7.68',
 
     # any module necessary for this one to work correctly
     'depends': [
@@ -46,6 +46,7 @@
         'views/res_bank.xml',
         'views/fiscal_position.xml',
         'views/account_mail_template.sql',
+        'views/payment_views.xml',
         'wizard/sale_make_invoice_advance_views.xml',
         # reports
         'reports/report_project_invoice_detailed.xml',
