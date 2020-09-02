@@ -21,11 +21,6 @@ class SFLedgerItemSync(models.Model):
     def getSFTranslator(self, sfInstance):
         return TranslatorSFLedgerItem.TranslatorSFLedgerItem(sfInstance.getConnection())
 
-    def unreconciled(self):
-        items = self.env['account.full.reconcile'].search(['!', ('name', 'ilike', 'A')])
-        for item in items:
-            item.unlink()
-
     def reconciledEntries(self, duration=10):
         userSF = self.env.ref('vcls-etl.SF_mail').value
         passwordSF = self.env.ref('vcls-etl.SF_password').value
