@@ -80,7 +80,7 @@ class ReportAccountGeneralLedger(models.AbstractModel):
                     'level': 2,
                     'unfoldable': True,
                     'unfolded': 'account_%s' % (account.id,) in options.get('unfolded_lines') or unfold_all,
-                    'colspan': 4,
+                    'colspan': 5,
                 })
             if 'account_%s' % (account.id,) in options.get('unfolded_lines') or unfold_all:
                 initial_debit = grouped_accounts[account]['initial_bal']['debit']
@@ -95,7 +95,7 @@ class ReportAccountGeneralLedger(models.AbstractModel):
                         'class': 'o_account_reports_initial_balance',
                         'name': _('Initial Balance'),
                         'parent_id': 'account_%s' % (account.id,),
-                        'columns': [{'name': v} for v in ['', '', '', initial_currency, self.format_value(initial_debit), self.format_value(initial_credit), self.format_value(initial_balance)]],
+                        'columns': [{'name': v} for v in ['', '', '', '', initial_currency, self.format_value(initial_debit), self.format_value(initial_credit), self.format_value(initial_balance)]],
                     })
                     progress = initial_balance
                 else:
@@ -187,7 +187,7 @@ class ReportAccountGeneralLedger(models.AbstractModel):
                         'class': 'o_account_reports_domain_total',
                         'parent_id': 'account_%s' % (account.id,),
                         'name': _('Total '),
-                        'columns': [{'name': v} for v in ['', '', '', amount_currency, self.format_value(debit), self.format_value(credit), self.format_value(balance)]],
+                        'columns': [{'name': v} for v in ['', '', '', '', amount_currency, self.format_value(debit), self.format_value(credit), self.format_value(balance)]],
                     })
 
                 lines += domain_lines
@@ -199,7 +199,7 @@ class ReportAccountGeneralLedger(models.AbstractModel):
                 'name': _('Total'),
                 'class': 'total',
                 'level': 1,
-                'columns': [{'name': v} for v in ['', '', '', '', self.format_value(sum_debit), self.format_value(sum_credit), self.format_value(sum_balance)]],
+                'columns': [{'name': v} for v in ['', '', '', '', '', self.format_value(sum_debit), self.format_value(sum_credit), self.format_value(sum_balance)]],
             })
 
         journals = [j for j in options.get('journals') if j.get('selected')]
@@ -207,7 +207,7 @@ class ReportAccountGeneralLedger(models.AbstractModel):
             lines.append({
                 'id': 0,
                 'name': _('Tax Declaration'),
-                'columns': [{'name': v} for v in ['', '', '', '', '', '', '']],
+                'columns': [{'name': v} for v in ['', '', '', '', '', '', '', '']],
                 'level': 1,
                 'unfoldable': False,
                 'unfolded': False,
@@ -215,7 +215,7 @@ class ReportAccountGeneralLedger(models.AbstractModel):
             lines.append({
                 'id': 0,
                 'name': _('Name'),
-                'columns': [{'name': v} for v in ['', '', '', '', _('Base Amount'), _('Tax Amount'), '']],
+                'columns': [{'name': v} for v in ['', '', '', '', '', _('Base Amount'), _('Tax Amount'), '']],
                 'level': 2,
                 'unfoldable': False,
                 'unfolded': False,
@@ -230,7 +230,7 @@ class ReportAccountGeneralLedger(models.AbstractModel):
                     'caret_options': 'account.tax',
                     'unfoldable': False,
                     'columns': [{'name': v} for v in [self.format_value(base_amount), self.format_value(tax_amount), '']],
-                    'colspan': 5,
+                    'colspan': 6,
                     'level': 4,
                 })
 
