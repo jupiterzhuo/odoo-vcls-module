@@ -27,7 +27,7 @@ class Project(models.Model):
     type_ids = fields.Many2many(
         default=lambda self: self._get_default_type_common())
 
-    user_id = fields.Many2one('res.users', string='Project Manager', default=lambda self: self._default_user_id() , track_visibility="onchange")
+    user_id = fields.Many2one('res.users', string='Lead Cons.', default=lambda self: self._default_user_id() , track_visibility="onchange")
 
     project_type = fields.Selection([
         ('dev', 'Developement'),
@@ -99,7 +99,7 @@ class Project(models.Model):
     risk_ids = fields.Many2many(
         'risk', string='Risk',
         compute='_compute_risk_ids',
-        # store=True,
+        store=True,
     )
 
     risk_score = fields.Integer(

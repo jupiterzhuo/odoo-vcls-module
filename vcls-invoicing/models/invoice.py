@@ -32,6 +32,7 @@ class Invoice(models.Model):
         'res.users',
         string='Invoicing Administrator',
         related='commercial_partner_id.invoice_admin_id',
+        store=True,
         )
 
     invoice_sending_date = fields.Datetime()
@@ -827,5 +828,15 @@ class Invoice(models.Model):
     def action_generate_draft_invoice_attachments(self):
         action = self.env.ref('vcls-invoicing.action_invoice_attachment').read()[0]
         action['domain'] = [('res_id', '=', self.id), ('name', 'like', DRAFTINVOICE)]
+        return action
+    
+    def action_register_invoice_payment(self):
+        action = self.env.ref('account.action_account_invoice_payment').read()[0]
+        default_journal = self.env['account.journal'].search([('bank_account_id','=',self.partner_bank_id.id)],limit=1)
+        action['context'] = {
+            'default_invoice_ids': [(4, self.id, None)],
+            'default_journal_id': default_journal.id,
+            'deafult_company_id':self.company_id.id,
+            }
         return action
 

@@ -3,6 +3,8 @@
 #Odoo Imports
 from odoo import api, fields, models
 from odoo.exceptions import UserError, ValidationError
+import logging
+_logger = logging.getLogger(__name__)
 
 class WizardTicket(models.TransientModel):
     _name = 'wizard.ticket'
@@ -39,6 +41,27 @@ class Ticket(models.Model):
     # Custom Fields #
     #################
     
+    company_id = fields.Many2one(
+        comodel_name='res.company',
+        related=False, 
+        string='Company', 
+        store=True, 
+        readonly=True,
+        compute = '_compute_company_id',
+        )
+
+    @api.depends('partner_id')
+    def _compute_company_id(self):
+        for ticket in self.filtered(lambda t: t.partner_id):
+            user = self.env['res.users'].sudo().with_context(active_test=False).search([('partner_id','=',ticket.partner_id.id)],limit=1)
+            if user:
+                #_logger.info("TICKET COMPANY | user {} in {}".format(user.name,user.company_id.name))
+                ticket.company_id = user.company_id
+            else:
+                #_logger.info("TICKET COMPANY | partner {} in {}".format(ticket.partner_id.name,ticket.partner_id.company_id.name))
+                ticket.company_id = ticket.partner_id.company_id
+
+
     subcategory_id = fields.Many2one(
         'helpdesk.ticket.subcategory',
         string='Subcategory',

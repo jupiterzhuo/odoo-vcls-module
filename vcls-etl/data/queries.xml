@@ -176,14 +176,17 @@
             <field name="key">etl_sf_ledgerentry_query</field>
             <field name="value">
                 SELECT Id, Name, CurrencyIsoCode, s2cor__Date__c, s2cor__Source_Document__c,
-                s2cor__Sequence_Number__c, s2cor__Journal__c, s2cor__Supplier_Tag__c
+                s2cor__Sequence_Number__c, s2cor__Journal__c, s2cor__Supplier_Tag__c, 
+                s2cor__Layer__c, s2cor__Draft__c
                 FROM s2cor__Sage_ACC_Ledger_Entry__c
             </field>
         </record>
 
         <record id="etl_sf_ledgerentry_filter" model="ir.config_parameter">
             <field name="key">etl_sf_ledgerentry_filter</field>
-            <field name="value"></field> 
+            <field name="value">
+                s2cor__Layer__c != 'Actual Deleted' AND s2cor__Period__c != 98
+            </field> 
         </record>
 
         <record id="etl_sf_ledgerentry_post" model="ir.config_parameter">

@@ -32,6 +32,7 @@
             </field>
         </record>
 
+        <!--
         <record model="ir.ui.view" id="view_invoice_asset_category">
             <field name="name">account.invoice.supplier.form</field>
             <field name="model">account.invoice</field>
@@ -41,6 +42,7 @@
                 </xpath>
             </field>
         </record>
+        -->
 
         <record model="ir.ui.view" id="purchase_order_form_inherit">
             <field name="name">purchase.order.form.inherit</field>

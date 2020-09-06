@@ -7,5 +7,12 @@
                 <script type="text/javascript" src="/vcls-theme/static/src/js/list_editable_renderer.js"></script>
             </xpath>
         </template>
+
+        <template id="_assets_backend_helpers" inherit_id="web_enterprise._assets_backend_helpers">
+            <xpath expr="//link[last()]" position="after">
+                <link rel="stylesheet" type="text/scss" href="/vcls-theme/static/src/scss/bootstrap_overridden.scss"/>
+            </xpath>
+        </template>
+
     </data>
 </odoo>

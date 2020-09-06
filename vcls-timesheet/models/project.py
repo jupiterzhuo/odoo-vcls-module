@@ -52,9 +52,18 @@ class Project(models.Model):
     @api.depends('task_ids.stage_allow_ts')
     def _compute_timesheet_open(self):
         for rec in self:
-            all_tasks = rec.task_ids | rec.child_id.mapped('task_ids') | rec.child_id.mapped('task_ids').mapped('child_ids') | rec.task_ids.mapped('child_ids') 
+            all_tasks = rec.task_ids | rec.child_id.mapped('task_ids') | rec.task_ids.mapped('child_ids') | rec.parent_id.mapped('task_ids')
             bools = all_tasks.mapped('stage_allow_ts')
-            rec.timesheet_open = True if any(bools) else False
+            timesheet_open = True if any(bools) else False
+            rec.timesheet_open = timesheet_open
+            if rec.parent_id:
+                rec.parent_id.write({
+                    "timesheet_open": timesheet_open,
+                })   
+            if rec.child_id:
+                rec.child_id.write({
+                    "timesheet_open": timesheet_open,
+                })
 
     @api.multi
     def _get_kpi(self):

@@ -5,6 +5,27 @@
         <field name="model">res.partner</field>
         <field name="inherit_id" ref="vcls-contact.view_form_contact_all" />
         <field name="arch" type="xml">
+
+            <xpath expr="//button[@name='toggle_active']" position="before">
+                <button type="object" groups="vcls_security.group_project_controller,vcls_security.group_finance_invoice_administrator" class="oe_stat_button" id="partner_ledger_button" icon="fa-pencil-square-o" name="open_partner_ledger" context="{'default_partner_id': active_id}">
+                    <field name="partner_ledger_label"/>
+                </button>
+                <button type="object" groups="vcls_security.group_project_controller,vcls_security.group_finance_invoice_administrator" class="oe_stat_button" name="open_action_followup" icon="fa-list" attrs="{'invisible': [('total_due', '=', 0)]}">
+                    <div class="o_field_widget o_stat_info">
+                        <span class="o_stat_value"><field name="total_due" widget="monetary" options="{'currency_field': 'currency_id'}"/></span>
+                        <span class="o_stat_text">Due</span>
+                    </div>
+                </button>
+                <button type="object" groups="vcls_security.group_project_controller,vcls_security.group_finance_invoice_administrator" class="oe_stat_button" icon="fa-pencil-square-o" name="action_view_partner_invoices" attrs="{'invisible': [('customer', '=', False)]}" context="{'default_partner_id': active_id}">
+                    <div class="o_form_field o_stat_info">
+                        <span class="o_stat_value">
+                            <field name="total_invoiced" widget="monetary" options="{'currency_field': 'currency_id'}"/>
+                        </span>
+                        <span class="o_stat_text">Invoiced</span>
+                    </div>
+                </button>
+            </xpath>
+
             <xpath expr="//page[@name='financials']" position="inside">
                 <group>
                     <group>
@@ -20,6 +41,7 @@
                     </group>
                 </group>
             </xpath>
+
         </field>
     </record>
 

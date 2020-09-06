@@ -118,9 +118,19 @@
                     <attribute name="groups">vcls_security.group_finance_invoice_administrator</attribute>
                 </xpath>
                 
+                <xpath expr="//button[@id='account_invoice_payment_btn']" position="replace">
+                    <button 
+                        name="action_register_invoice_payment" 
+                        type="object" states="open" string="Register Payment" 
+                        groups="account.group_account_invoice" class="oe_highlight"
+                        attrs="{'invisible': ['|',('state', '!=', 'open'),('type','=','out_refund')]}"/>
+                </xpath>
+
+                <!--
                 <xpath expr="//button[@id='account_invoice_payment_btn']" position="attributes">
                     <attribute name="attrs">{'invisible': ['|',('state', '!=', 'open'),('type','=','out_refund')]}</attribute>
                 </xpath>
+                -->
 
             </field>
         </record>
@@ -178,6 +188,20 @@
             </field>
         </record>
 
+        <record id="view_account_invoice_filter_vcls" model="ir.ui.view">
+            <field name="name">view.account.invoice.filter.vcls</field>
+            <field name="model">account.invoice</field>
+            <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+            <field name="arch" type="xml">
+            <xpath expr="//filter[@name='salesperson']" position="attributes">
+                <attribute name="invisible">1</attribute>
+            </xpath>
+            <xpath expr="//filter[@name='salesperson']" position="after">
+                <filter name="user_id" string="IA" domain="[]" context="{'group_by':'user_id'}"/>
+            </xpath>
+            </field>
+        </record>
+
         <record id="account.action_invoice_out_refund" model="ir.actions.act_window">
             <field name="name">Credit Notes</field>
             <field name="res_model">account.invoice</field>
@@ -186,7 +210,7 @@
             <field eval="False" name="view_id"/>
             <field name="domain">[('type','=','out_refund')]</field>
             <field name="context">{'default_type': 'out_refund', 'type': 'out_refund', 'journal_type': 'sale'}</field>
-            <field name="search_view_id" ref="account.view_account_invoice_filter"/>
+            <field name="search_view_id" ref="view_account_invoice_filter_vcls"/>
             <field name="view_ids" eval="[(5, 0, 0),
                 (0, 0, {'view_mode': 'tree', 'view_id': ref('vcls-invoicing.ia_invoices_view_tree')}),
                 (0, 0, {'view_mode': 'form', 'view_id': ref('vcls-invoicing.view_invoice_form')}),

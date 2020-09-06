@@ -275,6 +275,14 @@
             sequence="9"
         />
 
+        <menuitem 
+            id="menu_sales_performances"
+            name="Sales Performances"  
+            parent="vcls-theme.menu_bd_rep_main" 
+            action="vcls_performance.action_sales_perf"
+            sequence="12"
+        />
+
         <!-- CONFIGURATION -->
         <menuitem
             id="menu_bd_conf_main"
