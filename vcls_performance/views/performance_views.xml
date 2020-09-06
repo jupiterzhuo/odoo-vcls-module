@@ -1,0 +1,104 @@
+<odoo>
+  <data>
+    <!-- explicit list view definition -->
+    
+    <record model="ir.ui.view" id="view_period_list">
+      <field name="name">view_period_list</field>
+      <field name="model">performance.period</field>
+      <field name="arch" type="xml">
+        <tree>
+          <field name="name"/>
+          <field name="company_id"/>
+          <field name="date_start"/>
+          <field name="date_end"/>
+          <field name="objective_sales"/>
+          <!--<button type="action" name="action_build_sales" icon="fa-calculator"/>-->
+        </tree>
+      </field>
+    </record>
+    
+
+    <!-- actions opening views on models -->
+    
+    <record model="ir.actions.act_window" id="action_performance_period">
+      <field name="name">Performance Period</field>
+      <field name="res_model">performance.period</field>
+      <field name="view_mode">tree,form</field>
+    </record>
+
+    <!-- Top menu item -->
+    
+    <menuitem name="Performance" id="menu_performance_root" parent="base.reporting_menuitem"/>
+    <menuitem name="Periods" id="menu_performance_period" parent="menu_performance_root" action="action_performance_period"/>
+
+
+    <record id="pivot_sales_perf" model="ir.ui.view">
+        <field name="name">pivot.sales.performances</field>
+        <field name="model">performance.sales</field>
+        <field name="arch" type="xml">
+            <pivot string="Sales Performances" display_quantity="true">
+                <field name="date_start" type="row"/>
+                <field name="company_id" type="col"/>
+                <field name="sales_objective_cumulative" type="measure"/>
+                <field name="sales_total_cumulative" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+    
+    <record id="graph_sales_perf" model="ir.ui.view">
+        <field name="name">graph.sales.perf</field>
+        <field name="model">performance.sales</field>
+        <field name="arch" type="xml">
+            <graph string="Prorated Revenue" type="line" stacked="True">
+                <field name="date_start" type="row"/>
+                <field name="sales_objective_cumulative" type="measure"/>
+                <field name="sales_total_cumulative" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_sales_perf" model="ir.actions.act_window">
+        <field name="name">Sales Performances</field>
+        <field name="res_model">performance.sales</field>
+        <field name="view_mode">pivot,graph</field>
+        <field name="view_ids" eval="[(5, 0, 0),
+            (0, 0, {'view_mode': 'pivot', 'view_id': ref('pivot_sales_perf')}), 
+            (0, 0, {'view_mode': 'graph', 'view_id': ref('graph_sales_perf')}),
+        ]"/>
+    </record>
+    
+    <!-- Top menu item -->
+    
+    
+
+    <!-- server action to the one above -->
+    <!--
+    <record model="ir.actions.server" id="vcls_performance.action_server">
+      <field name="name">vcls_performance server</field>
+      <field name="model_id" ref="model_vcls_performance_vcls_performance"/>
+      <field name="state">code</field>
+      <field name="code">
+        action = {
+          "type": "ir.actions.act_window",
+          "view_mode": "tree,form",
+          "res_model": self._name,
+        }
+      </field>
+    </record>
+    -->
+
+    
+    <!-- menu categories -->
+    <!--
+    
+    <menuitem name="Menu 2" id="vcls_performance.menu_2" parent="vcls_performance.menu_root"/>
+    -->
+    <!-- actions -->
+    <!--
+    <menuitem name="List" id="vcls_performance.menu_1_list" parent="vcls_performance.menu_1"
+              action="vcls_performance.action_window"/>
+    <menuitem name="Server to list" id="vcls_performance" parent="vcls_performance.menu_2"
+              action="vcls_performance.action_server"/>
+    -->
+  </data>
+</odoo>

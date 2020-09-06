@@ -35,7 +35,7 @@ class InvoiceLine(models.Model):
         if result.purchase_line_id and not result.purchase_line_id.is_rebilled:
             result.account_analytic_id = False
         return result
-    
+
     @api.model
     def _timesheet_domain_get_invoiced_lines(self, sale_line_delivery):
         """
@@ -62,3 +62,41 @@ class InvoiceLine(models.Model):
         if self.filtered(lambda r: r.invoice_id and r.invoice_id.state != 'draft'):
             _logger.info("UNLINK INVOICE LINES {} {} {}".format(self.mapped('invoice_id.name'),self.mapped('invoice_id.state'),self.mapped('name')))
         return super(InvoiceLine, self).unlink()"""
+
+    @api.multi
+    def asset_generate(self, vals):
+        self.ensure_one()
+        if self.asset_category_id.open_asset and self.asset_category_id.date_first_depreciation == 'manual':
+            # the asset will auto-confirm, so we need to set its date
+            # since in this case the date will be readonly
+            vals['first_depreciation_manual_date'] = self.invoice_id.date_invoice
+        changed_vals = self.env['account.asset.asset'].onchange_category_id_values(vals['category_id'])
+        vals.update(changed_vals['value'])
+        asset = self.env['account.asset.asset'].create(vals)
+        if self.asset_category_id.open_asset:
+            asset.validate()
+
+    @api.one
+    def asset_create(self):
+        """Overwrite native method.
+        Generate one asset for each quantity on the invoice line, if the asset category is parametrized that way."""
+        if self.asset_category_id:
+            vals = {
+                'name': self.name,
+                'code': self.invoice_id.number or False,
+                'category_id': self.asset_category_id.id,
+                'partner_id': self.invoice_id.partner_id.id,
+                'company_id': self.invoice_id.company_id.id,
+                'currency_id': self.invoice_id.company_currency_id.id,
+                'date': self.invoice_id.date_invoice,
+                'invoice_id': self.invoice_id.id,
+            }
+            if self.asset_category_id.generate_multi_asset and self.quantity.is_integer():
+                vals['value'] = self.price_subtotal_signed / self.quantity
+                for __ in range(int(self.quantity)):
+                    asset_vals = dict(vals)
+                    self.asset_generate(asset_vals)
+            else:
+                vals['value'] = self.price_subtotal_signed
+                self.asset_generate(vals)
+        return True

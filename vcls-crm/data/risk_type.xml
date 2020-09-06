@@ -10,5 +10,14 @@
             <!-- field>OTHER INFORMATION FIELD</field -->
         </record>
 
+        <record id="risk_auto_WAR" model="risk.type">
+            <field name="name">automatic WAR</field>
+            <field name="description">if SO and not signed and is eligible for timesheets</field>
+            <field name="model_name">sale.order</field>
+            <field name="active">True</field> 
+            <field name="notify">True</field>
+            <field name="weight">1</field>
+
+       </record>
     </data>
 </odoo>

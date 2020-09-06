@@ -138,10 +138,23 @@ class SaleOrder(models.Model):
         default=0.01,
     )
 
+    opp_date_closed = fields.Datetime(
+        help='Related to the parent opportunity',
+        compute='_compute_date_closed',
+        readonly=True,
+        store=True,
+        default=False,
+    )
+
     @api.depends('opportunity_id','opportunity_id.probability')
     def _compute_probability(self):
         for so in self.filtered(lambda p: p.opportunity_id):
             so.probability = so.opportunity_id.probability
+    
+    @api.depends('opportunity_id','opportunity_id.date_closed')
+    def _compute_date_closed(self):
+        for so in self.filtered(lambda p: p.opportunity_id):
+            so.opp_date_closed = so.opportunity_id.date_closed
     
 
     sale_status = fields.Selection(
@@ -176,7 +189,36 @@ class SaleOrder(models.Model):
         ],
     )
 
+    sales_reporting_date = fields.Datetime(
+        store=True,
+        compute='_compute_sales_reporting_date',
+    )
 
+    @api.depends('create_date','confirmation_date','opp_date_closed')
+    def _compute_sales_reporting_date(self):
+        for so in self:
+            if so.confirmation_date:
+                so.sales_reporting_date = so.confirmation_date
+            elif so.opp_date_closed:
+                so.sales_reporting_date = so.opp_date_closed
+            else:
+                so.sales_reporting_date = so.create_date
+
+    converted_untaxed_amount = fields.Float(
+        store=True,
+        help='Amount converted in EUR',
+        compute='_compute_converted_untaxed_amount',
+    )
+
+    @api.depends('sales_reporting_date','amount_untaxed','currency_id')
+    def _compute_converted_untaxed_amount(self):
+        for so in self:
+            so.converted_untaxed_amount = so.currency_id._convert(
+                so.amount_untaxed,
+                self.env.ref('base.EUR'),
+                self.env.user.company_id,
+                so.sales_reporting_date or fields.Datetime.now(),
+            )
 
     ###############
     # ORM METHODS #

@@ -193,3 +193,21 @@ class Project(models.Model):
         string = 'Related Program',
         related="sale_order_id.program_id",
     )
+
+    project_status = fields.Selection(
+        selection=[
+        ('preproject', 'Pre-Project'),
+        ('risk', 'At Risk'),
+        ('ongoing', 'Ongoing'),
+        ('service_delivered', 'Service Delivered'),
+        ('closed', 'Closed')
+        ],
+        default='preproject',
+    )
+   
+    @api.onchange('project_status')
+    def _onchange_project_status(self):
+        for rec in self:
+            if rec.child_id:
+                rec.child_id.write({'project_status': rec.project_status})
+        

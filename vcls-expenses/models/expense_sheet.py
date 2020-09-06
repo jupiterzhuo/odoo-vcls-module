@@ -54,6 +54,10 @@ class ExpenseSheet(models.Model):
         #required=True
     )
 
+    employee_type = fields.Selection(
+        related='employee_id.employee_type',
+        store=True,
+    )
     ######################
     # OVERWRITTEN FIELDS #
     ######################
@@ -70,7 +74,7 @@ class ExpenseSheet(models.Model):
     
     payment_mode = fields.Selection([("own_account", "Employee (to reimburse)"), ("company_account", "Company")], default=False, related=False,readonly=False)
 
-    @api.constrains('journal_id', 'journal_id.company_id', 'company_id')
+    @api.constrains('journal_id', 'company_id')
     def _check_expense_sheet_same_company(self):
         for sheet in self:
             if not sheet.company_id or not sheet.journal_id:
@@ -127,12 +131,17 @@ class ExpenseSheet(models.Model):
                     record.user_id = record.employee_id.expense_manager_id or record.employee_id.parent_id.user_id
                 else:
                     record.user_id = False
-    
+
     @api.depends('project_id')
     def _compute_analytic_account(self):
         for sheet in self:
             sheet.analytic_account_id = sheet.project_id.analytic_account_id
-    
+            sheet.expense_line_ids.write({
+                'project_id': sheet.project_id.id,
+                'analytic_account_id': sheet.analytic_account_id.id,
+                'sale_order_id': sheet.sale_order_id.id,
+            })
+ 
     @api.onchange('type')
     def change_type(self):
         for sheet in self:

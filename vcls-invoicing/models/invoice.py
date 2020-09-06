@@ -32,6 +32,7 @@ class Invoice(models.Model):
         'res.users',
         string='Invoicing Administrator',
         related='commercial_partner_id.invoice_admin_id',
+        store=True,
         )
 
     invoice_sending_date = fields.Datetime()
@@ -218,7 +219,7 @@ class Invoice(models.Model):
         for parent_task, list_tasks in list_timesheet_to_compute.items():
             number_tasks = len(list_tasks)
             for task_individual in list_tasks:
-                for timesheet_id in task_individual.timesheet_ids.filtered(lambda t: t.timesheet_invoice_id.id == self.id and t.unit_amount_rounded>0):
+                for timesheet_id in task_individual.timesheet_ids.filtered(lambda t: t.timesheet_invoice_id.id == self.id and t.unit_amount_rounded!=0):
                     if self.merge_subtask and timesheet_id.task_id.parent_id:  # if the task has a parent and we want to merge
                         current_task_id = timesheet_id.task_id.parent_id
                     else:
@@ -336,7 +337,7 @@ class Invoice(models.Model):
         self.ensure_one()
         data = OrderedDict()
         total_not_taxed = 0.
-        for timesheet_id in self.timesheet_ids.filtered(lambda t: t.so_line.qty_invoiced and t.unit_amount_rounded>0)\
+        for timesheet_id in self.timesheet_ids.filtered(lambda t: t.so_line.qty_invoiced and t.unit_amount_rounded!=0)\
                 .sorted(lambda t: t.so_line.price_unit, reverse=True):
             rate_sale_line_id = timesheet_id.so_line
 
@@ -395,7 +396,7 @@ class Invoice(models.Model):
         self.ensure_one()
         data = OrderedDict()
         total_not_taxed = 0.
-        for timesheet_id in self.timesheet_ids.filtered(lambda t: t.so_line.qty_invoiced and t.unit_amount_rounded>0)\
+        for timesheet_id in self.timesheet_ids.filtered(lambda t: t.so_line.qty_invoiced and t.unit_amount_rounded!=0)\
                 .sorted(lambda t: t.so_line.price_unit, reverse=True):
             rate_sale_line_id = timesheet_id.so_line
 
@@ -827,5 +828,15 @@ class Invoice(models.Model):
     def action_generate_draft_invoice_attachments(self):
         action = self.env.ref('vcls-invoicing.action_invoice_attachment').read()[0]
         action['domain'] = [('res_id', '=', self.id), ('name', 'like', DRAFTINVOICE)]
+        return action
+    
+    def action_register_invoice_payment(self):
+        action = self.env.ref('account.action_account_invoice_payment').read()[0]
+        default_journal = self.env['account.journal'].search([('bank_account_id','=',self.partner_bank_id.id)],limit=1)
+        action['context'] = {
+            'default_invoice_ids': [(4, self.id, None)],
+            'default_journal_id': default_journal.id,
+            'deafult_company_id':self.company_id.id,
+            }
         return action
 
