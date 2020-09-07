@@ -16,7 +16,7 @@
     # Check https://github.com/odoo/odoo/blob/12.0/odoo/addons/base/data/ir_module_category_data.xml
     # for the full list
     'category': 'Uncategorized',
-    'version': '0.4.9',
+    'version': '0.4.10',
 
     # any module necessary for this one to work correctly
     'depends': [
@@ -33,6 +33,7 @@
         ### VIEWS ###
         'views/account_move_line_views.xml',
         'views/general_ledger_assets.xml',
+        'views/partner_views.xml',
     ],
     # only loaded in demonstration mode
     'demo': [

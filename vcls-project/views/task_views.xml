@@ -149,6 +149,7 @@
             <field name="inherit_id" ref="project.view_task_search_form"/>
             <field name="arch" type="xml">
                 <group expand="0">
+                    <filter string="Reporting Task" name="reporting_task" context="{'group_by':'reporting_task_id'}"/>
                     <filter string="Deadline" name="date_deadline" context="{'group_by':'date_deadline'}"/>
                 </group>
             </field>

@@ -1,0 +1,17 @@
+<odoo>
+    <data>
+        <record model="ir.ui.view" id="view_form_contact_all">
+            <field name="name">view_form_contact_all</field>
+            <field name="model">res.partner</field>
+            <field name="inherit_id" ref="vcls-contact.view_form_contact_all"/>
+                <field name="arch" type="xml">
+                    <xpath expr="//filter[@name='property_product_pricelist']" position="after">
+                        <field name="property_account_payable_id" options='{"no_open": True,"no_create": 1, "no_create_edit": 1}'/>
+                        <field name="property_account_receivable_id" options='{"no_open": True,"no_create": 1, "no_create_edit": 1}'/>
+                    </xpath>
+
+                </field>
+        </record>
+    
+    </data>
+</odoo>

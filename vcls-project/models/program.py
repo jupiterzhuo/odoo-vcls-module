@@ -197,7 +197,7 @@ class Project(models.Model):
     project_status = fields.Selection(
         selection=[
         ('preproject', 'Pre-Project'),
-        ('risk', 'At Risk'),
+        ('risk', 'Work at Risk'),
         ('ongoing', 'Ongoing'),
         ('service_delivered', 'Service Delivered'),
         ('closed', 'Closed')
