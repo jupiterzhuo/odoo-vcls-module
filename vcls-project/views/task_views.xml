@@ -173,7 +173,7 @@
             <field name="res_model">project.task</field>
             <field name="context">{
                 'default_project_id': active_id,
-                'search_default_reporting_task: 1'
+                
             }</field>
             <field name="domain">[('project_id', 'child_of', [active_id])]</field>
         </record>
