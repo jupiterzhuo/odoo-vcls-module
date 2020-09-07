@@ -44,12 +44,9 @@ class TranslatorSFLedgerItem(TranslatorSFGeneral.TranslatorSFGeneral):
         result['ref'] = SF_LedgerItem['Name']
 
         #result['full_reconcile_id'] / SF_LedgerItem['s2cor__Document_Number_Tag__c']
-        if result['account_id']:
-            return result
-        result['account_id'] = odoo.env['account.account'].search([('code','=','512000-1000')],limit=1).id
-        
 
         return result
+
 
     @staticmethod
     def generateLog(SF_LedgerItem):
