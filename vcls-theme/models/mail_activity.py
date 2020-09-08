@@ -46,7 +46,7 @@ class MailActivity(models.Model):
             if activity.res_model == 'account.invoice':
                 activity.res_name = "%s | %s" % (TYPES[rec.type], rec.temp_name or '')
             elif activity.res_model == 'project.task':
-                activity.res_name = "%s - %s" % (activity.name, rec.project_id.display_name or '')
+                activity.res_name = "%s - %s" % (rec.name, rec.project_id.display_name or '')
             else:
                 activity.res_name = rec.name_get()[0][1]
 

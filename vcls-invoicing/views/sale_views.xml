@@ -71,10 +71,7 @@
                 <xpath expr="(//button[@name='%(sale.action_view_sale_advance_payment_inv)d'])[2]" position="attributes">
                     <attribute name="attrs">{'invisible':  ['|', ('invoice_status', '=', 'to invoice'), ('family_invoice_status', '=', 'to invoice')]}</attribute>
                 </xpath>
-                <xpath expr="//field[@name='scope_of_work']" position="before">
-                    <field name="family_invoice_status"/>
-                    <field name="invoice_status"/>
-                </xpath>
+
             </field>
     </record>
 
