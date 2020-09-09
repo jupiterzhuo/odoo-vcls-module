@@ -197,10 +197,10 @@ class SaleOrder(models.Model):
     @api.depends('create_date','confirmation_date','opp_date_closed')
     def _compute_sales_reporting_date(self):
         for so in self:
-            if so.confirmation_date:
-                so.sales_reporting_date = so.confirmation_date
-            elif so.opp_date_closed:
+            if so.opp_date_closed:
                 so.sales_reporting_date = so.opp_date_closed
+            elif so.confirmation_date:
+                so.sales_reporting_date = so.confirmation_date
             else:
                 so.sales_reporting_date = so.create_date
 
